@@ -21,7 +21,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | Milestone | Contents | Status |
 |---|---|---|
 | M0 | Project scaffolding, build props, analyzers | ✅ |
-| M1 | Edge types and core graph abstractions | — |
+| M1 | Edge types and core graph abstractions | ✅ |
 | M2 | `UndirectedGraph`, `DirectedGraph` | — |
 | M3 | Multigraphs, `DirectedAcyclicGraph` | — |
 | M4 | BFS/DFS, cycle detection, topological sort | — |
@@ -31,6 +31,21 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M8 | Fluent builder, structural queries, dense storage | — |
 | M9 | Hypergraph | — |
 | M10 | Docs and packaging | — |
+
+## Usage
+
+Edges are lightweight value types; weighted edges accept any numeric type via generic math:
+
+```csharp
+using Graph1x.Edges;
+
+var road = new Edge<string>("Lisbon", "Porto");
+var toll = new WeightedEdge<string, decimal>("Lisbon", "Porto", 22.85m);
+
+var (source, target, weight) = toll; // deconstruction
+```
+
+Edge values are ordered pairs — undirected semantics (`a-b` == `b-a`) are applied by the graph that stores them, not by the edge itself.
 
 ## Building
 

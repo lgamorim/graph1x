@@ -9,7 +9,7 @@
         <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(IsPackable)' != 'false'">
+    <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
