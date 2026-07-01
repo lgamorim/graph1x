@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B76827BC-A207-4EB1-9BE5-D469614E5172}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4760B934-E5F4-403C-8207-A1D2E46029F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graph1x", "src\Graph1x\Graph1x.csproj", "{868F94FC-C1A6-439C-8FA2-7A506A94E265}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graph1x.UnitTests", "test\Graph1x.UnitTests\Graph1x.UnitTests.csproj", "{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{868F94FC-C1A6-439C-8FA2-7A506A94E265} = {B76827BC-A207-4EB1-9BE5-D469614E5172}
+		{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959} = {4760B934-E5F4-403C-8207-A1D2E46029F4}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{868F94FC-C1A6-439C-8FA2-7A506A94E265}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{868F94FC-C1A6-439C-8FA2-7A506A94E265}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{868F94FC-C1A6-439C-8FA2-7A506A94E265}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{868F94FC-C1A6-439C-8FA2-7A506A94E265}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CA6FC14-8D49-46BA-BA8D-10DA74C5E959}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
