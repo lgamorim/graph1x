@@ -23,7 +23,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M0 | Project scaffolding, build props, analyzers | ✅ |
 | M1 | Edge types and core graph abstractions | ✅ |
 | M2 | `UndirectedGraph`, `DirectedGraph` | ✅ |
-| M3 | Multigraphs, `DirectedAcyclicGraph` | — |
+| M3 | Multigraphs, `DirectedAcyclicGraph` | ✅ |
 | M4 | BFS/DFS, cycle detection, topological sort | — |
 | M5 | Connectivity (components, Tarjan SCC) | — |
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | — |
@@ -68,7 +68,21 @@ roads.AddEdge(new Edge<string>("Lisbon", "Porto"));
 roads.ContainsEdge("PORTO", "lisbon"); // true
 ```
 
-Self-loops are allowed everywhere (an undirected self-loop counts 2 toward the degree; a directed one counts 1 in + 1 out).
+Self-loops are allowed everywhere except in DAGs (an undirected self-loop counts 2 toward the degree; a directed one counts 1 in + 1 out).
+
+Multigraphs accept parallel edges; DAGs reject anything that would create a cycle:
+
+```csharp
+var flights = new DirectedMultigraph<string, WeightedEdge<string, decimal>>();
+flights.AddEdge(new WeightedEdge<string, decimal>("LIS", "OPO", 49.90m));
+flights.AddEdge(new WeightedEdge<string, decimal>("LIS", "OPO", 89.90m)); // parallel — allowed
+flights.GetEdges("LIS", "OPO");    // both fares
+
+var build = new DirectedAcyclicGraph<string, Edge<string>>();
+build.AddEdge(new Edge<string>("compile", "test"));
+build.AddEdge(new Edge<string>("test", "package"));
+build.AddEdge(new Edge<string>("package", "compile")); // false — would close a cycle
+```
 
 ## Building
 

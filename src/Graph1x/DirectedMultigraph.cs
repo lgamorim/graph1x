@@ -4,34 +4,33 @@ using Graph1x.Internal;
 namespace Graph1x;
 
 /// <summary>
-/// A simple directed graph (no parallel edges, self-loops allowed) backed by
-/// adjacency lists with separate out- and in-edge indexes for O(1) edge lookup
-/// in either direction.
+/// A directed multigraph: parallel edges between the same endpoints and
+/// self-loops are all allowed. Backed by per-vertex out/in edge lists.
 /// </summary>
 /// <typeparam name="TVertex">The vertex type.</typeparam>
 /// <typeparam name="TEdge">The edge type.</typeparam>
-public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMutableGraph<TVertex, TEdge>
+public class DirectedMultigraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMutableGraph<TVertex, TEdge>
     where TVertex : notnull
     where TEdge : IEdge<TVertex>
 {
-    private readonly Dictionary<TVertex, Dictionary<TVertex, TEdge>> _outEdges;
-    private readonly Dictionary<TVertex, Dictionary<TVertex, TEdge>> _inEdges;
+    private readonly Dictionary<TVertex, List<TEdge>> _outEdges;
+    private readonly Dictionary<TVertex, List<TEdge>> _inEdges;
 
-    /// <summary>Initializes an empty graph using the default vertex comparer.</summary>
-    public DirectedGraph()
+    /// <summary>Initializes an empty multigraph using the default vertex comparer.</summary>
+    public DirectedMultigraph()
         : this(EqualityComparer<TVertex>.Default)
     {
     }
 
-    /// <summary>Initializes an empty graph using <paramref name="vertexComparer"/> to identify vertices.</summary>
+    /// <summary>Initializes an empty multigraph using <paramref name="vertexComparer"/> to identify vertices.</summary>
     /// <param name="vertexComparer">The comparer used to identify vertices.</param>
     /// <exception cref="ArgumentNullException"><paramref name="vertexComparer"/> is <see langword="null"/>.</exception>
-    public DirectedGraph(IEqualityComparer<TVertex> vertexComparer)
+    public DirectedMultigraph(IEqualityComparer<TVertex> vertexComparer)
     {
         ArgumentNullException.ThrowIfNull(vertexComparer);
         VertexComparer = vertexComparer;
-        _outEdges = new Dictionary<TVertex, Dictionary<TVertex, TEdge>>(vertexComparer);
-        _inEdges = new Dictionary<TVertex, Dictionary<TVertex, TEdge>>(vertexComparer);
+        _outEdges = new Dictionary<TVertex, List<TEdge>>(vertexComparer);
+        _inEdges = new Dictionary<TVertex, List<TEdge>>(vertexComparer);
     }
 
     /// <inheritdoc/>
@@ -44,7 +43,7 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
     public bool IsDirected => true;
 
     /// <inheritdoc/>
-    public bool AllowsParallelEdges => false;
+    public bool AllowsParallelEdges => true;
 
     /// <inheritdoc/>
     public IEqualityComparer<TVertex> VertexComparer { get; }
@@ -57,9 +56,9 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
     {
         get
         {
-            foreach (var adjacency in _outEdges.Values)
+            foreach (var outgoing in _outEdges.Values)
             {
-                foreach (var edge in adjacency.Values)
+                foreach (var edge in outgoing)
                 {
                     yield return edge;
                 }
@@ -76,25 +75,20 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
             return false;
         }
 
-        _outEdges.Add(vertex, new Dictionary<TVertex, TEdge>(VertexComparer));
-        _inEdges.Add(vertex, new Dictionary<TVertex, TEdge>(VertexComparer));
+        _outEdges.Add(vertex, []);
+        _inEdges.Add(vertex, []);
         return true;
     }
 
     /// <inheritdoc/>
-    public virtual bool AddEdge(TEdge edge)
+    public bool AddEdge(TEdge edge)
     {
         ArgumentNullException.ThrowIfNull(edge);
         AddVertex(edge.Source);
         AddVertex(edge.Target);
 
-        if (_outEdges[edge.Source].ContainsKey(edge.Target))
-        {
-            return false;
-        }
-
-        _outEdges[edge.Source].Add(edge.Target, edge);
-        _inEdges[edge.Target].Add(edge.Source, edge);
+        _outEdges[edge.Source].Add(edge);
+        _inEdges[edge.Target].Add(edge);
         EdgeCount++;
         return true;
     }
@@ -108,17 +102,18 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
             return false;
         }
 
-        foreach (var target in outgoing.Keys)
+        foreach (var edge in outgoing)
         {
-            _inEdges[target].Remove(vertex);
+            _inEdges[edge.Target].Remove(edge);
         }
 
-        foreach (var source in _inEdges[vertex].Keys)
+        var incoming = _inEdges[vertex];
+        foreach (var edge in incoming)
         {
-            _outEdges[source].Remove(vertex);
+            _outEdges[edge.Source].Remove(edge);
         }
 
-        EdgeCount -= outgoing.Count + _inEdges[vertex].Count(pair => !VertexComparer.Equals(pair.Key, vertex));
+        EdgeCount -= outgoing.Count + incoming.Count;
         _outEdges.Remove(vertex);
         _inEdges.Remove(vertex);
         return true;
@@ -128,30 +123,12 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
     public bool RemoveEdge(TEdge edge)
     {
         ArgumentNullException.ThrowIfNull(edge);
-        if (!_outEdges.TryGetValue(edge.Source, out var adjacency)
-            || !adjacency.TryGetValue(edge.Target, out var stored)
-            || !EqualityComparer<TEdge>.Default.Equals(stored, edge))
+        if (!_outEdges.TryGetValue(edge.Source, out var outgoing) || !outgoing.Remove(edge))
         {
             return false;
         }
 
-        return RemoveEdge(edge.Source, edge.Target);
-    }
-
-    /// <summary>Removes the edge from <paramref name="source"/> to <paramref name="target"/>, whatever its payload.</summary>
-    /// <param name="source">The source endpoint.</param>
-    /// <param name="target">The target endpoint.</param>
-    /// <returns><see langword="true"/> if an edge was removed.</returns>
-    public bool RemoveEdge(TVertex source, TVertex target)
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(target);
-        if (!_outEdges.TryGetValue(source, out var adjacency) || !adjacency.Remove(target))
-        {
-            return false;
-        }
-
-        _inEdges[target].Remove(source);
+        _inEdges[edge.Target].Remove(edge);
         EdgeCount--;
         return true;
     }
@@ -176,7 +153,20 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(target);
-        return _outEdges.TryGetValue(source, out var adjacency) && adjacency.ContainsKey(target);
+        return _outEdges.TryGetValue(source, out var outgoing)
+            && outgoing.Any(edge => VertexComparer.Equals(edge.Target, target));
+    }
+
+    /// <summary>Gets every parallel edge from <paramref name="source"/> to <paramref name="target"/>.</summary>
+    /// <param name="source">The source endpoint.</param>
+    /// <param name="target">The target endpoint.</param>
+    /// <returns>The matching edges, possibly empty.</returns>
+    /// <exception cref="ArgumentException"><paramref name="source"/> is not in the graph.</exception>
+    public IEnumerable<TEdge> GetEdges(TVertex source, TVertex target)
+    {
+        Guard.VertexExists(_outEdges, source);
+        ArgumentNullException.ThrowIfNull(target);
+        return _outEdges[source].Where(edge => VertexComparer.Equals(edge.Target, target));
     }
 
     /// <inheritdoc/>
@@ -200,14 +190,14 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
     public IEnumerable<TEdge> OutEdges(TVertex vertex)
     {
         Guard.VertexExists(_outEdges, vertex);
-        return _outEdges[vertex].Values;
+        return _outEdges[vertex];
     }
 
     /// <inheritdoc/>
     public IEnumerable<TEdge> InEdges(TVertex vertex)
     {
         Guard.VertexExists(_inEdges, vertex);
-        return _inEdges[vertex].Values;
+        return _inEdges[vertex];
     }
 
     /// <inheritdoc/>
@@ -219,15 +209,15 @@ public class DirectedGraph<TVertex, TEdge> : IDirectedGraph<TVertex, TEdge>, IMu
 
     private IEnumerable<TEdge> EnumerateAdjacent(TVertex vertex)
     {
-        foreach (var edge in _outEdges[vertex].Values)
+        foreach (var edge in _outEdges[vertex])
         {
             yield return edge;
         }
 
-        foreach (var (source, edge) in _inEdges[vertex])
+        foreach (var edge in _inEdges[vertex])
         {
             // Self-loops already came out of the outgoing side.
-            if (!VertexComparer.Equals(source, vertex))
+            if (!VertexComparer.Equals(edge.Source, vertex))
             {
                 yield return edge;
             }
