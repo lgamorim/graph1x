@@ -27,7 +27,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M4 | BFS/DFS, cycle detection, topological sort | ✅ |
 | M5 | Connectivity (components, Tarjan SCC) | ✅ |
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | ✅ |
-| M7 | MST (Kruskal, Prim) | — |
+| M7 | MST (Kruskal, Prim) | ✅ |
 | M8 | Fluent builder, structural queries, dense storage | — |
 | M9 | Hypergraph | — |
 | M10 | Docs and packaging | — |
@@ -132,6 +132,14 @@ new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhatt
 ```
 
 Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
+
+Minimum spanning trees (undirected graphs; disconnected input yields a spanning forest):
+
+```csharp
+var forest = network.MinimumSpanningForest();       // Kruskal by default
+new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .FindMinimumSpanningForest(network);            // or Prim, same interface
+```
 
 ## Building
 
