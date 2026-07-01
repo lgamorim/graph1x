@@ -25,7 +25,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M2 | `UndirectedGraph`, `DirectedGraph` | ✅ |
 | M3 | Multigraphs, `DirectedAcyclicGraph` | ✅ |
 | M4 | BFS/DFS, cycle detection, topological sort | ✅ |
-| M5 | Connectivity (components, Tarjan SCC) | — |
+| M5 | Connectivity (components, Tarjan SCC) | ✅ |
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | — |
 | M7 | MST (Kruskal, Prim) | — |
 | M8 | Fluent builder, structural queries, dense storage | — |
@@ -99,6 +99,15 @@ graph.TopologicalSort();                // Kahn's algorithm; throws GraphCycleEx
 ```
 
 Cycle detection understands multigraphs (two parallel undirected edges form a cycle) and self-loops. `GraphCycleException` carries the offending cycle.
+
+Connectivity queries:
+
+```csharp
+graph.ConnectedComponents();          // direction-agnostic components
+graph.IsConnected();                  // at most one component (empty graph: true)
+directed.WeaklyConnectedComponents(); // components after forgetting direction
+directed.StronglyConnectedComponents(); // Tarjan, iterative; reverse topological order
+```
 
 ## Building
 
