@@ -22,7 +22,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 |---|---|---|
 | M0 | Project scaffolding, build props, analyzers | ✅ |
 | M1 | Edge types and core graph abstractions | ✅ |
-| M2 | `UndirectedGraph`, `DirectedGraph` | — |
+| M2 | `UndirectedGraph`, `DirectedGraph` | ✅ |
 | M3 | Multigraphs, `DirectedAcyclicGraph` | — |
 | M4 | BFS/DFS, cycle detection, topological sort | — |
 | M5 | Connectivity (components, Tarjan SCC) | — |
@@ -46,6 +46,29 @@ var (source, target, weight) = toll; // deconstruction
 ```
 
 Edge values are ordered pairs — undirected semantics (`a-b` == `b-a`) are applied by the graph that stores them, not by the edge itself.
+
+Graphs are mutable adjacency-list structures. Add/Remove follow the .NET collection idiom (`bool` instead of exceptions), `AddEdge` auto-adds missing endpoint vertices, and `RemoveVertex` cascades to incident edges:
+
+```csharp
+using Graph1x;
+using Graph1x.Edges;
+
+var graph = new DirectedGraph<string, Edge<string>>();
+graph.AddEdge(new Edge<string>("a", "b"));
+graph.AddEdge(new Edge<string>("b", "c"));
+
+graph.ContainsEdge("a", "b");   // true
+graph.ContainsEdge("b", "a");   // false — direction matters
+graph.OutDegree("b");           // 1
+graph.RemoveVertex("b");        // also removes a->b and b->c
+
+// Undirected graphs treat endpoints symmetrically and accept custom comparers.
+var roads = new UndirectedGraph<string, Edge<string>>(StringComparer.OrdinalIgnoreCase);
+roads.AddEdge(new Edge<string>("Lisbon", "Porto"));
+roads.ContainsEdge("PORTO", "lisbon"); // true
+```
+
+Self-loops are allowed everywhere (an undirected self-loop counts 2 toward the degree; a directed one counts 1 in + 1 out).
 
 ## Building
 
