@@ -24,7 +24,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M1 | Edge types and core graph abstractions | ✅ |
 | M2 | `UndirectedGraph`, `DirectedGraph` | ✅ |
 | M3 | Multigraphs, `DirectedAcyclicGraph` | ✅ |
-| M4 | BFS/DFS, cycle detection, topological sort | — |
+| M4 | BFS/DFS, cycle detection, topological sort | ✅ |
 | M5 | Connectivity (components, Tarjan SCC) | — |
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | — |
 | M7 | MST (Kruskal, Prim) | — |
@@ -83,6 +83,22 @@ build.AddEdge(new Edge<string>("compile", "test"));
 build.AddEdge(new Edge<string>("test", "package"));
 build.AddEdge(new Edge<string>("package", "compile")); // false — would close a cycle
 ```
+
+Algorithms live in `Graph1x.Algorithms` as extension methods. Traversals are lazy iterators (implemented without recursion, so deep graphs cannot overflow the stack):
+
+```csharp
+using Graph1x.Algorithms;
+
+foreach (var v in graph.BreadthFirstSearch("a")) { /* ... */ }
+graph.DepthFirstSearch("a");            // pre-order
+graph.DepthFirstSearchPostOrder("a");   // post-order
+
+graph.HasCycle();                       // directed or undirected
+graph.FindCycle();                      // the cycle's vertices, or null
+graph.TopologicalSort();                // Kahn's algorithm; throws GraphCycleException on cycles
+```
+
+Cycle detection understands multigraphs (two parallel undirected edges form a cycle) and self-loops. `GraphCycleException` carries the offending cycle.
 
 ## Building
 
