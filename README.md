@@ -26,7 +26,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M3 | Multigraphs, `DirectedAcyclicGraph` | ✅ |
 | M4 | BFS/DFS, cycle detection, topological sort | ✅ |
 | M5 | Connectivity (components, Tarjan SCC) | ✅ |
-| M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | — |
+| M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | ✅ |
 | M7 | MST (Kruskal, Prim) | — |
 | M8 | Fluent builder, structural queries, dense storage | — |
 | M9 | Hypergraph | — |
@@ -108,6 +108,30 @@ graph.IsConnected();                  // at most one component (empty graph: tru
 directed.WeaklyConnectedComponents(); // components after forgetting direction
 directed.StronglyConnectedComponents(); // Tarjan, iterative; reverse topological order
 ```
+
+Shortest paths default to Dijkstra via the facade; the strategies are swappable behind `IShortestPathAlgorithm<,,>`:
+
+```csharp
+var route = graph.ShortestPath("LIS", "MAD");            // weighted edges carry the weights
+var hops  = graph.ShortestPath("a", "z", _ => 1);        // any edge type + weight selector
+
+route.IsReachable;  // false instead of exceptions for missing routes
+route.Distance;     // total weight (throws if unreachable)
+route.Path;         // ["LIS", ..., "MAD"]
+
+// Negative weights? Bellman-Ford (throws NegativeCycleException on negative cycles).
+new BellmanFordShortestPath<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .FindPath(graph, "a", "b");
+
+// All pairs at once (Floyd-Warshall), or heuristic-guided search (A*).
+new FloydWarshallAllShortestPaths<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .Compute(graph)
+    .Between("a", "b");
+new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhattan)
+    .FindPath(grid, start, goal);
+```
+
+Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
 
 ## Building
 
