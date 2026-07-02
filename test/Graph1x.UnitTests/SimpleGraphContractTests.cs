@@ -1,7 +1,7 @@
 using Graph1x;
 using Graph1x.Edges;
 
-namespace Graph1x.UnitTests.Graphs;
+namespace Graph1x.UnitTests;
 
 /// <summary>
 /// Contract tests for simple graphs: parallel edges are rejected, self-loops

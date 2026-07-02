@@ -2,7 +2,7 @@ using Graph1x;
 using Graph1x.Algorithms;
 using Graph1x.Edges;
 
-namespace Graph1x.UnitTests.Graphs;
+namespace Graph1x.UnitTests;
 
 public class DirectedAdjacencyMatrixGraphTests : SimpleGraphContractTests
 {
