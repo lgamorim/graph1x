@@ -18,7 +18,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Feature-complete for the planned scope. Built milestone by milestone with TDD (tests written before the implementation); 400+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass.
+Built milestone by milestone with TDD (tests written before the implementation); nearly 500 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
 
 | Area | Contents |
 |---|---|
@@ -120,6 +120,11 @@ var hops  = graph.ShortestPath("a", "z", _ => 1);        // any edge type + weig
 route.IsReachable;  // false instead of exceptions for missing routes
 route.Distance;     // total weight (throws if unreachable)
 route.Path;         // ["LIS", ..., "MAD"]
+
+// Querying many targets from one source? One run, many lookups:
+var fromLisbon = graph.ShortestPathsFrom("LIS");
+fromLisbon.To("MAD");     // ShortestPathResult, no recomputation
+fromLisbon.Distances;     // every reachable vertex at once
 
 // Negative weights? Bellman-Ford (throws NegativeCycleException on negative cycles).
 new BellmanFordShortestPath<string, WeightedEdge<string, int>, int>(e => e.Weight)

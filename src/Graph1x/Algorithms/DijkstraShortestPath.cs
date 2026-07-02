@@ -38,6 +38,51 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
         GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
         GraphTraversalCore.ValidateEndpoint(graph, target, nameof(target));
 
+        var (distance, predecessor) = Relax(graph, source, hasTarget: true, target);
+
+        // Early exit only happens once the target is settled, and an exhausted
+        // frontier settles every distance entry, so presence means reachable.
+        return distance.TryGetValue(target, out var total)
+            ? new ShortestPathResult<TVertex, TWeight>(
+                source,
+                target,
+                total,
+                GraphTraversalCore.BuildPath(source, target, predecessor, graph.VertexComparer))
+            : new ShortestPathResult<TVertex, TWeight>(source, target);
+    }
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex in one run, for querying many targets without
+    /// re-running the algorithm.
+    /// </summary>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="ArgumentException"><paramref name="source"/> is not in the graph.</exception>
+    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source)
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
+
+        var (distance, predecessor) = Relax(graph, source, hasTarget: false, target: default);
+        return new SingleSourceShortestPaths<TVertex, TWeight>(
+            source,
+            distance,
+            predecessor,
+            new HashSet<TVertex>(graph.Vertices, graph.VertexComparer),
+            graph.VertexComparer);
+    }
+
+    private (Dictionary<TVertex, TWeight> Distance, Dictionary<TVertex, TVertex> Predecessor) Relax(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source,
+        bool hasTarget,
+        TVertex? target)
+    {
         var comparer = graph.VertexComparer;
         var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
         var predecessor = new Dictionary<TVertex, TVertex>(comparer);
@@ -52,7 +97,7 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
                 continue;
             }
 
-            if (comparer.Equals(current, target))
+            if (hasTarget && comparer.Equals(current, target!))
             {
                 break;
             }
@@ -81,12 +126,6 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
             }
         }
 
-        return !distance.TryGetValue(target, out var total) || !settled.Contains(target)
-            ? new ShortestPathResult<TVertex, TWeight>(source, target)
-            : new ShortestPathResult<TVertex, TWeight>(
-                source,
-                target,
-                total,
-                GraphTraversalCore.BuildPath(source, target, predecessor, comparer));
+        return (distance, predecessor);
     }
 }
