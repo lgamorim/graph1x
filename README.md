@@ -25,12 +25,12 @@ Feature-complete for the planned scope. Built milestone by milestone with TDD (t
 | Graph types | `DirectedGraph`, `UndirectedGraph`, `DirectedMultigraph`, `UndirectedMultigraph`, `DirectedAcyclicGraph`, `DirectedAdjacencyMatrixGraph`, `UndirectedAdjacencyMatrixGraph`, `Hypergraph` |
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
-| Connectivity | Connected/weakly connected components, Tarjan SCC |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
-| Structure | Density, degree sequence, bipartiteness, transpose |
+| Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 
 ## Usage
@@ -179,6 +179,10 @@ graph.DegreeSequence();           // descending degrees
 graph.IsBipartite();              // 2-colorability (direction ignored)
 graph.FindBipartition();          // the two vertex sets, or null
 graph.Transpose();                // reversed copy of a directed graph
+graph.FindBridges();              // edges whose removal disconnects (undirected)
+graph.FindArticulationPoints();   // cut vertices (undirected)
+dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
+dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).

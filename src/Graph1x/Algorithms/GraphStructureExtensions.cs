@@ -173,4 +173,130 @@ public static class GraphStructureExtensions
         where TVertex : notnull
         where TWeight : INumber<TWeight>
         => graph.Transpose(edge => new WeightedEdge<TVertex, TWeight>(edge.Target, edge.Source, edge.Weight));
+
+    /// <summary>
+    /// Builds the transitive closure of a directed graph: an edge u → v for
+    /// every non-empty path u → ... → v in the original (so vertices on cycles
+    /// gain self-loops). Vertices are preserved.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The directed graph to close.</param>
+    /// <param name="edgeFactory">Builds the closure edge for a (source, target) pair.</param>
+    /// <returns>A new directed graph containing the closure.</returns>
+    public static IDirectedGraph<TVertex, TEdge> TransitiveClosure<TVertex, TEdge>(
+        this IDirectedGraph<TVertex, TEdge> graph,
+        Func<TVertex, TVertex, TEdge> edgeFactory)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(edgeFactory);
+
+        var comparer = graph.VertexComparer;
+        var closure = new DirectedGraph<TVertex, TEdge>(comparer);
+        foreach (var vertex in graph.Vertices)
+        {
+            closure.AddVertex(vertex);
+        }
+
+        foreach (var source in graph.Vertices)
+        {
+            // BFS over out-edges; the source itself only enters `reached` when
+            // an edge leads back to it, which is exactly the cycle case.
+            var reached = new HashSet<TVertex>(comparer);
+            var queue = new Queue<TVertex>();
+            foreach (var edge in graph.OutEdges(source))
+            {
+                if (reached.Add(edge.Target))
+                {
+                    queue.Enqueue(edge.Target);
+                }
+            }
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                closure.AddEdge(edgeFactory(source, current));
+                foreach (var edge in graph.OutEdges(current))
+                {
+                    if (reached.Add(edge.Target))
+                    {
+                        queue.Enqueue(edge.Target);
+                    }
+                }
+            }
+        }
+
+        return closure;
+    }
+
+    /// <summary>Builds the transitive closure of a directed graph with <see cref="Edge{TVertex}"/> edges.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <param name="graph">The directed graph to close.</param>
+    /// <returns>A new directed graph containing the closure.</returns>
+    public static IDirectedGraph<TVertex, Edge<TVertex>> TransitiveClosure<TVertex>(
+        this IDirectedGraph<TVertex, Edge<TVertex>> graph)
+        where TVertex : notnull
+        => graph.TransitiveClosure((source, target) => new Edge<TVertex>(source, target));
+
+    /// <summary>
+    /// Builds the transitive reduction of a directed acyclic graph: the unique
+    /// minimal edge set with the same reachability. An edge u → v is dropped
+    /// when v is also reachable through another successor of u. Parallel edges
+    /// collapse to one; vertices are preserved.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The directed acyclic graph to reduce.</param>
+    /// <returns>A new directed graph containing the reduction.</returns>
+    /// <exception cref="GraphCycleException">The graph contains a cycle; general graphs have no unique reduction.</exception>
+    public static IDirectedGraph<TVertex, TEdge> TransitiveReduction<TVertex, TEdge>(
+        this IDirectedGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        var order = graph.TopologicalSort(); // throws GraphCycleException on cyclic input
+
+        var comparer = graph.VertexComparer;
+
+        // Descendant sets in reverse topological order: every successor is
+        // processed before the vertices pointing at it.
+        var descendants = new Dictionary<TVertex, HashSet<TVertex>>(comparer);
+        for (var i = order.Count - 1; i >= 0; i--)
+        {
+            var vertex = order[i];
+            var reachable = new HashSet<TVertex>(comparer);
+            foreach (var edge in graph.OutEdges(vertex))
+            {
+                reachable.Add(edge.Target);
+                reachable.UnionWith(descendants[edge.Target]);
+            }
+
+            descendants[vertex] = reachable;
+        }
+
+        var reduced = new DirectedGraph<TVertex, TEdge>(comparer);
+        foreach (var vertex in graph.Vertices)
+        {
+            reduced.AddVertex(vertex);
+        }
+
+        foreach (var vertex in graph.Vertices)
+        {
+            var successors = new HashSet<TVertex>(graph.OutEdges(vertex).Select(edge => edge.Target), comparer);
+            foreach (var edge in graph.OutEdges(vertex))
+            {
+                var redundant = successors.Any(other =>
+                    !comparer.Equals(other, edge.Target) && descendants[other].Contains(edge.Target));
+                if (!redundant)
+                {
+                    reduced.AddEdge(edge);
+                }
+            }
+        }
+
+        return reduced;
+    }
 }
