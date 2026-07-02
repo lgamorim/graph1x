@@ -1,5 +1,7 @@
 # Graph1x
 
+[![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
+
 A .NET library for creating, mutating, and analyzing graphs, built with modern C# and developed test-first.
 
 ## Goals

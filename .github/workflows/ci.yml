@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [master, "feature/**"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore Graph1x.sln
+
+      - name: Build
+        run: dotnet build Graph1x.sln -c Release --no-restore
+
+      - name: Test (net8.0 on the .NET 8 runtime, net10.0 on .NET 10)
+        run: dotnet test Graph1x.sln -c Release --no-build
+
+      - name: Pack
+        run: dotnet pack src/Graph1x/Graph1x.csproj -c Release --no-build
