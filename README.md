@@ -29,6 +29,7 @@ Feature-complete for the planned scope. Built milestone by milestone with TDD (t
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
+| Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 
@@ -151,6 +152,12 @@ result.FlowValue;           // max flow == min cut capacity
 result.EdgeFlows;           // flow per edge (parallel edges listed individually)
 result.MinCutEdges;         // the bottleneck edges
 result.SourceSideOfMinCut;  // the residual-reachable vertex set
+```
+
+Maximum bipartite matching (undirected bipartite graphs; the partition is derived automatically):
+
+```csharp
+var pairs = graph.MaximumBipartiteMatching(); // Hopcroft-Karp, O(E·√V)
 ```
 
 Graphs can be built fluently, and structural queries cover density, degree sequence, bipartiteness, and transpose:
