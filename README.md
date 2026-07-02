@@ -28,7 +28,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M5 | Connectivity (components, Tarjan SCC) | ✅ |
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | ✅ |
 | M7 | MST (Kruskal, Prim) | ✅ |
-| M8 | Fluent builder, structural queries, dense storage | — |
+| M8 | Fluent builder, structural queries, dense storage | ✅ |
 | M9 | Hypergraph | — |
 | M10 | Docs and packaging | — |
 
@@ -140,6 +140,29 @@ var forest = network.MinimumSpanningForest();       // Kruskal by default
 new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weight)
     .FindMinimumSpanningForest(network);            // or Prim, same interface
 ```
+
+Graphs can be built fluently, and structural queries cover density, degree sequence, bipartiteness, and transpose:
+
+```csharp
+using Graph1x.Builders;
+
+var graph = Graph.DirectedWeighted<string, int>()
+    .AddEdge("a", "b", 3)
+    .AddEdge("b", "c", 4)
+    .Build();                     // typed DirectedGraph<string, WeightedEdge<string, int>>
+
+Graph.Wrap(new DirectedAcyclicGraph<string, Edge<string>>()) // build onto any graph
+    .AddVertices("a", "b")
+    .Build();
+
+graph.Density();                  // E / V(V-1) directed, 2E / V(V-1) undirected
+graph.DegreeSequence();           // descending degrees
+graph.IsBipartite();              // 2-colorability (direction ignored)
+graph.FindBipartition();          // the two vertex sets, or null
+graph.Transpose();                // reversed copy of a directed graph
+```
+
+For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
 
 ## Building
 
