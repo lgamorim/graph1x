@@ -16,21 +16,18 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Under active development, milestone by milestone (TDD — tests are written before the implementation):
+Feature-complete for the planned scope. Built milestone by milestone with TDD (tests written before the implementation); 400+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass.
 
-| Milestone | Contents | Status |
-|---|---|---|
-| M0 | Project scaffolding, build props, analyzers | ✅ |
-| M1 | Edge types and core graph abstractions | ✅ |
-| M2 | `UndirectedGraph`, `DirectedGraph` | ✅ |
-| M3 | Multigraphs, `DirectedAcyclicGraph` | ✅ |
-| M4 | BFS/DFS, cycle detection, topological sort | ✅ |
-| M5 | Connectivity (components, Tarjan SCC) | ✅ |
-| M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | ✅ |
-| M7 | MST (Kruskal, Prim) | ✅ |
-| M8 | Fluent builder, structural queries, dense storage | ✅ |
-| M9 | Hypergraph | ✅ |
-| M10 | Docs and packaging | — |
+| Area | Contents |
+|---|---|
+| Graph types | `DirectedGraph`, `UndirectedGraph`, `DirectedMultigraph`, `UndirectedMultigraph`, `DirectedAcyclicGraph`, `DirectedAdjacencyMatrixGraph`, `UndirectedAdjacencyMatrixGraph`, `Hypergraph` |
+| Traversal | BFS, DFS pre/post-order (lazy, iterative) |
+| Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
+| Connectivity | Connected/weakly connected components, Tarjan SCC |
+| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
+| Spanning trees | Kruskal, Prim (forests on disconnected input) |
+| Structure | Density, degree sequence, bipartiteness, transpose |
+| Construction | Fluent `GraphBuilder` with typed `Build()` |
 
 ## Usage
 

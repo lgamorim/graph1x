@@ -6,6 +6,22 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageId>Graph1x</PackageId>
+        <Version>0.1.0</Version>
+        <Authors>Luis Gomes Amorim</Authors>
+        <Description>A graph manipulation library for .NET: directed/undirected, weighted (generic math), multigraphs, DAG-enforcing and dense matrix-backed graphs, plus hypergraphs — with traversals, cycle detection, topological sort, connectivity/SCC, shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*), minimum spanning trees (Kruskal, Prim), and structural queries.</Description>
+        <PackageTags>graph;graphs;algorithms;dijkstra;topological-sort;mst;hypergraph;multigraph;dag</PackageTags>
+        <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/lgamorim/graph1x</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
     <ItemGroup>
         <InternalsVisibleTo Include="Graph1x.UnitTests" />
     </ItemGroup>
