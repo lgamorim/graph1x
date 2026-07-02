@@ -28,6 +28,7 @@ Feature-complete for the planned scope. Built milestone by milestone with TDD (t
 | Connectivity | Connected/weakly connected components, Tarjan SCC |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
+| Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
 | Structure | Density, degree sequence, bipartiteness, transpose |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 
@@ -138,6 +139,18 @@ Minimum spanning trees (undirected graphs; disconnected input yields a spanning 
 var forest = network.MinimumSpanningForest();       // Kruskal by default
 new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weight)
     .FindMinimumSpanningForest(network);            // or Prim, same interface
+```
+
+Maximum flow (directed networks, non-negative capacities) returns the flow value, per-edge flows, and a minimum cut that certifies optimality:
+
+```csharp
+var result = network.MaximumFlow("source", "sink");   // WeightedEdge capacities
+network.MaximumFlow("s", "t", e => e.Capacity);       // or any capacity selector
+
+result.FlowValue;           // max flow == min cut capacity
+result.EdgeFlows;           // flow per edge (parallel edges listed individually)
+result.MinCutEdges;         // the bottleneck edges
+result.SourceSideOfMinCut;  // the residual-reachable vertex set
 ```
 
 Graphs can be built fluently, and structural queries cover density, degree sequence, bipartiteness, and transpose:
