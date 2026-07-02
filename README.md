@@ -29,7 +29,7 @@ Under active development, milestone by milestone (TDD — tests are written befo
 | M6 | Shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*) | ✅ |
 | M7 | MST (Kruskal, Prim) | ✅ |
 | M8 | Fluent builder, structural queries, dense storage | ✅ |
-| M9 | Hypergraph | — |
+| M9 | Hypergraph | ✅ |
 | M10 | Docs and packaging | — |
 
 ## Usage
@@ -163,6 +163,19 @@ graph.Transpose();                // reversed copy of a directed graph
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
+
+Hypergraphs (edges joining any number of vertices) are a standalone type with their own incidence and connectivity queries:
+
+```csharp
+using Graph1x.Hypergraphs;
+
+var teams = new Hypergraph<string>();
+var kickoff = teams.AddHyperedge("ana", "bruno", "carla"); // returns a handle
+teams.Degree("ana");             // number of incident hyperedges
+teams.AreConnected("ana", "dora");
+teams.ConnectedComponents();
+teams.RemoveHyperedge(kickoff);
+```
 
 ## Building
 
