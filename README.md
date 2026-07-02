@@ -181,7 +181,7 @@ dotnet build Graph1x.sln
 dotnet test Graph1x.sln
 ```
 
-Requires the .NET 10 SDK. Warnings are treated as errors and .NET analyzers run at the latest analysis level.
+The library targets **.NET 8 (LTS)** and **.NET 10**; the test suite runs against both. Building requires the .NET 10 SDK. Warnings are treated as errors and .NET analyzers run at the latest analysis level.
 
 ## Project layout
 
