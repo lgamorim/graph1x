@@ -32,6 +32,7 @@ Feature-complete for the planned scope. Built milestone by milestone with TDD (t
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
+| Serialization | Graphviz DOT export with escaping and label selectors |
 
 ## Usage
 
@@ -198,6 +199,19 @@ teams.Degree("ana");             // number of incident hyperedges
 teams.AreConnected("ana", "dora");
 teams.ConnectedComponents();
 teams.RemoveHyperedge(kickoff);
+```
+
+Any graph renders to Graphviz DOT for quick visualization (`dot -Tsvg`):
+
+```csharp
+using Graph1x.Serialization;
+
+var dot = graph.ToDot();                                  // digraph/graph picked automatically
+graph.ToDot(new DotExportOptions<string, WeightedEdge<string, int>>
+{
+    GraphName = "network",
+    EdgeLabel = e => e.Weight.ToString(),                 // [label="…"] per edge
+});
 ```
 
 ## Building
