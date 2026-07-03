@@ -212,6 +212,10 @@ teams.Degree("ana");             // number of incident hyperedges
 teams.AreConnected("ana", "dora");
 teams.ConnectedComponents();
 teams.RemoveHyperedge(kickoff);
+
+// Expansions bridge hypergraphs into the full algorithm suite:
+teams.ToCliqueExpansion();          // co-membership graph (2-section)
+teams.ToBipartiteIncidenceGraph();  // lossless vertex/hyperedge bipartite graph
 ```
 
 Hand out graphs without handing out mutation — live views and immutable snapshots both stay fully algorithm-compatible (directed views keep directed dispatch):

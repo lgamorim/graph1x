@@ -16,6 +16,9 @@ All notable changes to Graph1x are documented in this file. The format follows
   Hierholzer-based `FindEulerianCircuit`/`FindEulerianPath`, multigraph-aware.
 - DSatur vertex coloring (`ColorVertices`) returning a proper coloring and a
   chromatic-number upper bound; exact on bipartite graphs.
+- Hypergraph expansions: `ToCliqueExpansion` (2-section) and the lossless
+  `ToBipartiteIncidenceGraph`, making the whole binary-edge algorithm suite
+  usable on hypergraph data.
 
 ## [0.2.0] - 2026-07-03
 
