@@ -6,6 +6,8 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-03
+
 ### Added
 
 - Tag-triggered release workflow publishing the package and symbols to
@@ -19,6 +21,9 @@ All notable changes to Graph1x are documented in this file. The format follows
 - Hypergraph expansions: `ToCliqueExpansion` (2-section) and the lossless
   `ToBipartiteIncidenceGraph`, making the whole binary-edge algorithm suite
   usable on hypergraph data.
+- `GraphGenerator`: deterministic seeded Erdős–Rényi (directed/undirected),
+  `Complete`, `CompleteBipartite`, `Path`, `Cycle`, `Star`, and `Grid`
+  generators over integer vertices.
 
 ## [0.2.0] - 2026-07-03
 
