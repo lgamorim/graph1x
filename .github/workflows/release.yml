@@ -1,0 +1,63 @@
+name: Release
+
+# Pushing a v* tag publishes to NuGet.org and creates a GitHub Release.
+# Manual dispatch runs the same pipeline as a dry-run: build, test, and
+# pack only — nothing is published.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDKs
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore Graph1x.sln
+
+      - name: Build
+        run: dotnet build Graph1x.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Graph1x.sln -c Release --no-build
+
+      - name: Pack
+        run: dotnet pack src/Graph1x/Graph1x.csproj -c Release --no-build -o packages
+
+      - name: Extract release notes from CHANGELOG
+        if: github.ref_type == 'tag'
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v ver="$version" '$0 ~ "^## \\[" ver "\\]" {flag=1; next} /^## \[/ {flag=0} flag' CHANGELOG.md > release-notes.md
+          echo "Notes for $version:"
+          cat release-notes.md
+
+      - name: Push to NuGet.org
+        if: github.ref_type == 'tag'
+        run: >
+          dotnet nuget push "packages/*.nupkg"
+          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "$GITHUB_REF_NAME"
+          packages/*.nupkg packages/*.snupkg
+          --title "$GITHUB_REF_NAME"
+          --notes-file release-notes.md
