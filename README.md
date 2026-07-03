@@ -25,6 +25,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Graph types | `DirectedGraph`, `UndirectedGraph`, `DirectedMultigraph`, `UndirectedMultigraph`, `DirectedAcyclicGraph`, `DirectedAdjacencyMatrixGraph`, `UndirectedAdjacencyMatrixGraph`, `Hypergraph` |
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
+| Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
@@ -99,6 +100,8 @@ graph.DepthFirstSearchPostOrder("a");   // post-order
 graph.HasCycle();                       // directed or undirected
 graph.FindCycle();                      // the cycle's vertices, or null
 graph.TopologicalSort();                // Kahn's algorithm; throws GraphCycleException on cycles
+graph.FindEulerianCircuit();            // every edge exactly once, or null (Hierholzer)
+graph.FindEulerianPath();               // Königsberg says null
 ```
 
 Cycle detection understands multigraphs (two parallel undirected edges form a cycle) and self-loops. `GraphCycleException` carries the offending cycle.

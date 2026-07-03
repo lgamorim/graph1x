@@ -12,6 +12,8 @@ All notable changes to Graph1x are documented in this file. The format follows
   NuGet.org and creating a GitHub Release with notes from this changelog.
 - `AsReadOnly()` live read-only views (directed views keep directed dispatch)
   and `ToFrozen()` immutable snapshots safe for concurrent readers.
+- Eulerian trails: `HasEulerianCircuit`/`HasEulerianPath` existence checks and
+  Hierholzer-based `FindEulerianCircuit`/`FindEulerianPath`, multigraph-aware.
 
 ## [0.2.0] - 2026-07-03
 
