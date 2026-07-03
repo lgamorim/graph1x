@@ -14,6 +14,8 @@ All notable changes to Graph1x are documented in this file. The format follows
   and `ToFrozen()` immutable snapshots safe for concurrent readers.
 - Eulerian trails: `HasEulerianCircuit`/`HasEulerianPath` existence checks and
   Hierholzer-based `FindEulerianCircuit`/`FindEulerianPath`, multigraph-aware.
+- DSatur vertex coloring (`ColorVertices`) returning a proper coloring and a
+  chromatic-number upper bound; exact on bipartite graphs.
 
 ## [0.2.0] - 2026-07-03
 

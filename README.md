@@ -32,6 +32,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
+| Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export with escaping and label selectors |
@@ -193,6 +194,9 @@ graph.FindBridges();              // edges whose removal disconnects (undirected
 graph.FindArticulationPoints();   // cut vertices (undirected)
 dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
 dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
+
+var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
+coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
