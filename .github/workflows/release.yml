@@ -40,7 +40,7 @@ jobs:
         if: github.ref_type == 'tag'
         run: |
           version="${GITHUB_REF_NAME#v}"
-          awk -v ver="$version" '$0 ~ "^## \\[" ver "\\]" {flag=1; next} /^## \[/ {flag=0} flag' CHANGELOG.md > release-notes.md
+          awk -v ver="$version" 'index($0, "## [" ver "]") == 1 {flag=1; next} /^## \[/ {flag=0} flag' CHANGELOG.md > release-notes.md
           echo "Notes for $version:"
           cat release-notes.md
 
