@@ -179,4 +179,150 @@ public static class GraphConnectivityExtensions
             onStack.Add(vertex);
         }
     }
+
+    /// <summary>
+    /// Finds the bridges of an undirected graph: edges whose removal increases
+    /// the number of connected components. A parallel edge pair is never a
+    /// bridge; self-loops are ignored.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The undirected graph to inspect.</param>
+    /// <returns>The bridge edges.</returns>
+    /// <exception cref="ArgumentException"><paramref name="graph"/> is directed.</exception>
+    public static IReadOnlyList<TEdge> FindBridges<TVertex, TEdge>(this IReadOnlyGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        => FindCutElements(graph).Bridges;
+
+    /// <summary>
+    /// Finds the articulation points (cut vertices) of an undirected graph:
+    /// vertices whose removal increases the number of connected components.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The undirected graph to inspect.</param>
+    /// <returns>The articulation points.</returns>
+    /// <exception cref="ArgumentException"><paramref name="graph"/> is directed.</exception>
+    public static IReadOnlySet<TVertex> FindArticulationPoints<TVertex, TEdge>(this IReadOnlyGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        => FindCutElements(graph).ArticulationPoints;
+
+    /// <summary>
+    /// One iterative low-link DFS computing bridges and articulation points
+    /// together (the same discovery/low-link machinery answers both).
+    /// </summary>
+    private static (IReadOnlyList<TEdge> Bridges, IReadOnlySet<TVertex> ArticulationPoints) FindCutElements<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        if (graph.IsDirected)
+        {
+            throw new ArgumentException(
+                "Bridges and articulation points are defined for undirected graphs.", nameof(graph));
+        }
+
+        var comparer = graph.VertexComparer;
+        var discovery = new Dictionary<TVertex, int>(comparer);
+        var low = new Dictionary<TVertex, int>(comparer);
+        var bridges = new List<TEdge>();
+        var articulationPoints = new HashSet<TVertex>(comparer);
+        var time = 0;
+
+        foreach (var root in graph.Vertices)
+        {
+            if (discovery.ContainsKey(root))
+            {
+                continue;
+            }
+
+            discovery[root] = low[root] = time++;
+            var stack = new Stack<CutFrame<TVertex, TEdge>>();
+            stack.Push(new CutFrame<TVertex, TEdge>(root, graph.AdjacentEdges(root).GetEnumerator()));
+
+            while (stack.Count > 0)
+            {
+                var frame = stack.Peek();
+                if (frame.Edges.MoveNext())
+                {
+                    var edge = frame.Edges.Current;
+                    var other = GraphTraversalCore.OtherEndpoint(graph, edge, frame.Vertex);
+                    if (comparer.Equals(other, frame.Vertex))
+                    {
+                        continue; // self-loops separate nothing
+                    }
+
+                    if (!discovery.TryGetValue(other, out var otherDiscovery))
+                    {
+                        discovery[other] = low[other] = time++;
+                        frame.ChildCount++;
+                        stack.Push(new CutFrame<TVertex, TEdge>(other, graph.AdjacentEdges(other).GetEnumerator())
+                        {
+                            HasParent = true,
+                            Parent = frame.Vertex,
+                            TreeEdge = edge,
+                        });
+                        continue;
+                    }
+
+                    // The single tree edge back to the parent is not a back
+                    // edge; skip it exactly once so a parallel edge still counts.
+                    if (frame.HasParent && !frame.SkippedParentEdge && comparer.Equals(other, frame.Parent!))
+                    {
+                        frame.SkippedParentEdge = true;
+                        continue;
+                    }
+
+                    low[frame.Vertex] = Math.Min(low[frame.Vertex], otherDiscovery);
+                    continue;
+                }
+
+                frame.Edges.Dispose();
+                stack.Pop();
+
+                if (stack.Count > 0)
+                {
+                    var parent = stack.Peek();
+                    low[parent.Vertex] = Math.Min(low[parent.Vertex], low[frame.Vertex]);
+                    if (low[frame.Vertex] > discovery[parent.Vertex])
+                    {
+                        bridges.Add(frame.TreeEdge!);
+                    }
+
+                    if (parent.HasParent && low[frame.Vertex] >= discovery[parent.Vertex])
+                    {
+                        articulationPoints.Add(parent.Vertex);
+                    }
+                }
+                else if (frame.ChildCount >= 2)
+                {
+                    articulationPoints.Add(frame.Vertex); // root rule
+                }
+            }
+        }
+
+        return (bridges, articulationPoints);
+    }
+
+    private sealed class CutFrame<TVertex, TEdge>(TVertex vertex, IEnumerator<TEdge> edges)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        public TVertex Vertex { get; } = vertex;
+
+        public IEnumerator<TEdge> Edges { get; } = edges;
+
+        public bool HasParent { get; init; }
+
+        public TVertex? Parent { get; init; }
+
+        public TEdge? TreeEdge { get; init; }
+
+        public bool SkippedParentEdge { get; set; }
+
+        public int ChildCount { get; set; }
+    }
 }

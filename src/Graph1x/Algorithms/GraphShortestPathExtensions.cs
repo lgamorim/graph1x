@@ -55,4 +55,44 @@ public static class GraphShortestPathExtensions
         where TVertex : notnull
         where TWeight : INumber<TWeight>
         => graph.ShortestPath(source, target, edge => edge.Weight);
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex using Dijkstra's algorithm and
+    /// <paramref name="weightSelector"/> to read edge weights.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    public static SingleSourceShortestPaths<TVertex, TWeight> ShortestPathsFrom<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source,
+        Func<TEdge, TWeight> weightSelector)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+        => new DijkstraShortestPath<TVertex, TEdge, TWeight>(weightSelector).FindPathsFrom(graph, source);
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex using Dijkstra's algorithm and the weights carried by
+    /// the graph's <see cref="WeightedEdge{TVertex, TWeight}"/> edges.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    public static SingleSourceShortestPaths<TVertex, TWeight> ShortestPathsFrom<TVertex, TWeight>(
+        this IReadOnlyGraph<TVertex, WeightedEdge<TVertex, TWeight>> graph,
+        TVertex source)
+        where TVertex : notnull
+        where TWeight : INumber<TWeight>
+        => graph.ShortestPathsFrom(source, edge => edge.Weight);
 }

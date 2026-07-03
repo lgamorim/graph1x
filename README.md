@@ -1,5 +1,7 @@
 # Graph1x
 
+[![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
+
 A .NET library for creating, mutating, and analyzing graphs, built with modern C# and developed test-first.
 
 ## Goals
@@ -16,18 +18,21 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Feature-complete for the planned scope. Built milestone by milestone with TDD (tests written before the implementation); 400+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass.
+Built milestone by milestone with TDD (tests written before the implementation); nearly 500 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
 
 | Area | Contents |
 |---|---|
 | Graph types | `DirectedGraph`, `UndirectedGraph`, `DirectedMultigraph`, `UndirectedMultigraph`, `DirectedAcyclicGraph`, `DirectedAdjacencyMatrixGraph`, `UndirectedAdjacencyMatrixGraph`, `Hypergraph` |
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
-| Connectivity | Connected/weakly connected components, Tarjan SCC |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
-| Structure | Density, degree sequence, bipartiteness, transpose |
+| Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
+| Matching | Hopcroft-Karp maximum bipartite matching |
+| Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
+| Serialization | Graphviz DOT export with escaping and label selectors |
 
 ## Usage
 
@@ -116,6 +121,11 @@ route.IsReachable;  // false instead of exceptions for missing routes
 route.Distance;     // total weight (throws if unreachable)
 route.Path;         // ["LIS", ..., "MAD"]
 
+// Querying many targets from one source? One run, many lookups:
+var fromLisbon = graph.ShortestPathsFrom("LIS");
+fromLisbon.To("MAD");     // ShortestPathResult, no recomputation
+fromLisbon.Distances;     // every reachable vertex at once
+
 // Negative weights? Bellman-Ford (throws NegativeCycleException on negative cycles).
 new BellmanFordShortestPath<string, WeightedEdge<string, int>, int>(e => e.Weight)
     .FindPath(graph, "a", "b");
@@ -138,6 +148,24 @@ new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weigh
     .FindMinimumSpanningForest(network);            // or Prim, same interface
 ```
 
+Maximum flow (directed networks, non-negative capacities) returns the flow value, per-edge flows, and a minimum cut that certifies optimality:
+
+```csharp
+var result = network.MaximumFlow("source", "sink");   // WeightedEdge capacities
+network.MaximumFlow("s", "t", e => e.Capacity);       // or any capacity selector
+
+result.FlowValue;           // max flow == min cut capacity
+result.EdgeFlows;           // flow per edge (parallel edges listed individually)
+result.MinCutEdges;         // the bottleneck edges
+result.SourceSideOfMinCut;  // the residual-reachable vertex set
+```
+
+Maximum bipartite matching (undirected bipartite graphs; the partition is derived automatically):
+
+```csharp
+var pairs = graph.MaximumBipartiteMatching(); // Hopcroft-Karp, O(E·√V)
+```
+
 Graphs can be built fluently, and structural queries cover density, degree sequence, bipartiteness, and transpose:
 
 ```csharp
@@ -157,6 +185,10 @@ graph.DegreeSequence();           // descending degrees
 graph.IsBipartite();              // 2-colorability (direction ignored)
 graph.FindBipartition();          // the two vertex sets, or null
 graph.Transpose();                // reversed copy of a directed graph
+graph.FindBridges();              // edges whose removal disconnects (undirected)
+graph.FindArticulationPoints();   // cut vertices (undirected)
+dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
+dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
@@ -172,6 +204,19 @@ teams.Degree("ana");             // number of incident hyperedges
 teams.AreConnected("ana", "dora");
 teams.ConnectedComponents();
 teams.RemoveHyperedge(kickoff);
+```
+
+Any graph renders to Graphviz DOT for quick visualization (`dot -Tsvg`):
+
+```csharp
+using Graph1x.Serialization;
+
+var dot = graph.ToDot();                                  // digraph/graph picked automatically
+graph.ToDot(new DotExportOptions<string, WeightedEdge<string, int>>
+{
+    GraphName = "network",
+    EdgeLabel = e => e.Weight.ToString(),                 // [label="…"] per edge
+});
 ```
 
 ## Building

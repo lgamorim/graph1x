@@ -40,6 +40,47 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
         GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
         GraphTraversalCore.ValidateEndpoint(graph, target, nameof(target));
 
+        var (distance, predecessor) = RelaxAll(graph, source);
+
+        return distance.TryGetValue(target, out var total)
+            ? new ShortestPathResult<TVertex, TWeight>(
+                source,
+                target,
+                total,
+                GraphTraversalCore.BuildPath(source, target, predecessor, graph.VertexComparer))
+            : new ShortestPathResult<TVertex, TWeight>(source, target);
+    }
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex in one run, for querying many targets without
+    /// re-running the algorithm. Negative edge weights are supported.
+    /// </summary>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="ArgumentException"><paramref name="source"/> is not in the graph.</exception>
+    /// <exception cref="NegativeCycleException">A negative cycle is reachable from <paramref name="source"/>.</exception>
+    public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source)
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
+
+        var (distance, predecessor) = RelaxAll(graph, source);
+        return new SingleSourceShortestPaths<TVertex, TWeight>(
+            source,
+            distance,
+            predecessor,
+            new HashSet<TVertex>(graph.Vertices, graph.VertexComparer),
+            graph.VertexComparer);
+    }
+
+    private (Dictionary<TVertex, TWeight> Distance, Dictionary<TVertex, TVertex> Predecessor) RelaxAll(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source)
+    {
         var comparer = graph.VertexComparer;
         var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
         var predecessor = new Dictionary<TVertex, TVertex>(comparer);
@@ -70,13 +111,7 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
             }
         }
 
-        return distance.TryGetValue(target, out var total)
-            ? new ShortestPathResult<TVertex, TWeight>(
-                source,
-                target,
-                total,
-                GraphTraversalCore.BuildPath(source, target, predecessor, comparer))
-            : new ShortestPathResult<TVertex, TWeight>(source, target);
+        return (distance, predecessor);
     }
 
     private static bool Relax(

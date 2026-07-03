@@ -2,7 +2,8 @@
 
     <PropertyGroup>
         <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-        <RollForward>LatestMajor</RollForward>
+        <!-- Use the matching runtime when installed (CI); roll forward to a newer major only when it is missing (local dev with only .NET 10). -->
+        <RollForward>Major</RollForward>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
