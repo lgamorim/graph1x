@@ -25,14 +25,18 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Graph types | `DirectedGraph`, `UndirectedGraph`, `DirectedMultigraph`, `UndirectedMultigraph`, `DirectedAcyclicGraph`, `DirectedAdjacencyMatrixGraph`, `UndirectedAdjacencyMatrixGraph`, `Hypergraph` |
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
+| Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
+| Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
+| Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export with escaping and label selectors |
+| Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
 
@@ -98,6 +102,8 @@ graph.DepthFirstSearchPostOrder("a");   // post-order
 graph.HasCycle();                       // directed or undirected
 graph.FindCycle();                      // the cycle's vertices, or null
 graph.TopologicalSort();                // Kahn's algorithm; throws GraphCycleException on cycles
+graph.FindEulerianCircuit();            // every edge exactly once, or null (Hierholzer)
+graph.FindEulerianPath();               // Königsberg says null
 ```
 
 Cycle detection understands multigraphs (two parallel undirected edges form a cycle) and self-loops. `GraphCycleException` carries the offending cycle.
@@ -189,6 +195,9 @@ graph.FindBridges();              // edges whose removal disconnects (undirected
 graph.FindArticulationPoints();   // cut vertices (undirected)
 dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
 dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
+
+var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
+coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
@@ -204,6 +213,19 @@ teams.Degree("ana");             // number of incident hyperedges
 teams.AreConnected("ana", "dora");
 teams.ConnectedComponents();
 teams.RemoveHyperedge(kickoff);
+
+// Expansions bridge hypergraphs into the full algorithm suite:
+teams.ToCliqueExpansion();          // co-membership graph (2-section)
+teams.ToBipartiteIncidenceGraph();  // lossless vertex/hyperedge bipartite graph
+```
+
+Ready-made structures for tests, demos, and benchmarks come from `GraphGenerator` (`ErdosRenyi(n, p, seed)`, `Complete(n)`, `Grid(w, h)`, …) — seeded, so results are reproducible.
+
+Hand out graphs without handing out mutation — live views and immutable snapshots both stay fully algorithm-compatible (directed views keep directed dispatch):
+
+```csharp
+IReadOnlyGraph<string, Edge<string>> view = graph.AsReadOnly(); // live, not castable to IMutableGraph
+var snapshot = graph.ToFrozen();                                // deep copy, safe for concurrent readers
 ```
 
 Any graph renders to Graphviz DOT for quick visualization (`dot -Tsvg`):
@@ -227,6 +249,10 @@ dotnet test Graph1x.sln
 ```
 
 The library targets **.NET 8 (LTS)** and **.NET 10**; the test suite runs against both. Building requires the .NET 10 SDK. Warnings are treated as errors and .NET analyzers run at the latest analysis level.
+
+## Releasing
+
+Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack, publish to NuGet.org (requires the `NUGET_API_KEY` repository secret), and create a GitHub Release with notes from [CHANGELOG.md](CHANGELOG.md). Running the workflow manually performs a dry run that stops after packing.
 
 ## Project layout
 
