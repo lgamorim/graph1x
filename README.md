@@ -32,6 +32,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
+| Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export with escaping and label selectors |
 
 ## Usage
@@ -204,6 +205,13 @@ teams.Degree("ana");             // number of incident hyperedges
 teams.AreConnected("ana", "dora");
 teams.ConnectedComponents();
 teams.RemoveHyperedge(kickoff);
+```
+
+Hand out graphs without handing out mutation — live views and immutable snapshots both stay fully algorithm-compatible (directed views keep directed dispatch):
+
+```csharp
+IReadOnlyGraph<string, Edge<string>> view = graph.AsReadOnly(); // live, not castable to IMutableGraph
+var snapshot = graph.ToFrozen();                                // deep copy, safe for concurrent readers
 ```
 
 Any graph renders to Graphviz DOT for quick visualization (`dot -Tsvg`):
