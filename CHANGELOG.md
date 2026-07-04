@@ -6,6 +6,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Package author corrected to "Luís Amorim" (matching the git identity).
+- Package license expression corrected to Apache-2.0, matching the LICENSE
+  change in the repository.
+
 ## [0.3.0] - 2026-07-03
 
 ### Added
