@@ -20,10 +20,26 @@ public static class GraphCondensationExtensions
     public static CondensationResult<TVertex> Condense<TVertex, TEdge>(this IDirectedGraph<TVertex, TEdge> graph)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
+        => graph.Condense(CancellationToken.None);
+
+    /// <summary>Builds the condensation, observing <paramref name="cancellationToken"/> between phases.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The directed graph to condense.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>The condensation DAG plus component lookups.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static CondensationResult<TVertex> Condense<TVertex, TEdge>(
+        this IDirectedGraph<TVertex, TEdge> graph,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var components = graph.StronglyConnectedComponents();
+        cancellationToken.ThrowIfCancellationRequested();
         var componentOf = new Dictionary<TVertex, int>(graph.VertexComparer);
         for (var index = 0; index < components.Count; index++)
         {

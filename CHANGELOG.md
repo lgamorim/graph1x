@@ -19,6 +19,11 @@ All notable changes to Graph1x are documented in this file. The format follows
 - Node-link JSON serialization: `ToJson` export (Utf8JsonWriter, no
   reflection) and `GraphJson.Parse`/`ParseDirected`/`ParseUndirected`
   (+ weighted variants) importing into lossless multigraph types.
+- `CancellationToken` overloads on long-running algorithms (Floyd-Warshall,
+  single-source bulk queries, centrality, PageRank, max-flow, transitive
+  closure/reduction, condensation, distance metrics), checked cooperatively
+  at phase boundaries; `IMaximumFlowAlgorithm` gains a default-implemented
+  token overload so existing implementations keep compiling.
 
 ## [0.4.0] - 2026-07-05
 

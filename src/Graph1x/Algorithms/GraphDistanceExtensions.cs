@@ -64,6 +64,25 @@ public static class GraphDistanceExtensions
         where TWeight : INumber<TWeight>
         => Eccentricities(graph, weightSelector).Values.Max()!;
 
+    /// <summary>Gets the diameter, observing <paramref name="cancellationToken"/> between vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The connected graph to measure.</param>
+    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>The diameter.</returns>
+    /// <exception cref="InvalidOperationException">The graph is empty or not (strongly) connected.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static TWeight Diameter<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+        => Eccentricities(graph, weightSelector, cancellationToken).Values.Max()!;
+
     /// <summary>Gets the hop-count diameter.</summary>
     /// <typeparam name="TVertex">The vertex type.</typeparam>
     /// <typeparam name="TEdge">The edge type.</typeparam>
@@ -173,9 +192,29 @@ public static class GraphDistanceExtensions
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
         where TWeight : INumber<TWeight>
+        => graph.AveragePathLength(weightSelector, CancellationToken.None);
+
+    /// <summary>Gets the mean shortest-path distance, observing <paramref name="cancellationToken"/> between vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The connected graph to measure.</param>
+    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>The average path length.</returns>
+    /// <exception cref="InvalidOperationException">The graph is empty or not (strongly) connected.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static double AveragePathLength<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(weightSelector);
+        cancellationToken.ThrowIfCancellationRequested();
         ValidateConnected(graph);
 
         if (graph.VertexCount < 2)
@@ -186,6 +225,7 @@ public static class GraphDistanceExtensions
         var total = 0.0;
         foreach (var source in graph.Vertices)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var paths = graph.ShortestPathsFrom(source, weightSelector);
             foreach (var (target, distance) in paths.Distances)
             {
@@ -212,18 +252,21 @@ public static class GraphDistanceExtensions
 
     private static Dictionary<TVertex, TWeight> Eccentricities<TVertex, TEdge, TWeight>(
         IReadOnlyGraph<TVertex, TEdge> graph,
-        Func<TEdge, TWeight> weightSelector)
+        Func<TEdge, TWeight> weightSelector,
+        CancellationToken cancellationToken = default)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
         where TWeight : INumber<TWeight>
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(weightSelector);
+        cancellationToken.ThrowIfCancellationRequested();
         ValidateConnected(graph);
 
         var eccentricities = new Dictionary<TVertex, TWeight>(graph.VertexComparer);
         foreach (var vertex in graph.Vertices)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             eccentricities[vertex] = EccentricityOf(graph, vertex, weightSelector);
         }
 

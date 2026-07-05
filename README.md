@@ -219,6 +219,13 @@ graph.AveragePathLength();        // mean distance over ordered pairs
 
 Distance metrics require a connected graph (strongly connected when directed) and throw `InvalidOperationException` otherwise — no sentinel infinities.
 
+Long-running computations (all-pairs paths, centrality, PageRank, flows, closures, metrics, condensation) accept a `CancellationToken` via additive overloads, checked cooperatively at phase boundaries:
+
+```csharp
+graph.BetweennessCentrality(cancellationToken);
+network.MaximumFlow(s, t, e => e.Capacity, cancellationToken);
+```
+
 Centrality measures answer "which vertices matter":
 
 ```csharp

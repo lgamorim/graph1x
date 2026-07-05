@@ -35,16 +35,28 @@ public sealed class EdmondsKarpMaximumFlow<TVertex, TEdge, TWeight> : IMaximumFl
         IDirectedGraph<TVertex, TEdge> graph,
         TVertex source,
         TVertex sink)
+        => FindMaximumFlow(graph, source, sink, CancellationToken.None);
+
+    /// <inheritdoc/>
+    /// <remarks>Cancellation is observed between augmenting paths.</remarks>
+    public MaximumFlowResult<TVertex, TEdge, TWeight> FindMaximumFlow(
+        IDirectedGraph<TVertex, TEdge> graph,
+        TVertex source,
+        TVertex sink,
+        CancellationToken cancellationToken)
     {
         FlowGuards.Validate(graph, source, sink);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var network = new ResidualNetwork<TVertex, TEdge, TWeight>(graph, _capacitySelector);
+        cancellationToken.ThrowIfCancellationRequested();
         var sourceIndex = network.IndexOf(source);
         var sinkIndex = network.IndexOf(sink);
 
         var total = TWeight.Zero;
         while (network.FindAugmentingPath(sourceIndex, sinkIndex) is { } parentArc)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             total += network.Augment(parentArc, sourceIndex, sinkIndex);
         }
 

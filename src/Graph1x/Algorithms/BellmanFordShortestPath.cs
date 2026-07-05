@@ -64,11 +64,30 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
     public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
         IReadOnlyGraph<TVertex, TEdge> graph,
         TVertex source)
+        => FindPathsFrom(graph, source, CancellationToken.None);
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex, observing <paramref name="cancellationToken"/>
+    /// between relaxation passes. Negative edge weights are supported.
+    /// </summary>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="ArgumentException"><paramref name="source"/> is not in the graph.</exception>
+    /// <exception cref="NegativeCycleException">A negative cycle is reachable from <paramref name="source"/>.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
         GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
 
-        var (distance, predecessor) = RelaxAll(graph, source);
+        var (distance, predecessor) = RelaxAll(graph, source, cancellationToken);
         return new SingleSourceShortestPaths<TVertex, TWeight>(
             source,
             distance,
@@ -79,7 +98,8 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
 
     private (Dictionary<TVertex, TWeight> Distance, Dictionary<TVertex, TVertex> Predecessor) RelaxAll(
         IReadOnlyGraph<TVertex, TEdge> graph,
-        TVertex source)
+        TVertex source,
+        CancellationToken cancellationToken = default)
     {
         var comparer = graph.VertexComparer;
         var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
@@ -87,6 +107,7 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
 
         for (var pass = 1; pass < graph.VertexCount; pass++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var relaxed = false;
             foreach (var (from, to, weight) in Arcs(graph))
             {
