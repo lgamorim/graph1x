@@ -6,6 +6,8 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-05
+
 ### Added
 
 - Distance metrics: `Eccentricity`, `Diameter`, `Radius`, `Center`,
