@@ -24,6 +24,17 @@ All notable changes to Graph1x are documented in this file. The format follows
   closure/reduction, condensation, distance metrics), checked cooperatively
   at phase boundaries; `IMaximumFlowAlgorithm` gains a default-implemented
   token overload so existing implementations keep compiling.
+- Public API lockdown via Microsoft.CodeAnalysis.PublicApiAnalyzers: the full
+  surface is baselined, so any accidental signature change is now a build
+  error.
+- Trim/Native AOT compatibility (`IsAotCompatible`): analyzers report zero
+  findings and a full-trim consumer publish runs correctly.
+
+### Changed
+
+- `PageRank` is now a single method with four optional parameters (the token
+  overload merged in), per the Roslyn optional-parameter API guideline; all
+  existing call shapes still compile.
 
 ## [0.4.0] - 2026-07-05
 

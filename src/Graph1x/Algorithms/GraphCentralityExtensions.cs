@@ -286,34 +286,16 @@ public static class GraphCentralityExtensions
     /// <param name="damping">The damping factor in [0, 1]; 0.85 is the classic choice.</param>
     /// <param name="maxIterations">The iteration cap, at least 1.</param>
     /// <param name="tolerance">The L1 convergence threshold.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively between power iterations.</param>
     /// <returns>PageRank per vertex, summing to 1 (empty for the empty graph).</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Damping leaves [0, 1] or <paramref name="maxIterations"/> is below 1.</exception>
-    public static IReadOnlyDictionary<TVertex, double> PageRank<TVertex, TEdge>(
-        this IDirectedGraph<TVertex, TEdge> graph,
-        double damping = 0.85,
-        int maxIterations = 100,
-        double tolerance = 1e-9)
-        where TVertex : notnull
-        where TEdge : IEdge<TVertex>
-        => graph.PageRank(damping, maxIterations, tolerance, CancellationToken.None);
-
-    /// <summary>Computes PageRank, observing <paramref name="cancellationToken"/> between power iterations.</summary>
-    /// <typeparam name="TVertex">The vertex type.</typeparam>
-    /// <typeparam name="TEdge">The edge type.</typeparam>
-    /// <param name="graph">The directed graph to rank.</param>
-    /// <param name="damping">The damping factor in [0, 1].</param>
-    /// <param name="maxIterations">The iteration cap, at least 1.</param>
-    /// <param name="tolerance">The L1 convergence threshold.</param>
-    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
-    /// <returns>PageRank per vertex, summing to 1.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Damping leaves [0, 1] or <paramref name="maxIterations"/> is below 1.</exception>
     /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
     public static IReadOnlyDictionary<TVertex, double> PageRank<TVertex, TEdge>(
         this IDirectedGraph<TVertex, TEdge> graph,
-        double damping,
-        int maxIterations,
-        double tolerance,
-        CancellationToken cancellationToken)
+        double damping = 0.85,
+        int maxIterations = 100,
+        double tolerance = 1e-9,
+        CancellationToken cancellationToken = default)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
     {

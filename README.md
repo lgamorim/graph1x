@@ -21,7 +21,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
+Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, and its public API surface is analyzer-locked against accidental breaking changes.
 
 | Area | Contents |
 |---|---|
