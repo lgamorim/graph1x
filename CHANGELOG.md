@@ -6,6 +6,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Dev dependencies refreshed to latest: coverlet.collector 10.0.1,
+  Microsoft.NET.Test.Sdk 18.7.0, xunit.runner.visualstudio 3.1.5,
+  BenchmarkDotNet 0.15.8. The library itself keeps zero package references.
+
 ## [0.4.0] - 2026-07-05
 
 ### Added
