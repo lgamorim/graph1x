@@ -33,6 +33,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
+| Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export with escaping and label selectors |
@@ -198,7 +199,14 @@ dag.TransitiveReduction();        // minimal edge set with the same reachability
 
 var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
 coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
+
+graph.Diameter();                 // longest shortest path (hops, or pass a weight selector)
+graph.Radius();                   // smallest eccentricity
+graph.Center();                   // vertices at eccentricity == radius
+graph.AveragePathLength();        // mean distance over ordered pairs
 ```
+
+Distance metrics require a connected graph (strongly connected when directed) and throw `InvalidOperationException` otherwise — no sentinel infinities.
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
 

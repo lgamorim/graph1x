@@ -6,6 +6,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Distance metrics: `Eccentricity`, `Diameter`, `Radius`, `Center`,
+  `Periphery`, and `AveragePathLength`, in hop-count and weighted variants;
+  connected input required (strongly connected for directed graphs).
+
 ### Changed
 
 - Package author corrected to "Luís Amorim" (matching the git identity).
