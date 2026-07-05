@@ -6,6 +6,35 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-05
+
+### Added
+
+- Distance metrics: `Eccentricity`, `Diameter`, `Radius`, `Center`,
+  `Periphery`, and `AveragePathLength`, in hop-count and weighted variants;
+  connected input required (strongly connected for directed graphs).
+- Centrality measures: `DegreeCentrality`, `ClosenessCentrality`
+  (Wasserman-Faust scaled), `BetweennessCentrality` (Brandes, hop-count and
+  weighted), and `PageRank` with damping, tolerance, and dangling-node
+  handling.
+- `Condense()`: the SCC condensation DAG with component/member lookups,
+  making DAG-only tools applicable to any directed graph.
+- GraphML serialization: `ToGraphMl` export (weights, escaping, deterministic
+  output) and `GraphMl.Parse`/`ParseDirected`/`ParseUndirected` (+ weighted
+  variants) importing into lossless multigraph types.
+- `DinicMaximumFlow` behind the existing `IMaximumFlowAlgorithm` interface
+  (level graphs + blocking flows), sharing the residual network with
+  Edmonds-Karp.
+- `bench/Graph1x.Benchmarks`: BenchmarkDotNet suite (storage, traversal,
+  shortest paths, Edmonds-Karp vs Dinic, MST, SCC/matching) over seeded
+  generator fixtures.
+
+### Changed
+
+- Package author corrected to "Luís Amorim" (matching the git identity).
+- Package license expression corrected to Apache-2.0, matching the LICENSE
+  change in the repository.
+
 ## [0.3.0] - 2026-07-03
 
 ### Added

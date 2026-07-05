@@ -18,7 +18,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Built milestone by milestone with TDD (tests written before the implementation); nearly 500 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
+Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
 
 | Area | Contents |
 |---|---|
@@ -26,16 +26,18 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
-| Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
-| Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
+| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
+| Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
+| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export with escaping and label selectors |
+| Serialization | Graphviz DOT export; GraphML export and import (round-trip) |
 | Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -115,6 +117,11 @@ graph.ConnectedComponents();          // direction-agnostic components
 graph.IsConnected();                  // at most one component (empty graph: true)
 directed.WeaklyConnectedComponents(); // components after forgetting direction
 directed.StronglyConnectedComponents(); // Tarjan, iterative; reverse topological order
+
+var condensation = directed.Condense(); // each SCC collapsed to one vertex
+condensation.Graph.TopologicalSort();   // the condensation is always a DAG
+condensation.ComponentOf("a");          // vertex -> component index
+condensation.Members(0);                // component index -> original vertices
 ```
 
 Shortest paths default to Dijkstra via the facade; the strategies are swappable behind `IShortestPathAlgorithm<,,>`:
@@ -157,8 +164,10 @@ new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weigh
 Maximum flow (directed networks, non-negative capacities) returns the flow value, per-edge flows, and a minimum cut that certifies optimality:
 
 ```csharp
-var result = network.MaximumFlow("source", "sink");   // WeightedEdge capacities
+var result = network.MaximumFlow("source", "sink");   // Edmonds-Karp by default
 network.MaximumFlow("s", "t", e => e.Capacity);       // or any capacity selector
+new DinicMaximumFlow<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .FindMaximumFlow(network, "s", "t");              // Dinic for large/dense networks
 
 result.FlowValue;           // max flow == min cut capacity
 result.EdgeFlows;           // flow per edge (parallel edges listed individually)
@@ -198,6 +207,22 @@ dag.TransitiveReduction();        // minimal edge set with the same reachability
 
 var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
 coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
+
+graph.Diameter();                 // longest shortest path (hops, or pass a weight selector)
+graph.Radius();                   // smallest eccentricity
+graph.Center();                   // vertices at eccentricity == radius
+graph.AveragePathLength();        // mean distance over ordered pairs
+```
+
+Distance metrics require a connected graph (strongly connected when directed) and throw `InvalidOperationException` otherwise — no sentinel infinities.
+
+Centrality measures answer "which vertices matter":
+
+```csharp
+graph.DegreeCentrality();          // degree / (V-1)
+graph.ClosenessCentrality();       // Wasserman-Faust scaled; disconnected graphs fine
+graph.BetweennessCentrality();     // Brandes; weighted overload takes a selector
+network.PageRank(damping: 0.85);   // directed; ranks sum to 1, dangling nodes handled
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
@@ -241,6 +266,14 @@ graph.ToDot(new DotExportOptions<string, WeightedEdge<string, int>>
 });
 ```
 
+GraphML round-trips for persistence and interop with other tools:
+
+```csharp
+var xml = graph.ToGraphMl();                    // weights via GraphMlExportOptions.EdgeWeight
+var restored = GraphMl.Parse(xml);              // direction auto-detected from edgedefault
+GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
+```
+
 ## Building
 
 ```
@@ -250,6 +283,16 @@ dotnet test Graph1x.sln
 
 The library targets **.NET 8 (LTS)** and **.NET 10**; the test suite runs against both. Building requires the .NET 10 SDK. Warnings are treated as errors and .NET analyzers run at the latest analysis level.
 
+## Performance
+
+Selected numbers from the BenchmarkDotNet suite (ShortRun job, .NET 10, single dev machine — run `bench/Graph1x.Benchmarks` yourself for rigorous figures):
+
+| Scenario | Result |
+|---|---|
+| `ShortestPathsFrom` vs one `ShortestPath` per target (50×50 grid, 2 500 targets) | ~0.5 ms vs ~554 ms — **~1 100× faster**, ~1 100× fewer allocations |
+| A* (Manhattan) vs Dijkstra, corner to corner on the same grid | ~30 µs vs ~435 µs — **~14× faster** |
+| Edmonds-Karp vs Dinic (random networks, 50–150 vertices) | EK slightly ahead at these sizes (Dinic ratio 1.03–1.22×) — Dinic's level-graph overhead pays off on larger/denser networks |
+
 ## Releasing
 
 Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack, publish to NuGet.org (requires the `NUGET_API_KEY` repository secret), and create a GitHub Release with notes from [CHANGELOG.md](CHANGELOG.md). Running the workflow manually performs a dry run that stops after packing.
@@ -258,3 +301,4 @@ Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack,
 
 - `src/Graph1x` — the library
 - `test/Graph1x.UnitTests` — xUnit v3 test suite
+- `bench/Graph1x.Benchmarks` — BenchmarkDotNet suite (`dotnet run -c Release --project bench/Graph1x.Benchmarks`; seeded `GraphGenerator` fixtures, `--job Dry` for a smoke run)

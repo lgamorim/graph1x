@@ -8,11 +8,14 @@
 
     <PropertyGroup>
         <PackageId>Graph1x</PackageId>
-        <Version>0.3.0</Version>
-        <Authors>Luis Gomes Amorim</Authors>
+        <Version>0.4.0</Version>
+        <!-- NuGet.org ownership is account-based: the lgamorim account becomes
+             the package owner by publishing it (the nuspec owners element is
+             deprecated and not supported by SDK pack). -->
+        <Authors>Luís Amorim</Authors>
         <Description>A graph manipulation library for .NET: directed/undirected, weighted (generic math), multigraphs, DAG-enforcing and dense matrix-backed graphs, plus hypergraphs — with traversals, cycle detection, topological sort, connectivity/SCC, shortest paths (Dijkstra, Bellman-Ford, Floyd-Warshall, A*), minimum spanning trees (Kruskal, Prim), and structural queries.</Description>
         <PackageTags>graph;graphs;algorithms;dijkstra;topological-sort;mst;hypergraph;multigraph;dag</PackageTags>
-        <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/lgamorim/graph1x</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
