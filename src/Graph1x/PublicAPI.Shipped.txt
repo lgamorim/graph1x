@@ -1,0 +1,476 @@
+#nullable enable
+abstract Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.Clear() -> void
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.RemoveEdge(TVertex source, TVertex target) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.AdjacencyMatrixGraphBase<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>
+Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>.Between(TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Algorithms.AStarShortestPath<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.AStarShortestPath<TVertex, TEdge, TWeight>.AStarShortestPath(System.Func<TEdge, TWeight>! weightSelector, System.Func<TVertex, TVertex, TWeight>! heuristic) -> void
+Graph1x.Algorithms.AStarShortestPath<TVertex, TEdge, TWeight>.FindPath(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Algorithms.BellmanFordShortestPath<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.BellmanFordShortestPath<TVertex, TEdge, TWeight>.BellmanFordShortestPath(System.Func<TEdge, TWeight>! weightSelector) -> void
+Graph1x.Algorithms.BellmanFordShortestPath<TVertex, TEdge, TWeight>.FindPath(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Algorithms.BellmanFordShortestPath<TVertex, TEdge, TWeight>.FindPathsFrom(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.BellmanFordShortestPath<TVertex, TEdge, TWeight>.FindPathsFrom(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.CondensationResult<TVertex>
+Graph1x.Algorithms.CondensationResult<TVertex>.ComponentCount.get -> int
+Graph1x.Algorithms.CondensationResult<TVertex>.ComponentOf(TVertex vertex) -> int
+Graph1x.Algorithms.CondensationResult<TVertex>.Graph.get -> Graph1x.IDirectedGraph<int, Graph1x.Edges.Edge<int>>!
+Graph1x.Algorithms.CondensationResult<TVertex>.Members(int componentIndex) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+Graph1x.Algorithms.DijkstraShortestPath<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.DijkstraShortestPath<TVertex, TEdge, TWeight>.DijkstraShortestPath(System.Func<TEdge, TWeight>! weightSelector) -> void
+Graph1x.Algorithms.DijkstraShortestPath<TVertex, TEdge, TWeight>.FindPath(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Algorithms.DijkstraShortestPath<TVertex, TEdge, TWeight>.FindPathsFrom(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.DijkstraShortestPath<TVertex, TEdge, TWeight>.FindPathsFrom(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.DinicMaximumFlow<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.DinicMaximumFlow<TVertex, TEdge, TWeight>.DinicMaximumFlow(System.Func<TEdge, TWeight>! capacitySelector) -> void
+Graph1x.Algorithms.DinicMaximumFlow<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.DinicMaximumFlow<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.EdmondsKarpMaximumFlow<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.EdmondsKarpMaximumFlow<TVertex, TEdge, TWeight>.EdmondsKarpMaximumFlow(System.Func<TEdge, TWeight>! capacitySelector) -> void
+Graph1x.Algorithms.EdmondsKarpMaximumFlow<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.EdmondsKarpMaximumFlow<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>.FloydWarshallAllShortestPaths(System.Func<TEdge, TWeight>! weightSelector) -> void
+Graph1x.Algorithms.GraphCentralityExtensions
+Graph1x.Algorithms.GraphColoring<TVertex>
+Graph1x.Algorithms.GraphColoring<TVertex>.ColorCount.get -> int
+Graph1x.Algorithms.GraphColoring<TVertex>.ColorOf(TVertex vertex) -> int
+Graph1x.Algorithms.GraphColoring<TVertex>.Colors.get -> System.Collections.Generic.IReadOnlyDictionary<TVertex, int>!
+Graph1x.Algorithms.GraphColoringExtensions
+Graph1x.Algorithms.GraphCondensationExtensions
+Graph1x.Algorithms.GraphConnectivityExtensions
+Graph1x.Algorithms.GraphCycleException
+Graph1x.Algorithms.GraphCycleException.Cycle.get -> System.Collections.Generic.IReadOnlyList<object!>!
+Graph1x.Algorithms.GraphCycleException.GraphCycleException() -> void
+Graph1x.Algorithms.GraphCycleException.GraphCycleException(string! message) -> void
+Graph1x.Algorithms.GraphCycleException.GraphCycleException(string! message, System.Collections.Generic.IReadOnlyList<object!>! cycle) -> void
+Graph1x.Algorithms.GraphCycleException.GraphCycleException(string! message, System.Exception! innerException) -> void
+Graph1x.Algorithms.GraphCycleExtensions
+Graph1x.Algorithms.GraphDistanceExtensions
+Graph1x.Algorithms.GraphEulerianExtensions
+Graph1x.Algorithms.GraphMatchingExtensions
+Graph1x.Algorithms.GraphMaximumFlowExtensions
+Graph1x.Algorithms.GraphMinimumSpanningTreeExtensions
+Graph1x.Algorithms.GraphShortestPathExtensions
+Graph1x.Algorithms.GraphStructureExtensions
+Graph1x.Algorithms.GraphTopologicalSortExtensions
+Graph1x.Algorithms.GraphTraversalExtensions
+Graph1x.Algorithms.HopcroftKarpMatching<TVertex, TEdge>
+Graph1x.Algorithms.HopcroftKarpMatching<TVertex, TEdge>.FindMaximumMatching(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+Graph1x.Algorithms.HopcroftKarpMatching<TVertex, TEdge>.HopcroftKarpMatching() -> void
+Graph1x.Algorithms.IMaximumFlowAlgorithm<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.IMaximumFlowAlgorithm<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.IMaximumFlowAlgorithm<TVertex, TEdge, TWeight>.FindMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.IMinimumSpanningTreeAlgorithm<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.IMinimumSpanningTreeAlgorithm<TVertex, TEdge, TWeight>.FindMinimumSpanningForest(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+Graph1x.Algorithms.IShortestPathAlgorithm<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.IShortestPathAlgorithm<TVertex, TEdge, TWeight>.FindPath(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Algorithms.KruskalMinimumSpanningTree<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.KruskalMinimumSpanningTree<TVertex, TEdge, TWeight>.FindMinimumSpanningForest(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+Graph1x.Algorithms.KruskalMinimumSpanningTree<TVertex, TEdge, TWeight>.KruskalMinimumSpanningTree(System.Func<TEdge, TWeight>! weightSelector) -> void
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.EdgeFlows.get -> System.Collections.Generic.IReadOnlyList<(TEdge Edge, TWeight Flow)>!
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.FlowValue.get -> TWeight
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.MinCutEdges.get -> System.Collections.Generic.IReadOnlyList<TEdge>!
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.Sink.get -> TVertex
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.Source.get -> TVertex
+Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>.SourceSideOfMinCut.get -> System.Collections.Generic.IReadOnlySet<TVertex>!
+Graph1x.Algorithms.NegativeCycleException
+Graph1x.Algorithms.NegativeCycleException.NegativeCycleException() -> void
+Graph1x.Algorithms.NegativeCycleException.NegativeCycleException(string! message) -> void
+Graph1x.Algorithms.NegativeCycleException.NegativeCycleException(string! message, System.Exception! innerException) -> void
+Graph1x.Algorithms.NegativeWeightException
+Graph1x.Algorithms.NegativeWeightException.NegativeWeightException() -> void
+Graph1x.Algorithms.NegativeWeightException.NegativeWeightException(string! message) -> void
+Graph1x.Algorithms.NegativeWeightException.NegativeWeightException(string! message, System.Exception! innerException) -> void
+Graph1x.Algorithms.PrimMinimumSpanningTree<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.PrimMinimumSpanningTree<TVertex, TEdge, TWeight>.FindMinimumSpanningForest(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+Graph1x.Algorithms.PrimMinimumSpanningTree<TVertex, TEdge, TWeight>.PrimMinimumSpanningTree(System.Func<TEdge, TWeight>! weightSelector) -> void
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.Distance.get -> TWeight
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.IsReachable.get -> bool
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.Path.get -> System.Collections.Generic.IReadOnlyList<TVertex>!
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.ShortestPathResult(TVertex source, TVertex target) -> void
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.ShortestPathResult(TVertex source, TVertex target, TWeight distance, System.Collections.Generic.IReadOnlyList<TVertex>! path) -> void
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.Source.get -> TVertex
+Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>.Target.get -> TVertex
+Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>
+Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>.Distances.get -> System.Collections.Generic.IReadOnlyDictionary<TVertex, TWeight>!
+Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>.IsReachable(TVertex target) -> bool
+Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>.Source.get -> TVertex
+Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>.To(TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+Graph1x.Builders.Graph
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>.AddEdge(TEdge edge) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>!
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>.AddEdges(params System.Collections.Generic.IEnumerable<TEdge>! edges) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>!
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>.AddVertex(TVertex vertex) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>!
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>.AddVertices(params System.Collections.Generic.IEnumerable<TVertex>! vertices) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>!
+Graph1x.Builders.GraphBuilder<TGraph, TVertex, TEdge>.Build() -> TGraph
+Graph1x.Builders.GraphBuilderExtensions
+Graph1x.Builders.GraphGenerator
+Graph1x.DirectedAcyclicGraph<TVertex, TEdge>
+Graph1x.DirectedAcyclicGraph<TVertex, TEdge>.DirectedAcyclicGraph() -> void
+Graph1x.DirectedAcyclicGraph<TVertex, TEdge>.DirectedAcyclicGraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.DirectedAdjacencyMatrixGraph() -> void
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.DirectedAdjacencyMatrixGraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.InDegree(TVertex vertex) -> int
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.InEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.OutDegree(TVertex vertex) -> int
+Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.OutEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedGraph<TVertex, TEdge>
+Graph1x.DirectedGraph<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedGraph<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.Clear() -> void
+Graph1x.DirectedGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.DirectedGraph<TVertex, TEdge>.DirectedGraph() -> void
+Graph1x.DirectedGraph<TVertex, TEdge>.DirectedGraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.DirectedGraph<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.DirectedGraph<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedGraph<TVertex, TEdge>.InDegree(TVertex vertex) -> int
+Graph1x.DirectedGraph<TVertex, TEdge>.InEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedGraph<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.OutDegree(TVertex vertex) -> int
+Graph1x.DirectedGraph<TVertex, TEdge>.OutEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedGraph<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.RemoveEdge(TVertex source, TVertex target) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.DirectedGraph<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.DirectedGraph<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.DirectedGraph<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>
+Graph1x.DirectedMultigraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.Clear() -> void
+Graph1x.DirectedMultigraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.DirectedMultigraph<TVertex, TEdge>.DirectedMultigraph() -> void
+Graph1x.DirectedMultigraph<TVertex, TEdge>.DirectedMultigraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.DirectedMultigraph<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.DirectedMultigraph<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.GetEdges(TVertex source, TVertex target) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.InDegree(TVertex vertex) -> int
+Graph1x.DirectedMultigraph<TVertex, TEdge>.InEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.OutDegree(TVertex vertex) -> int
+Graph1x.DirectedMultigraph<TVertex, TEdge>.OutEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.DirectedMultigraph<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.DirectedMultigraph<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.DirectedMultigraph<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.Edges.Edge<TVertex>
+Graph1x.Edges.Edge<TVertex>.Deconstruct(out TVertex source, out TVertex target) -> void
+Graph1x.Edges.Edge<TVertex>.Edge() -> void
+Graph1x.Edges.Edge<TVertex>.Edge(TVertex source, TVertex target) -> void
+Graph1x.Edges.Edge<TVertex>.Equals(Graph1x.Edges.Edge<TVertex> other) -> bool
+Graph1x.Edges.Edge<TVertex>.Source.get -> TVertex
+Graph1x.Edges.Edge<TVertex>.Target.get -> TVertex
+Graph1x.Edges.IEdge<TVertex>
+Graph1x.Edges.IEdge<TVertex>.Source.get -> TVertex
+Graph1x.Edges.IEdge<TVertex>.Target.get -> TVertex
+Graph1x.Edges.IWeightedEdge<TVertex, TWeight>
+Graph1x.Edges.IWeightedEdge<TVertex, TWeight>.Weight.get -> TWeight
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Deconstruct(out TVertex source, out TVertex target, out TWeight weight) -> void
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Equals(Graph1x.Edges.WeightedEdge<TVertex, TWeight> other) -> bool
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Source.get -> TVertex
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Target.get -> TVertex
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Weight.get -> TWeight
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.WeightedEdge() -> void
+Graph1x.Edges.WeightedEdge<TVertex, TWeight>.WeightedEdge(TVertex source, TVertex target, TWeight weight) -> void
+Graph1x.GraphViewExtensions
+Graph1x.Hypergraphs.Hyperedge<TVertex>
+Graph1x.Hypergraphs.Hyperedge<TVertex>.Contains(TVertex vertex) -> bool
+Graph1x.Hypergraphs.Hyperedge<TVertex>.Size.get -> int
+Graph1x.Hypergraphs.Hyperedge<TVertex>.Vertices.get -> System.Collections.Generic.IReadOnlySet<TVertex>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>
+Graph1x.Hypergraphs.Hypergraph<TVertex>.AddHyperedge(params System.Collections.Generic.IEnumerable<TVertex>! vertices) -> Graph1x.Hypergraphs.Hyperedge<TVertex>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>.AddVertex(TVertex vertex) -> bool
+Graph1x.Hypergraphs.Hypergraph<TVertex>.AreConnected(TVertex first, TVertex second) -> bool
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Clear() -> void
+Graph1x.Hypergraphs.Hypergraph<TVertex>.ConnectedComponents() -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Degree(TVertex vertex) -> int
+Graph1x.Hypergraphs.Hypergraph<TVertex>.HyperedgeCount.get -> int
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Hyperedges.get -> System.Collections.Generic.IEnumerable<Graph1x.Hypergraphs.Hyperedge<TVertex>!>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Hypergraph() -> void
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Hypergraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.Hypergraphs.Hypergraph<TVertex>.IncidentHyperedges(TVertex vertex) -> System.Collections.Generic.IEnumerable<Graph1x.Hypergraphs.Hyperedge<TVertex>!>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>.RemoveHyperedge(Graph1x.Hypergraphs.Hyperedge<TVertex>! hyperedge) -> bool
+Graph1x.Hypergraphs.Hypergraph<TVertex>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.Hypergraphs.Hypergraph<TVertex>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.Hypergraphs.Hypergraph<TVertex>.VertexCount.get -> int
+Graph1x.Hypergraphs.Hypergraph<TVertex>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.Hypergraphs.HypergraphExpansionExtensions
+Graph1x.Hypergraphs.IncidenceVertex
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>.Equals(Graph1x.Hypergraphs.IncidenceVertex<TVertex> other) -> bool
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>.HyperedgeIndex.get -> int
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>.IncidenceVertex() -> void
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>.IsHyperedge.get -> bool
+Graph1x.Hypergraphs.IncidenceVertex<TVertex>.Vertex.get -> TVertex
+Graph1x.IDirectedGraph<TVertex, TEdge>
+Graph1x.IDirectedGraph<TVertex, TEdge>.InDegree(TVertex vertex) -> int
+Graph1x.IDirectedGraph<TVertex, TEdge>.InEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.IDirectedGraph<TVertex, TEdge>.OutDegree(TVertex vertex) -> int
+Graph1x.IDirectedGraph<TVertex, TEdge>.OutEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.IMutableGraph<TVertex, TEdge>
+Graph1x.IMutableGraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+Graph1x.IMutableGraph<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.IMutableGraph<TVertex, TEdge>.Clear() -> void
+Graph1x.IMutableGraph<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.IMutableGraph<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.IReadOnlyGraph<TVertex, TEdge>
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.IReadOnlyGraph<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.<Clone>$() -> Graph1x.Serialization.DotExportOptions<TVertex, TEdge>!
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.DotExportOptions() -> void
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.EdgeLabel.get -> System.Func<TEdge, string!>?
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.EdgeLabel.init -> void
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.Equals(Graph1x.Serialization.DotExportOptions<TVertex, TEdge>? other) -> bool
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.GraphName.get -> string!
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.GraphName.init -> void
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.VertexLabel.get -> System.Func<TVertex, string!>?
+Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.VertexLabel.init -> void
+Graph1x.Serialization.GraphDotExtensions
+Graph1x.Serialization.GraphJson
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.<Clone>$() -> Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>!
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.EdgeWeight.get -> System.Func<TEdge, double>?
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.EdgeWeight.init -> void
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.Equals(Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>? other) -> bool
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.GraphJsonExportOptions() -> void
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.VertexId.get -> System.Func<TVertex, string!>?
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.VertexId.init -> void
+Graph1x.Serialization.GraphJsonExtensions
+Graph1x.Serialization.GraphMl
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.<Clone>$() -> Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>!
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.EdgeWeight.get -> System.Func<TEdge, double>?
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.EdgeWeight.init -> void
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.Equals(Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>? other) -> bool
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.GraphId.get -> string!
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.GraphId.init -> void
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.GraphMlExportOptions() -> void
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.VertexId.get -> System.Func<TVertex, string!>?
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.VertexId.init -> void
+Graph1x.Serialization.GraphMlExtensions
+Graph1x.UndirectedAdjacencyMatrixGraph<TVertex, TEdge>
+Graph1x.UndirectedAdjacencyMatrixGraph<TVertex, TEdge>.UndirectedAdjacencyMatrixGraph() -> void
+Graph1x.UndirectedAdjacencyMatrixGraph<TVertex, TEdge>.UndirectedAdjacencyMatrixGraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.UndirectedGraph<TVertex, TEdge>
+Graph1x.UndirectedGraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.UndirectedGraph<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.Clear() -> void
+Graph1x.UndirectedGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.UndirectedGraph<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.UndirectedGraph<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.UndirectedGraph<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.RemoveEdge(TVertex source, TVertex target) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.UndirectedGraph<TVertex, TEdge>.UndirectedGraph() -> void
+Graph1x.UndirectedGraph<TVertex, TEdge>.UndirectedGraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.UndirectedGraph<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.UndirectedGraph<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.UndirectedGraph<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+Graph1x.UndirectedMultigraph<TVertex, TEdge>
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.AddVertex(TVertex vertex) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.AdjacentEdges(TVertex vertex) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.AllowsParallelEdges.get -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.Clear() -> void
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.ContainsVertex(TVertex vertex) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.Degree(TVertex vertex) -> int
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.EdgeCount.get -> int
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.Edges.get -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.GetEdges(TVertex source, TVertex target) -> System.Collections.Generic.IEnumerable<TEdge>!
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.IsDirected.get -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.RemoveEdge(TEdge edge) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.RemoveEdge(TVertex source, TVertex target) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.RemoveVertex(TVertex vertex) -> bool
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.UndirectedMultigraph() -> void
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.UndirectedMultigraph(System.Collections.Generic.IEqualityComparer<TVertex>! vertexComparer) -> void
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.VertexComparer.get -> System.Collections.Generic.IEqualityComparer<TVertex>!
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.VertexCount.get -> int
+Graph1x.UndirectedMultigraph<TVertex, TEdge>.Vertices.get -> System.Collections.Generic.IEnumerable<TVertex>!
+override Graph1x.DirectedAcyclicGraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+override Graph1x.DirectedAdjacencyMatrixGraph<TVertex, TEdge>.IsDirected.get -> bool
+override Graph1x.Edges.Edge<TVertex>.GetHashCode() -> int
+override Graph1x.Edges.Edge<TVertex>.ToString() -> string!
+override Graph1x.Edges.WeightedEdge<TVertex, TWeight>.GetHashCode() -> int
+override Graph1x.Edges.WeightedEdge<TVertex, TWeight>.ToString() -> string!
+override Graph1x.Hypergraphs.Hyperedge<TVertex>.ToString() -> string!
+override Graph1x.Hypergraphs.IncidenceVertex<TVertex>.Equals(object? obj) -> bool
+override Graph1x.Hypergraphs.IncidenceVertex<TVertex>.GetHashCode() -> int
+override Graph1x.Hypergraphs.IncidenceVertex<TVertex>.ToString() -> string!
+override Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.Equals(object? obj) -> bool
+override Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.GetHashCode() -> int
+override Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.ToString() -> string!
+override Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.Equals(object? obj) -> bool
+override Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.GetHashCode() -> int
+override Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.ToString() -> string!
+override Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.Equals(object? obj) -> bool
+override Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.GetHashCode() -> int
+override Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.ToString() -> string!
+override Graph1x.UndirectedAdjacencyMatrixGraph<TVertex, TEdge>.IsDirected.get -> bool
+static Graph1x.Algorithms.GraphCentralityExtensions.BetweennessCentrality<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.BetweennessCentrality<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector, System.Threading.CancellationToken cancellationToken) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.BetweennessCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.BetweennessCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.ClosenessCentrality<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.ClosenessCentrality<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector, System.Threading.CancellationToken cancellationToken) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.ClosenessCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.ClosenessCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.DegreeCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.PageRank<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, double damping = 0.85, int maxIterations = 100, double tolerance = 1E-09, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphColoringExtensions.ColorVertices<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.Algorithms.GraphColoring<TVertex>!
+static Graph1x.Algorithms.GraphCondensationExtensions.Condense<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> Graph1x.Algorithms.CondensationResult<TVertex>!
+static Graph1x.Algorithms.GraphCondensationExtensions.Condense<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.CondensationResult<TVertex>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.ConnectedComponents<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.FindArticulationPoints<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.FindBridges<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.IsConnected<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> bool
+static Graph1x.Algorithms.GraphConnectivityExtensions.StronglyConnectedComponents<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.WeaklyConnectedComponents<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
+static Graph1x.Algorithms.GraphCycleExtensions.FindCycle<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TVertex>?
+static Graph1x.Algorithms.GraphCycleExtensions.HasCycle<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> bool
+static Graph1x.Algorithms.GraphDistanceExtensions.AveragePathLength<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> double
+static Graph1x.Algorithms.GraphDistanceExtensions.AveragePathLength<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector, System.Threading.CancellationToken cancellationToken) -> double
+static Graph1x.Algorithms.GraphDistanceExtensions.AveragePathLength<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> double
+static Graph1x.Algorithms.GraphDistanceExtensions.Center<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+static Graph1x.Algorithms.GraphDistanceExtensions.Center<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+static Graph1x.Algorithms.GraphDistanceExtensions.Diameter<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> TWeight
+static Graph1x.Algorithms.GraphDistanceExtensions.Diameter<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector, System.Threading.CancellationToken cancellationToken) -> TWeight
+static Graph1x.Algorithms.GraphDistanceExtensions.Diameter<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> int
+static Graph1x.Algorithms.GraphDistanceExtensions.Eccentricity<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex vertex, System.Func<TEdge, TWeight>! weightSelector) -> TWeight
+static Graph1x.Algorithms.GraphDistanceExtensions.Eccentricity<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex vertex) -> int
+static Graph1x.Algorithms.GraphDistanceExtensions.Periphery<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+static Graph1x.Algorithms.GraphDistanceExtensions.Periphery<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlySet<TVertex>!
+static Graph1x.Algorithms.GraphDistanceExtensions.Radius<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> TWeight
+static Graph1x.Algorithms.GraphDistanceExtensions.Radius<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> int
+static Graph1x.Algorithms.GraphEulerianExtensions.FindEulerianCircuit<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>?
+static Graph1x.Algorithms.GraphEulerianExtensions.FindEulerianPath<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>?
+static Graph1x.Algorithms.GraphEulerianExtensions.HasEulerianCircuit<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> bool
+static Graph1x.Algorithms.GraphEulerianExtensions.HasEulerianPath<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> bool
+static Graph1x.Algorithms.GraphMatchingExtensions.MaximumBipartiteMatching<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+static Graph1x.Algorithms.GraphMaximumFlowExtensions.MaximumFlow<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Func<TEdge, TWeight>! capacitySelector) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+static Graph1x.Algorithms.GraphMaximumFlowExtensions.MaximumFlow<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Func<TEdge, TWeight>! capacitySelector, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, TEdge, TWeight>!
+static Graph1x.Algorithms.GraphMaximumFlowExtensions.MaximumFlow<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MaximumFlowResult<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>, TWeight>!
+static Graph1x.Algorithms.GraphMinimumSpanningTreeExtensions.MinimumSpanningForest<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IReadOnlyList<TEdge>!
+static Graph1x.Algorithms.GraphMinimumSpanningTreeExtensions.MinimumSpanningForest<TVertex, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph) -> System.Collections.Generic.IReadOnlyList<Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!
+static Graph1x.Algorithms.GraphShortestPathExtensions.ShortestPath<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphShortestPathExtensions.ShortestPath<TVertex, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source, TVertex target) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphShortestPathExtensions.ShortestPathsFrom<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphShortestPathExtensions.ShortestPathsFrom<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, System.Func<TEdge, TWeight>! weightSelector, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphShortestPathExtensions.ShortestPathsFrom<TVertex, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphStructureExtensions.DegreeSequence<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<int>!
+static Graph1x.Algorithms.GraphStructureExtensions.Density<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> double
+static Graph1x.Algorithms.GraphStructureExtensions.FindBipartition<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> (System.Collections.Generic.IReadOnlySet<TVertex>! Left, System.Collections.Generic.IReadOnlySet<TVertex>! Right)?
+static Graph1x.Algorithms.GraphStructureExtensions.IsBipartite<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> bool
+static Graph1x.Algorithms.GraphStructureExtensions.TransitiveClosure<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TVertex, TVertex, TEdge>! edgeFactory) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphStructureExtensions.TransitiveClosure<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TVertex, TVertex, TEdge>! edgeFactory, System.Threading.CancellationToken cancellationToken) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphStructureExtensions.TransitiveClosure<TVertex>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Algorithms.GraphStructureExtensions.TransitiveReduction<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphStructureExtensions.TransitiveReduction<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphStructureExtensions.Transpose<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TEdge, TEdge>! reverseEdge) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphStructureExtensions.Transpose<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph) -> Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!
+static Graph1x.Algorithms.GraphStructureExtensions.Transpose<TVertex>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Algorithms.GraphTopologicalSortExtensions.TopologicalSort<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<TVertex>!
+static Graph1x.Algorithms.GraphTraversalExtensions.BreadthFirstSearch<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex start) -> System.Collections.Generic.IEnumerable<TVertex>!
+static Graph1x.Algorithms.GraphTraversalExtensions.DepthFirstSearch<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex start) -> System.Collections.Generic.IEnumerable<TVertex>!
+static Graph1x.Algorithms.GraphTraversalExtensions.DepthFirstSearchPostOrder<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex start) -> System.Collections.Generic.IEnumerable<TVertex>!
+static Graph1x.Builders.Graph.Directed<TVertex>() -> Graph1x.Builders.GraphBuilder<Graph1x.DirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!, TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Builders.Graph.DirectedWeighted<TVertex, TWeight>() -> Graph1x.Builders.GraphBuilder<Graph1x.DirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!, TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!
+static Graph1x.Builders.Graph.Undirected<TVertex>() -> Graph1x.Builders.GraphBuilder<Graph1x.UndirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!, TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Builders.Graph.UndirectedWeighted<TVertex, TWeight>() -> Graph1x.Builders.GraphBuilder<Graph1x.UndirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!, TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!
+static Graph1x.Builders.Graph.Wrap<TVertex, TEdge>(Graph1x.IMutableGraph<TVertex, TEdge>! graph) -> Graph1x.Builders.GraphBuilder<Graph1x.IMutableGraph<TVertex, TEdge>!, TVertex, TEdge>!
+static Graph1x.Builders.GraphBuilderExtensions.AddEdge<TGraph, TVertex, TWeight>(this Graph1x.Builders.GraphBuilder<TGraph, TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! builder, TVertex source, TVertex target, TWeight weight) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>!
+static Graph1x.Builders.GraphBuilderExtensions.AddEdge<TGraph, TVertex>(this Graph1x.Builders.GraphBuilder<TGraph, TVertex, Graph1x.Edges.Edge<TVertex>>! builder, TVertex source, TVertex target) -> Graph1x.Builders.GraphBuilder<TGraph, TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Builders.GraphGenerator.Complete(int vertexCount) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.CompleteBipartite(int leftCount, int rightCount) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.Cycle(int vertexCount) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.ErdosRenyi(int vertexCount, double edgeProbability, int seed) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.ErdosRenyiDirected(int vertexCount, double edgeProbability, int seed) -> Graph1x.DirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.Grid(int width, int height) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.Path(int vertexCount) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Builders.GraphGenerator.Star(int leafCount) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+static Graph1x.Edges.Edge<TVertex>.operator !=(Graph1x.Edges.Edge<TVertex> left, Graph1x.Edges.Edge<TVertex> right) -> bool
+static Graph1x.Edges.Edge<TVertex>.operator ==(Graph1x.Edges.Edge<TVertex> left, Graph1x.Edges.Edge<TVertex> right) -> bool
+static Graph1x.Edges.WeightedEdge<TVertex, TWeight>.operator !=(Graph1x.Edges.WeightedEdge<TVertex, TWeight> left, Graph1x.Edges.WeightedEdge<TVertex, TWeight> right) -> bool
+static Graph1x.Edges.WeightedEdge<TVertex, TWeight>.operator ==(Graph1x.Edges.WeightedEdge<TVertex, TWeight> left, Graph1x.Edges.WeightedEdge<TVertex, TWeight> right) -> bool
+static Graph1x.GraphViewExtensions.AsReadOnly<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.GraphViewExtensions.AsReadOnly<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.IReadOnlyGraph<TVertex, TEdge>!
+static Graph1x.GraphViewExtensions.ToFrozen<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.GraphViewExtensions.ToFrozen<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.IReadOnlyGraph<TVertex, TEdge>!
+static Graph1x.Hypergraphs.HypergraphExpansionExtensions.ToBipartiteIncidenceGraph<TVertex>(this Graph1x.Hypergraphs.Hypergraph<TVertex>! hypergraph) -> Graph1x.UndirectedGraph<Graph1x.Hypergraphs.IncidenceVertex<TVertex>, Graph1x.Edges.Edge<Graph1x.Hypergraphs.IncidenceVertex<TVertex>>>!
+static Graph1x.Hypergraphs.HypergraphExpansionExtensions.ToCliqueExpansion<TVertex>(this Graph1x.Hypergraphs.Hypergraph<TVertex>! hypergraph) -> Graph1x.UndirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Hypergraphs.IncidenceVertex.ForHyperedge<TVertex>(int hyperedgeIndex) -> Graph1x.Hypergraphs.IncidenceVertex<TVertex>
+static Graph1x.Hypergraphs.IncidenceVertex.ForVertex<TVertex>(TVertex vertex) -> Graph1x.Hypergraphs.IncidenceVertex<TVertex>
+static Graph1x.Hypergraphs.IncidenceVertex<TVertex>.operator !=(Graph1x.Hypergraphs.IncidenceVertex<TVertex> left, Graph1x.Hypergraphs.IncidenceVertex<TVertex> right) -> bool
+static Graph1x.Hypergraphs.IncidenceVertex<TVertex>.operator ==(Graph1x.Hypergraphs.IncidenceVertex<TVertex> left, Graph1x.Hypergraphs.IncidenceVertex<TVertex> right) -> bool
+static Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.operator !=(Graph1x.Serialization.DotExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.DotExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.DotExportOptions<TVertex, TEdge>.operator ==(Graph1x.Serialization.DotExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.DotExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.GraphDotExtensions.ToDot<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> string!
+static Graph1x.Serialization.GraphDotExtensions.ToDot<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, Graph1x.Serialization.DotExportOptions<TVertex, TEdge>! options) -> string!
+static Graph1x.Serialization.GraphJson.Parse(string! json) -> Graph1x.IMutableGraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphJson.ParseDirected(string! json) -> Graph1x.DirectedMultigraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphJson.ParseDirectedWeighted(string! json) -> Graph1x.DirectedMultigraph<string!, Graph1x.Edges.WeightedEdge<string!, double>>!
+static Graph1x.Serialization.GraphJson.ParseUndirected(string! json) -> Graph1x.UndirectedMultigraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphJson.ParseUndirectedWeighted(string! json) -> Graph1x.UndirectedMultigraph<string!, Graph1x.Edges.WeightedEdge<string!, double>>!
+static Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.operator !=(Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.operator ==(Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.GraphJsonExtensions.ToJson<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> string!
+static Graph1x.Serialization.GraphJsonExtensions.ToJson<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>! options) -> string!
+static Graph1x.Serialization.GraphMl.Parse(string! xml) -> Graph1x.IMutableGraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphMl.ParseDirected(string! xml) -> Graph1x.DirectedMultigraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphMl.ParseDirectedWeighted(string! xml, string! weightKey = "weight") -> Graph1x.DirectedMultigraph<string!, Graph1x.Edges.WeightedEdge<string!, double>>!
+static Graph1x.Serialization.GraphMl.ParseUndirected(string! xml) -> Graph1x.UndirectedMultigraph<string!, Graph1x.Edges.Edge<string!>>!
+static Graph1x.Serialization.GraphMl.ParseUndirectedWeighted(string! xml, string! weightKey = "weight") -> Graph1x.UndirectedMultigraph<string!, Graph1x.Edges.WeightedEdge<string!, double>>!
+static Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.operator !=(Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.operator ==(Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>? left, Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>? right) -> bool
+static Graph1x.Serialization.GraphMlExtensions.ToGraphMl<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> string!
+static Graph1x.Serialization.GraphMlExtensions.ToGraphMl<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>! options) -> string!
+virtual Graph1x.DirectedGraph<TVertex, TEdge>.AddEdge(TEdge edge) -> bool
+~override Graph1x.Edges.Edge<TVertex>.Equals(object obj) -> bool
+~override Graph1x.Edges.WeightedEdge<TVertex, TWeight>.Equals(object obj) -> bool

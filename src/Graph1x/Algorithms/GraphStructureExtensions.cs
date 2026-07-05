@@ -189,9 +189,29 @@ public static class GraphStructureExtensions
         Func<TVertex, TVertex, TEdge> edgeFactory)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
+        => graph.TransitiveClosure(edgeFactory, CancellationToken.None);
+
+    /// <summary>
+    /// Builds the transitive closure, observing
+    /// <paramref name="cancellationToken"/> between source vertices.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The directed graph to close.</param>
+    /// <param name="edgeFactory">Builds the closure edge for a (source, target) pair.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>A new directed graph containing the closure.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IDirectedGraph<TVertex, TEdge> TransitiveClosure<TVertex, TEdge>(
+        this IDirectedGraph<TVertex, TEdge> graph,
+        Func<TVertex, TVertex, TEdge> edgeFactory,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(edgeFactory);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var comparer = graph.VertexComparer;
         var closure = new DirectedGraph<TVertex, TEdge>(comparer);
@@ -202,6 +222,8 @@ public static class GraphStructureExtensions
 
         foreach (var source in graph.Vertices)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             // BFS over out-edges; the source itself only enters `reached` when
             // an edge leads back to it, which is exactly the cycle case.
             var reached = new HashSet<TVertex>(comparer);
@@ -255,8 +277,27 @@ public static class GraphStructureExtensions
         this IDirectedGraph<TVertex, TEdge> graph)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
+        => graph.TransitiveReduction(CancellationToken.None);
+
+    /// <summary>
+    /// Builds the transitive reduction of a DAG, observing
+    /// <paramref name="cancellationToken"/> between vertices.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The directed acyclic graph to reduce.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>A new directed graph containing the reduction.</returns>
+    /// <exception cref="GraphCycleException">The graph contains a cycle.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IDirectedGraph<TVertex, TEdge> TransitiveReduction<TVertex, TEdge>(
+        this IDirectedGraph<TVertex, TEdge> graph,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
         var order = graph.TopologicalSort(); // throws GraphCycleException on cyclic input
 
         var comparer = graph.VertexComparer;
@@ -266,6 +307,7 @@ public static class GraphStructureExtensions
         var descendants = new Dictionary<TVertex, HashSet<TVertex>>(comparer);
         for (var i = order.Count - 1; i >= 0; i--)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var vertex = order[i];
             var reachable = new HashSet<TVertex>(comparer);
             foreach (var edge in graph.OutEdges(vertex))

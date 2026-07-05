@@ -430,3 +430,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 .idea/
+
+# DocFX generated output
+docs/_site/
+docs/api/

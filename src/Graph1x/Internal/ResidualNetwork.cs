@@ -40,16 +40,22 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
     private readonly Dictionary<TVertex, int> _index;
     private readonly TVertex[] _vertices;
     private readonly List<int>[] _incidentArcs;
-    private readonly List<int> _arcHead = [];
-    private readonly List<TWeight> _capacity = [];
-    private readonly List<TWeight> _flow = [];
-    private readonly List<TEdge> _origin = [];
+    private readonly List<int> _arcHead;
+    private readonly List<TWeight> _capacity;
+    private readonly List<TWeight> _flow;
+    private readonly List<TEdge> _origin;
 
     internal ResidualNetwork(IDirectedGraph<TVertex, TEdge> graph, Func<TEdge, TWeight> capacitySelector)
     {
+        var arcCapacity = 2 * graph.EdgeCount;
+        _arcHead = new List<int>(arcCapacity);
+        _capacity = new List<TWeight>(arcCapacity);
+        _flow = new List<TWeight>(arcCapacity);
+        _origin = new List<TEdge>(arcCapacity);
+
         _comparer = graph.VertexComparer;
         _vertices = graph.Vertices.ToArray();
-        _index = new Dictionary<TVertex, int>(_comparer);
+        _index = new Dictionary<TVertex, int>(_vertices.Length, _comparer);
         for (var i = 0; i < _vertices.Length; i++)
         {
             _index[_vertices[i]] = i;

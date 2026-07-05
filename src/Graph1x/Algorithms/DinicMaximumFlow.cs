@@ -35,16 +35,28 @@ public sealed class DinicMaximumFlow<TVertex, TEdge, TWeight> : IMaximumFlowAlgo
         IDirectedGraph<TVertex, TEdge> graph,
         TVertex source,
         TVertex sink)
+        => FindMaximumFlow(graph, source, sink, CancellationToken.None);
+
+    /// <inheritdoc/>
+    /// <remarks>Cancellation is observed between level-graph phases.</remarks>
+    public MaximumFlowResult<TVertex, TEdge, TWeight> FindMaximumFlow(
+        IDirectedGraph<TVertex, TEdge> graph,
+        TVertex source,
+        TVertex sink,
+        CancellationToken cancellationToken)
     {
         FlowGuards.Validate(graph, source, sink);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var network = new ResidualNetwork<TVertex, TEdge, TWeight>(graph, _capacitySelector);
+        cancellationToken.ThrowIfCancellationRequested();
         var sourceIndex = network.IndexOf(source);
         var sinkIndex = network.IndexOf(sink);
 
         var total = TWeight.Zero;
         while (BuildLevels(network, sourceIndex) is { } levels && levels[sinkIndex] >= 0)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             total += BlockingFlow(network, levels, sourceIndex, sinkIndex);
         }
 

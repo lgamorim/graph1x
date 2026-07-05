@@ -1,6 +1,9 @@
 # Graph1x
 
 [![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
+[![Docs](https://github.com/lgamorim/graph1x/actions/workflows/docs.yml/badge.svg)](https://lgamorim.github.io/graph1x/)
+
+**[API documentation →](https://lgamorim.github.io/graph1x/)**
 
 A .NET library for creating, mutating, and analyzing graphs, built with modern C# and developed test-first.
 
@@ -18,7 +21,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging.
+Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, and its public API surface is analyzer-locked against accidental breaking changes.
 
 | Area | Contents |
 |---|---|
@@ -37,7 +40,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export; GraphML export and import (round-trip) |
+| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
 | Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -216,6 +219,13 @@ graph.AveragePathLength();        // mean distance over ordered pairs
 
 Distance metrics require a connected graph (strongly connected when directed) and throw `InvalidOperationException` otherwise — no sentinel infinities.
 
+Long-running computations (all-pairs paths, centrality, PageRank, flows, closures, metrics, condensation) accept a `CancellationToken` via additive overloads, checked cooperatively at phase boundaries:
+
+```csharp
+graph.BetweennessCentrality(cancellationToken);
+network.MaximumFlow(s, t, e => e.Capacity, cancellationToken);
+```
+
 Centrality measures answer "which vertices matter":
 
 ```csharp
@@ -274,6 +284,14 @@ var restored = GraphMl.Parse(xml);              // direction auto-detected from 
 GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
 ```
 
+JSON uses the node-link shape shared with NetworkX/D3 (`{ "directed": …, "nodes": […], "edges": […] }`), written without reflection:
+
+```csharp
+var json = graph.ToJson();                      // weights via GraphJsonExportOptions.EdgeWeight
+GraphJson.Parse(json);                          // direction auto-detected
+GraphJson.ParseUndirectedWeighted(json);        // typed weighted variants
+```
+
 ## Building
 
 ```
@@ -292,6 +310,7 @@ Selected numbers from the BenchmarkDotNet suite (ShortRun job, .NET 10, single d
 | `ShortestPathsFrom` vs one `ShortestPath` per target (50×50 grid, 2 500 targets) | ~0.5 ms vs ~554 ms — **~1 100× faster**, ~1 100× fewer allocations |
 | A* (Manhattan) vs Dijkstra, corner to corner on the same grid | ~30 µs vs ~435 µs — **~14× faster** |
 | Edmonds-Karp vs Dinic (random networks, 50–150 vertices) | EK slightly ahead at these sizes (Dinic ratio 1.03–1.22×) — Dinic's level-graph overhead pays off on larger/denser networks |
+| 0.5.0 allocation pass (pre-sized collections, PageRank buffer reuse) | BFS 100k: −18% allocations/−25% time; Dijkstra runs: −34–36% allocations; components: −25% allocations |
 
 ## Releasing
 

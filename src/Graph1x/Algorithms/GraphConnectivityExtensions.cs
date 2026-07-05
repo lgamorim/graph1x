@@ -26,7 +26,7 @@ public static class GraphConnectivityExtensions
         ArgumentNullException.ThrowIfNull(graph);
 
         var comparer = graph.VertexComparer;
-        var visited = new HashSet<TVertex>(comparer);
+        var visited = new HashSet<TVertex>(graph.VertexCount, comparer);
         var components = new List<IReadOnlySet<TVertex>>();
 
         foreach (var root in graph.Vertices)
@@ -105,9 +105,9 @@ public static class GraphConnectivityExtensions
         ArgumentNullException.ThrowIfNull(graph);
 
         var comparer = graph.VertexComparer;
-        var indices = new Dictionary<TVertex, int>(comparer);
-        var lowlinks = new Dictionary<TVertex, int>(comparer);
-        var onStack = new HashSet<TVertex>(comparer);
+        var indices = new Dictionary<TVertex, int>(graph.VertexCount, comparer);
+        var lowlinks = new Dictionary<TVertex, int>(graph.VertexCount, comparer);
+        var onStack = new HashSet<TVertex>(graph.VertexCount, comparer);
         var sccStack = new Stack<TVertex>();
         var components = new List<IReadOnlySet<TVertex>>();
         var nextIndex = 0;

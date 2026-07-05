@@ -33,8 +33,23 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
     /// <returns>A queryable all-pairs result.</returns>
     /// <exception cref="NegativeCycleException">The graph contains a negative cycle.</exception>
     public AllPairsShortestPaths<TVertex, TWeight> Compute(IReadOnlyGraph<TVertex, TEdge> graph)
+        => Compute(graph, CancellationToken.None);
+
+    /// <summary>
+    /// Computes shortest paths between every pair of vertices, observing
+    /// <paramref name="cancellationToken"/> between pivot iterations.
+    /// </summary>
+    /// <param name="graph">The graph to analyze.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>A queryable all-pairs result.</returns>
+    /// <exception cref="NegativeCycleException">The graph contains a negative cycle.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public AllPairsShortestPaths<TVertex, TWeight> Compute(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var vertices = graph.Vertices.ToArray();
         var count = vertices.Length;
@@ -74,6 +89,7 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
 
         for (var k = 0; k < count; k++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             for (var i = 0; i < count; i++)
             {
                 if (!reachable[i, k])

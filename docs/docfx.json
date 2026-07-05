@@ -1,0 +1,32 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "..",
+          "files": ["src/Graph1x/Graph1x.csproj"]
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["**/*.{md,yml}"],
+        "exclude": ["_site/**"]
+      }
+    ],
+    "output": "_site",
+    "template": ["default", "modern"],
+    "globalMetadata": {
+      "_appName": "Graph1x",
+      "_appTitle": "Graph1x",
+      "_appFooter": "Graph1x — a graph manipulation library for .NET",
+      "_enableSearch": true
+    }
+  }
+}

@@ -64,11 +64,30 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
     public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
         IReadOnlyGraph<TVertex, TEdge> graph,
         TVertex source)
+        => FindPathsFrom(graph, source, CancellationToken.None);
+
+    /// <summary>
+    /// Computes shortest paths from <paramref name="source"/> to every
+    /// reachable vertex, observing <paramref name="cancellationToken"/>
+    /// between vertex settlements.
+    /// </summary>
+    /// <param name="graph">The graph to search.</param>
+    /// <param name="source">The start vertex.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>A queryable single-source result.</returns>
+    /// <exception cref="ArgumentException"><paramref name="source"/> is not in the graph.</exception>
+    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public SingleSourceShortestPaths<TVertex, TWeight> FindPathsFrom(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex source,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
         GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
 
-        var (distance, predecessor) = Relax(graph, source, hasTarget: false, target: default);
+        var (distance, predecessor) = Relax(graph, source, hasTarget: false, target: default, cancellationToken);
         return new SingleSourceShortestPaths<TVertex, TWeight>(
             source,
             distance,
@@ -81,17 +100,20 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
         IReadOnlyGraph<TVertex, TEdge> graph,
         TVertex source,
         bool hasTarget,
-        TVertex? target)
+        TVertex? target,
+        CancellationToken cancellationToken = default)
     {
         var comparer = graph.VertexComparer;
-        var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
-        var predecessor = new Dictionary<TVertex, TVertex>(comparer);
-        var settled = new HashSet<TVertex>(comparer);
-        var frontier = new PriorityQueue<TVertex, TWeight>();
+        var capacity = graph.VertexCount;
+        var distance = new Dictionary<TVertex, TWeight>(capacity, comparer) { [source] = TWeight.Zero };
+        var predecessor = new Dictionary<TVertex, TVertex>(capacity, comparer);
+        var settled = new HashSet<TVertex>(capacity, comparer);
+        var frontier = new PriorityQueue<TVertex, TWeight>(capacity);
         frontier.Enqueue(source, TWeight.Zero);
 
         while (frontier.TryDequeue(out var current, out _))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!settled.Add(current))
             {
                 continue;

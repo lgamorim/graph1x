@@ -27,4 +27,23 @@ public interface IMaximumFlowAlgorithm<TVertex, TEdge, TWeight>
         IDirectedGraph<TVertex, TEdge> graph,
         TVertex source,
         TVertex sink);
+
+    /// <summary>
+    /// Computes the maximum flow, observing <paramref name="cancellationToken"/>
+    /// cooperatively. The default implementation forwards to the tokenless
+    /// overload and therefore ignores the token — implementations should
+    /// override it to honor cancellation.
+    /// </summary>
+    /// <param name="graph">The directed flow network.</param>
+    /// <param name="source">The vertex the flow originates from.</param>
+    /// <param name="sink">The vertex the flow drains into.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>The flow value, per-edge flows, and a minimum cut.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled (honored by overriding implementations).</exception>
+    MaximumFlowResult<TVertex, TEdge, TWeight> FindMaximumFlow(
+        IDirectedGraph<TVertex, TEdge> graph,
+        TVertex source,
+        TVertex sink,
+        CancellationToken cancellationToken)
+        => FindMaximumFlow(graph, source, sink);
 }

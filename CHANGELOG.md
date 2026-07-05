@@ -6,6 +6,44 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-05
+
+### Changed
+
+- Dev dependencies refreshed to latest: coverlet.collector 10.0.1,
+  Microsoft.NET.Test.Sdk 18.7.0, xunit.runner.visualstudio 3.1.5,
+  BenchmarkDotNet 0.15.8. The library itself keeps zero package references.
+
+### Added
+
+- DocFX documentation site (API reference generated from the XML docs)
+  deployed to GitHub Pages on every master push.
+- Node-link JSON serialization: `ToJson` export (Utf8JsonWriter, no
+  reflection) and `GraphJson.Parse`/`ParseDirected`/`ParseUndirected`
+  (+ weighted variants) importing into lossless multigraph types.
+- `CancellationToken` overloads on long-running algorithms (Floyd-Warshall,
+  single-source bulk queries, centrality, PageRank, max-flow, transitive
+  closure/reduction, condensation, distance metrics), checked cooperatively
+  at phase boundaries; `IMaximumFlowAlgorithm` gains a default-implemented
+  token overload so existing implementations keep compiling.
+- Public API lockdown via Microsoft.CodeAnalysis.PublicApiAnalyzers: the full
+  surface is baselined, so any accidental signature change is now a build
+  error.
+- Trim/Native AOT compatibility (`IsAotCompatible`): analyzers report zero
+  findings and a full-trim consumer publish runs correctly.
+
+### Changed
+
+- `PageRank` is now a single method with four optional parameters (the token
+  overload merged in), per the Roslyn optional-parameter API guideline; all
+  existing call shapes still compile.
+- Benchmark-guided allocation reductions: pre-sized collections in BFS/DFS,
+  Dijkstra/Bellman-Ford, Tarjan/components, and the flow residual network;
+  PageRank caches out-degrees and swaps rank buffers instead of allocating
+  per iteration. Typical wins: −18–36% allocations on traversal and
+  shortest-path hot paths (A* intentionally left unsized — measurement showed
+  pre-sizing hurts it).
+
 ## [0.4.0] - 2026-07-05
 
 ### Added

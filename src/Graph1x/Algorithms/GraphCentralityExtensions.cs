@@ -45,6 +45,20 @@ public static class GraphCentralityExtensions
         where TEdge : IEdge<TVertex>
         => graph.ClosenessCentrality(_ => 1);
 
+    /// <summary>Gets hop-count closeness centrality, observing <paramref name="cancellationToken"/> between vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>Closeness per vertex.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> ClosenessCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        => graph.ClosenessCentrality(_ => 1, cancellationToken);
+
     /// <summary>
     /// Gets closeness centrality from weighted distances (measured from each
     /// vertex outward), Wasserman-Faust scaled by reachable-set size so
@@ -63,14 +77,34 @@ public static class GraphCentralityExtensions
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
         where TWeight : INumber<TWeight>
+        => graph.ClosenessCentrality(weightSelector, CancellationToken.None);
+
+    /// <summary>Gets weighted closeness centrality, observing <paramref name="cancellationToken"/> between vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>Closeness per vertex.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> ClosenessCentrality<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(weightSelector);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var centrality = new Dictionary<TVertex, double>(graph.VertexComparer);
         var vertexCount = graph.VertexCount;
         foreach (var vertex in graph.Vertices)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var distances = graph.ShortestPathsFrom(vertex, weightSelector).Distances;
             var reachable = distances.Count; // includes the vertex itself at distance zero
             var total = distances.Values.Sum(double.CreateChecked);
@@ -91,9 +125,24 @@ public static class GraphCentralityExtensions
         this IReadOnlyGraph<TVertex, TEdge> graph)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
+        => graph.BetweennessCentrality(CancellationToken.None);
+
+    /// <summary>Gets hop-count betweenness centrality, observing <paramref name="cancellationToken"/> between source vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>Raw betweenness per vertex.</returns>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
-        return BrandesAccumulate(graph, BreadthFirstStage);
+        cancellationToken.ThrowIfCancellationRequested();
+        return BrandesAccumulate(graph, BreadthFirstStage, cancellationToken);
 
         (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
             BreadthFirstStage(TVertex source)
@@ -147,10 +196,30 @@ public static class GraphCentralityExtensions
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
         where TWeight : INumber<TWeight>
+        => graph.BetweennessCentrality(weightSelector, CancellationToken.None);
+
+    /// <summary>Gets weighted betweenness centrality, observing <paramref name="cancellationToken"/> between source vertices.</summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
+    /// <returns>Raw betweenness per vertex.</returns>
+    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        CancellationToken cancellationToken)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(weightSelector);
-        return BrandesAccumulate(graph, DijkstraStage);
+        cancellationToken.ThrowIfCancellationRequested();
+        return BrandesAccumulate(graph, DijkstraStage, cancellationToken);
 
         (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
             DijkstraStage(TVertex source)
@@ -217,17 +286,21 @@ public static class GraphCentralityExtensions
     /// <param name="damping">The damping factor in [0, 1]; 0.85 is the classic choice.</param>
     /// <param name="maxIterations">The iteration cap, at least 1.</param>
     /// <param name="tolerance">The L1 convergence threshold.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively between power iterations.</param>
     /// <returns>PageRank per vertex, summing to 1 (empty for the empty graph).</returns>
     /// <exception cref="ArgumentOutOfRangeException">Damping leaves [0, 1] or <paramref name="maxIterations"/> is below 1.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
     public static IReadOnlyDictionary<TVertex, double> PageRank<TVertex, TEdge>(
         this IDirectedGraph<TVertex, TEdge> graph,
         double damping = 0.85,
         int maxIterations = 100,
-        double tolerance = 1e-9)
+        double tolerance = 1e-9,
+        CancellationToken cancellationToken = default)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentOutOfRangeException.ThrowIfNegative(damping);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(damping, 1.0);
         ArgumentOutOfRangeException.ThrowIfLessThan(maxIterations, 1);
@@ -244,24 +317,43 @@ public static class GraphCentralityExtensions
             ranks[vertex] = 1.0 / count;
         }
 
+        // Out-degrees are loop-invariant; cache them once instead of asking
+        // the graph per in-edge per iteration.
+        var outDegree = new Dictionary<TVertex, int>(count, graph.VertexComparer);
+        foreach (var vertex in graph.Vertices)
+        {
+            outDegree[vertex] = graph.OutDegree(vertex);
+        }
+
+        var next = new Dictionary<TVertex, double>(count, graph.VertexComparer);
         for (var iteration = 0; iteration < maxIterations; iteration++)
         {
-            var danglingMass = graph.Vertices
-                .Where(vertex => graph.OutDegree(vertex) == 0)
-                .Sum(vertex => ranks[vertex]);
+            cancellationToken.ThrowIfCancellationRequested();
+            var danglingMass = 0.0;
+            foreach (var (vertex, degree) in outDegree)
+            {
+                if (degree == 0)
+                {
+                    danglingMass += ranks[vertex];
+                }
+            }
 
-            var next = new Dictionary<TVertex, double>(graph.VertexComparer);
             var change = 0.0;
             foreach (var vertex in graph.Vertices)
             {
-                var incoming = graph.InEdges(vertex)
-                    .Sum(edge => ranks[edge.Source] / graph.OutDegree(edge.Source));
+                var incoming = 0.0;
+                foreach (var edge in graph.InEdges(vertex))
+                {
+                    incoming += ranks[edge.Source] / outDegree[edge.Source];
+                }
+
                 var rank = ((1.0 - damping) / count) + (damping * (incoming + (danglingMass / count)));
                 next[vertex] = rank;
                 change += Math.Abs(rank - ranks[vertex]);
             }
 
-            ranks = next;
+            // Swap the two buffers instead of allocating a dictionary per iteration.
+            (ranks, next) = (next, ranks);
             if (change < tolerance)
             {
                 break;
@@ -279,7 +371,8 @@ public static class GraphCentralityExtensions
     /// </summary>
     private static Dictionary<TVertex, double> BrandesAccumulate<TVertex, TEdge>(
         IReadOnlyGraph<TVertex, TEdge> graph,
-        Func<TVertex, (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)> stage)
+        Func<TVertex, (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)> stage,
+        CancellationToken cancellationToken = default)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
     {
@@ -292,6 +385,7 @@ public static class GraphCentralityExtensions
 
         foreach (var source in graph.Vertices)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var (order, sigma, predecessors) = stage(source);
             var dependency = new Dictionary<TVertex, double>(comparer);
             foreach (var vertex in order)
