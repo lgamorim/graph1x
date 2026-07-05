@@ -17,6 +17,9 @@ All notable changes to Graph1x are documented in this file. The format follows
   handling.
 - `Condense()`: the SCC condensation DAG with component/member lookups,
   making DAG-only tools applicable to any directed graph.
+- GraphML serialization: `ToGraphMl` export (weights, escaping, deterministic
+  output) and `GraphMl.Parse`/`ParseDirected`/`ParseUndirected` (+ weighted
+  variants) importing into lossless multigraph types.
 
 ### Changed
 

@@ -37,7 +37,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export with escaping and label selectors |
+| Serialization | Graphviz DOT export; GraphML export and import (round-trip) |
 | Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -262,6 +262,14 @@ graph.ToDot(new DotExportOptions<string, WeightedEdge<string, int>>
     GraphName = "network",
     EdgeLabel = e => e.Weight.ToString(),                 // [label="…"] per edge
 });
+```
+
+GraphML round-trips for persistence and interop with other tools:
+
+```csharp
+var xml = graph.ToGraphMl();                    // weights via GraphMlExportOptions.EdgeWeight
+var restored = GraphMl.Parse(xml);              // direction auto-detected from edgedefault
+GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
 ```
 
 ## Building
