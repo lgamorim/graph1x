@@ -15,6 +15,8 @@ All notable changes to Graph1x are documented in this file. The format follows
   (Wasserman-Faust scaled), `BetweennessCentrality` (Brandes, hop-count and
   weighted), and `PageRank` with damping, tolerance, and dangling-node
   handling.
+- `Condense()`: the SCC condensation DAG with component/member lookups,
+  making DAG-only tools applicable to any directed graph.
 
 ### Changed
 

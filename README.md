@@ -26,7 +26,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
-| Connectivity | Connected/weakly connected components, Tarjan SCC, bridges, articulation points |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
@@ -117,6 +117,11 @@ graph.ConnectedComponents();          // direction-agnostic components
 graph.IsConnected();                  // at most one component (empty graph: true)
 directed.WeaklyConnectedComponents(); // components after forgetting direction
 directed.StronglyConnectedComponents(); // Tarjan, iterative; reverse topological order
+
+var condensation = directed.Condense(); // each SCC collapsed to one vertex
+condensation.Graph.TopologicalSort();   // the condensation is always a DAG
+condensation.ComponentOf("a");          // vertex -> component index
+condensation.Members(0);                // component index -> original vertices
 ```
 
 Shortest paths default to Dijkstra via the facade; the strategies are swappable behind `IShortestPathAlgorithm<,,>`:
