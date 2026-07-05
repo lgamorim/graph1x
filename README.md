@@ -29,7 +29,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
-| Flow networks | Edmonds-Karp maximum flow with certifying minimum cut |
+| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
@@ -164,8 +164,10 @@ new PrimMinimumSpanningTree<string, WeightedEdge<string, int>, int>(e => e.Weigh
 Maximum flow (directed networks, non-negative capacities) returns the flow value, per-edge flows, and a minimum cut that certifies optimality:
 
 ```csharp
-var result = network.MaximumFlow("source", "sink");   // WeightedEdge capacities
+var result = network.MaximumFlow("source", "sink");   // Edmonds-Karp by default
 network.MaximumFlow("s", "t", e => e.Capacity);       // or any capacity selector
+new DinicMaximumFlow<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .FindMaximumFlow(network, "s", "t");              // Dinic for large/dense networks
 
 result.FlowValue;           // max flow == min cut capacity
 result.EdgeFlows;           // flow per edge (parallel edges listed individually)
@@ -289,3 +291,4 @@ Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack,
 
 - `src/Graph1x` — the library
 - `test/Graph1x.UnitTests` — xUnit v3 test suite
+- `bench/Graph1x.Benchmarks` — BenchmarkDotNet suite (`dotnet run -c Release --project bench/Graph1x.Benchmarks`; seeded `GraphGenerator` fixtures, `--job Dry` for a smoke run)

@@ -20,6 +20,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 - GraphML serialization: `ToGraphMl` export (weights, escaping, deterministic
   output) and `GraphMl.Parse`/`ParseDirected`/`ParseUndirected` (+ weighted
   variants) importing into lossless multigraph types.
+- `DinicMaximumFlow` behind the existing `IMaximumFlowAlgorithm` interface
+  (level graphs + blocking flows), sharing the residual network with
+  Edmonds-Karp.
+- `bench/Graph1x.Benchmarks`: BenchmarkDotNet suite (storage, traversal,
+  shortest paths, Edmonds-Karp vs Dinic, MST, SCC/matching) over seeded
+  generator fixtures.
 
 ### Changed
 
