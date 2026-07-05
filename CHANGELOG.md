@@ -12,6 +12,11 @@ All notable changes to Graph1x are documented in this file. The format follows
   Microsoft.NET.Test.Sdk 18.7.0, xunit.runner.visualstudio 3.1.5,
   BenchmarkDotNet 0.15.8. The library itself keeps zero package references.
 
+### Added
+
+- DocFX documentation site (API reference generated from the XML docs)
+  deployed to GitHub Pages on every master push.
+
 ## [0.4.0] - 2026-07-05
 
 ### Added
