@@ -31,8 +31,8 @@ public static class GraphTraversalExtensions
 
         IEnumerable<TVertex> Iterator()
         {
-            var visited = new HashSet<TVertex>(graph.VertexComparer) { start };
-            var queue = new Queue<TVertex>();
+            var visited = new HashSet<TVertex>(graph.VertexCount, graph.VertexComparer) { start };
+            var queue = new Queue<TVertex>(graph.VertexCount);
             queue.Enqueue(start);
 
             while (queue.Count > 0)
@@ -73,7 +73,7 @@ public static class GraphTraversalExtensions
 
         IEnumerable<TVertex> Iterator()
         {
-            var visited = new HashSet<TVertex>(graph.VertexComparer) { start };
+            var visited = new HashSet<TVertex>(graph.VertexCount, graph.VertexComparer) { start };
             var stack = new Stack<IEnumerator<TVertex>>();
             yield return start;
             stack.Push(GraphTraversalCore.Successors(graph, start).GetEnumerator());
@@ -120,7 +120,7 @@ public static class GraphTraversalExtensions
 
         IEnumerable<TVertex> Iterator()
         {
-            var visited = new HashSet<TVertex>(graph.VertexComparer) { start };
+            var visited = new HashSet<TVertex>(graph.VertexCount, graph.VertexComparer) { start };
             var stack = new Stack<(TVertex Vertex, IEnumerator<TVertex> Successors)>();
             stack.Push((start, GraphTraversalCore.Successors(graph, start).GetEnumerator()));
 

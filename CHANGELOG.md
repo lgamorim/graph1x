@@ -35,6 +35,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 - `PageRank` is now a single method with four optional parameters (the token
   overload merged in), per the Roslyn optional-parameter API guideline; all
   existing call shapes still compile.
+- Benchmark-guided allocation reductions: pre-sized collections in BFS/DFS,
+  Dijkstra/Bellman-Ford, Tarjan/components, and the flow residual network;
+  PageRank caches out-degrees and swaps rank buffers instead of allocating
+  per iteration. Typical wins: −18–36% allocations on traversal and
+  shortest-path hot paths (A* intentionally left unsized — measurement showed
+  pre-sizing hurts it).
 
 ## [0.4.0] - 2026-07-05
 

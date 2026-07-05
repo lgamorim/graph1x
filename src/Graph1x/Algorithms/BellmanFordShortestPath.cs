@@ -102,8 +102,8 @@ public sealed class BellmanFordShortestPath<TVertex, TEdge, TWeight> : IShortest
         CancellationToken cancellationToken = default)
     {
         var comparer = graph.VertexComparer;
-        var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
-        var predecessor = new Dictionary<TVertex, TVertex>(comparer);
+        var distance = new Dictionary<TVertex, TWeight>(graph.VertexCount, comparer) { [source] = TWeight.Zero };
+        var predecessor = new Dictionary<TVertex, TVertex>(graph.VertexCount, comparer);
 
         for (var pass = 1; pass < graph.VertexCount; pass++)
         {

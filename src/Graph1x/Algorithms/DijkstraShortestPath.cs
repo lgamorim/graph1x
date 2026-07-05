@@ -104,10 +104,11 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
         CancellationToken cancellationToken = default)
     {
         var comparer = graph.VertexComparer;
-        var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
-        var predecessor = new Dictionary<TVertex, TVertex>(comparer);
-        var settled = new HashSet<TVertex>(comparer);
-        var frontier = new PriorityQueue<TVertex, TWeight>();
+        var capacity = graph.VertexCount;
+        var distance = new Dictionary<TVertex, TWeight>(capacity, comparer) { [source] = TWeight.Zero };
+        var predecessor = new Dictionary<TVertex, TVertex>(capacity, comparer);
+        var settled = new HashSet<TVertex>(capacity, comparer);
+        var frontier = new PriorityQueue<TVertex, TWeight>(capacity);
         frontier.Enqueue(source, TWeight.Zero);
 
         while (frontier.TryDequeue(out var current, out _))

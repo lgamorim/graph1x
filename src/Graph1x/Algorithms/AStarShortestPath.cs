@@ -45,6 +45,9 @@ public sealed class AStarShortestPath<TVertex, TEdge, TWeight> : IShortestPathAl
         GraphTraversalCore.ValidateEndpoint(graph, source, nameof(source));
         GraphTraversalCore.ValidateEndpoint(graph, target, nameof(target));
 
+        // Deliberately NOT pre-sized to VertexCount: a well-guided A* visits a
+        // small fraction of the graph, and benchmarking showed full-capacity
+        // pre-sizing triples its allocations for zero speedup.
         var comparer = graph.VertexComparer;
         var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
         var predecessor = new Dictionary<TVertex, TVertex>(comparer);

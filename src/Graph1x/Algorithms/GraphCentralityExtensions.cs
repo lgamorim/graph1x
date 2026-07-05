@@ -317,25 +317,43 @@ public static class GraphCentralityExtensions
             ranks[vertex] = 1.0 / count;
         }
 
+        // Out-degrees are loop-invariant; cache them once instead of asking
+        // the graph per in-edge per iteration.
+        var outDegree = new Dictionary<TVertex, int>(count, graph.VertexComparer);
+        foreach (var vertex in graph.Vertices)
+        {
+            outDegree[vertex] = graph.OutDegree(vertex);
+        }
+
+        var next = new Dictionary<TVertex, double>(count, graph.VertexComparer);
         for (var iteration = 0; iteration < maxIterations; iteration++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var danglingMass = graph.Vertices
-                .Where(vertex => graph.OutDegree(vertex) == 0)
-                .Sum(vertex => ranks[vertex]);
+            var danglingMass = 0.0;
+            foreach (var (vertex, degree) in outDegree)
+            {
+                if (degree == 0)
+                {
+                    danglingMass += ranks[vertex];
+                }
+            }
 
-            var next = new Dictionary<TVertex, double>(graph.VertexComparer);
             var change = 0.0;
             foreach (var vertex in graph.Vertices)
             {
-                var incoming = graph.InEdges(vertex)
-                    .Sum(edge => ranks[edge.Source] / graph.OutDegree(edge.Source));
+                var incoming = 0.0;
+                foreach (var edge in graph.InEdges(vertex))
+                {
+                    incoming += ranks[edge.Source] / outDegree[edge.Source];
+                }
+
                 var rank = ((1.0 - damping) / count) + (damping * (incoming + (danglingMass / count)));
                 next[vertex] = rank;
                 change += Math.Abs(rank - ranks[vertex]);
             }
 
-            ranks = next;
+            // Swap the two buffers instead of allocating a dictionary per iteration.
+            (ranks, next) = (next, ranks);
             if (change < tolerance)
             {
                 break;

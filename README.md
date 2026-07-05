@@ -310,6 +310,7 @@ Selected numbers from the BenchmarkDotNet suite (ShortRun job, .NET 10, single d
 | `ShortestPathsFrom` vs one `ShortestPath` per target (50×50 grid, 2 500 targets) | ~0.5 ms vs ~554 ms — **~1 100× faster**, ~1 100× fewer allocations |
 | A* (Manhattan) vs Dijkstra, corner to corner on the same grid | ~30 µs vs ~435 µs — **~14× faster** |
 | Edmonds-Karp vs Dinic (random networks, 50–150 vertices) | EK slightly ahead at these sizes (Dinic ratio 1.03–1.22×) — Dinic's level-graph overhead pays off on larger/denser networks |
+| 0.5.0 allocation pass (pre-sized collections, PageRank buffer reuse) | BFS 100k: −18% allocations/−25% time; Dijkstra runs: −34–36% allocations; components: −25% allocations |
 
 ## Releasing
 
