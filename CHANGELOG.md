@@ -11,6 +11,10 @@ All notable changes to Graph1x are documented in this file. The format follows
 - Distance metrics: `Eccentricity`, `Diameter`, `Radius`, `Center`,
   `Periphery`, and `AveragePathLength`, in hop-count and weighted variants;
   connected input required (strongly connected for directed graphs).
+- Centrality measures: `DegreeCentrality`, `ClosenessCentrality`
+  (Wasserman-Faust scaled), `BetweennessCentrality` (Brandes, hop-count and
+  weighted), and `PageRank` with damping, tolerance, and dangling-node
+  handling.
 
 ### Changed
 

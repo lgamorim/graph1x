@@ -34,6 +34,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
+| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export with escaping and label selectors |
@@ -207,6 +208,15 @@ graph.AveragePathLength();        // mean distance over ordered pairs
 ```
 
 Distance metrics require a connected graph (strongly connected when directed) and throw `InvalidOperationException` otherwise — no sentinel infinities.
+
+Centrality measures answer "which vertices matter":
+
+```csharp
+graph.DegreeCentrality();          // degree / (V-1)
+graph.ClosenessCentrality();       // Wasserman-Faust scaled; disconnected graphs fine
+graph.BetweennessCentrality();     // Brandes; weighted overload takes a selector
+network.PageRank(damping: 0.85);   // directed; ranks sum to 1, dangling nodes handled
+```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
 
