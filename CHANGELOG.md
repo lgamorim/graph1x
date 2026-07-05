@@ -6,6 +6,8 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-05
+
 ### Changed
 
 - Dev dependencies refreshed to latest: coverlet.collector 10.0.1,
