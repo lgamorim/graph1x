@@ -16,6 +16,9 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 - DocFX documentation site (API reference generated from the XML docs)
   deployed to GitHub Pages on every master push.
+- Node-link JSON serialization: `ToJson` export (Utf8JsonWriter, no
+  reflection) and `GraphJson.Parse`/`ParseDirected`/`ParseUndirected`
+  (+ weighted variants) importing into lossless multigraph types.
 
 ## [0.4.0] - 2026-07-05
 

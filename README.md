@@ -40,7 +40,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export; GraphML export and import (round-trip) |
+| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
 | Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -275,6 +275,14 @@ GraphML round-trips for persistence and interop with other tools:
 var xml = graph.ToGraphMl();                    // weights via GraphMlExportOptions.EdgeWeight
 var restored = GraphMl.Parse(xml);              // direction auto-detected from edgedefault
 GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
+```
+
+JSON uses the node-link shape shared with NetworkX/D3 (`{ "directed": …, "nodes": […], "edges": […] }`), written without reflection:
+
+```csharp
+var json = graph.ToJson();                      // weights via GraphJsonExportOptions.EdgeWeight
+GraphJson.Parse(json);                          // direction auto-detected
+GraphJson.ParseUndirectedWeighted(json);        // typed weighted variants
 ```
 
 ## Building
