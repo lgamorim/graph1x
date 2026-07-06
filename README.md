@@ -21,7 +21,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Built milestone by milestone with TDD (tests written before the implementation); nearly 800 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, strong-name signed, and its public API surface is analyzer-locked against accidental breaking changes.
+Built milestone by milestone with TDD (tests written before the implementation); over 830 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, strong-name signed, and its public API surface is analyzer-locked against accidental breaking changes.
 
 | Area | Contents |
 |---|---|
@@ -41,9 +41,10 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
 | Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank, eigenvector, Katz |
 | Clustering | Local/average clustering coefficients, global transitivity |
+| Cliques | Lazy maximal clique enumeration (Bron–Kerbosch with pivoting) |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips with typed vertex/edge attributes |
+| Serialization | Graphviz DOT and Mermaid flowchart export; GraphML and node-link JSON round-trips with typed vertex/edge attributes |
 | Generators | Seeded Erdős–Rényi, Barabási–Albert, Watts–Strogatz, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -268,6 +269,9 @@ graph.LocalClusteringCoefficient("a");
 graph.ClusteringCoefficients();        // all vertices at once
 graph.AverageClusteringCoefficient();
 graph.GlobalClusteringCoefficient();   // transitivity: 3·triangles / connected triples
+
+// Maximal cliques: lazy Bron–Kerbosch, so partial enumeration stays cheap.
+graph.EnumerateMaximalCliques().Take(10);
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
@@ -308,6 +312,17 @@ graph.ToDot(new DotExportOptions<string, WeightedEdge<string, int>>
 {
     GraphName = "network",
     EdgeLabel = e => e.Weight.ToString(),                 // [label="…"] per edge
+});
+```
+
+Mermaid output drops straight into GitHub markdown or docs pages — nodes get safe synthetic ids with the display label attached:
+
+```csharp
+var mermaid = graph.ToMermaid();                          // flowchart TD, --> or --- picked automatically
+graph.ToMermaid(new MermaidExportOptions<string, WeightedEdge<string, int>>
+{
+    Direction = MermaidDirection.LeftToRight,             // flowchart LR
+    EdgeLabel = e => e.Weight.ToString(),                 // -->|"…"| per edge
 });
 ```
 
