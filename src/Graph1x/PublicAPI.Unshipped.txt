@@ -1,5 +1,12 @@
 #nullable enable
+Graph1x.Algorithms.GraphDagPathExtensions
 Graph1x.Algorithms.GraphOperationsExtensions
+static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphDagPathExtensions.DagLongestPathsFrom<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphDagPathExtensions.DagLongestPathsFrom<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphDagPathExtensions.DagShortestPathsFrom<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
+static Graph1x.Algorithms.GraphDagPathExtensions.DagShortestPathsFrom<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source) -> Graph1x.Algorithms.SingleSourceShortestPaths<TVertex, TWeight>!
 static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TVertex, TVertex, TEdge>! edgeFactory) -> Graph1x.IMutableGraph<TVertex, TEdge>!
 static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
 static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IMutableGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!

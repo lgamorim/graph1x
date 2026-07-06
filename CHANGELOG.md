@@ -8,6 +8,12 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- DAG path algorithms via single-pass topological relaxation:
+  `DagShortestPathsFrom`, `DagLongestPathsFrom` (both reuse
+  `SingleSourceShortestPaths`), and `CriticalPath` (the maximum-weight path
+  anywhere in the DAG). Negative weights are supported; cyclic input throws
+  `GraphCycleException`.
+
 - Graph set operations in `Graph1x.Algorithms`: `Subgraph` (induced by a
   vertex selection; unknown vertices ignored), `Union` (operands must agree
   on direction; result family and comparer come from the first), and

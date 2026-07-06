@@ -31,6 +31,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
+| DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
@@ -156,6 +157,16 @@ new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhatt
 ```
 
 Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
+
+On DAGs, a single topological pass beats both and takes negative weights in stride — plus the longest-path queries that are intractable on general graphs:
+
+```csharp
+dag.DagShortestPathsFrom("compile");    // SingleSourceShortestPaths, negative weights OK
+dag.DagLongestPathsFrom("compile");     // same shape, maximizing
+dag.CriticalPath();                     // heaviest path anywhere (scheduling/CPM)
+```
+
+These throw `GraphCycleException` on cyclic input, like `TopologicalSort`.
 
 Minimum spanning trees (undirected graphs; disconnected input yields a spanning forest):
 
