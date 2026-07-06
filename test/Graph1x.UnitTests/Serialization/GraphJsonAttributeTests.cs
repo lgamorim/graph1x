@@ -111,6 +111,33 @@ public class GraphJsonAttributeTests
     }
 
     [Fact]
+    public void ParseDocument_EdgesInterleavedAcrossSources_KeepsEdgeDataInDocumentOrder()
+    {
+        // Foreign documents may order edges freely; Graph1x's own exports
+        // group them by source vertex. EdgeData stays in document order, so
+        // it must be correlated by document position, not by zipping with
+        // the graph's edge enumeration.
+        const string json = """
+            {
+              "directed": true,
+              "nodes": [{ "id": "a" }, { "id": "b" }, { "id": "c" }],
+              "edges": [
+                { "source": "b", "target": "c", "w": 1 },
+                { "source": "a", "target": "b", "w": 2 }
+              ]
+            }
+            """;
+
+        var document = GraphJson.ParseDocument(json);
+
+        Assert.Equal(1.0, document.EdgeData[0]["w"]);
+        Assert.Equal(2.0, document.EdgeData[1]["w"]);
+
+        // The graph itself enumerates edges grouped by source vertex.
+        Assert.Equal(new Edge<string>("a", "b"), document.Graph.Edges.First());
+    }
+
+    [Fact]
     public void ParseDocument_ReservedPropertiesAreNotAttributes()
     {
         var graph = new DirectedGraph<string, Edge<string>>();

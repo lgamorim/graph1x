@@ -6,9 +6,10 @@ namespace Graph1x.Serialization;
 
 /// <summary>
 /// Exports graphs to GraphML (http://graphml.graphdrawing.org). Vertices are
-/// declared first (isolated ones included) and edges follow in insertion
-/// order; XML escaping is handled by the writer, so arbitrary vertex strings
-/// are safe. Weights are written with the invariant culture.
+/// declared first (isolated ones included) and edges follow in the graph's
+/// enumeration order (grouped by source vertex); XML escaping is handled by
+/// the writer, so arbitrary vertex strings are safe. Weights are written with
+/// the invariant culture.
 /// </summary>
 public static class GraphMlExtensions
 {

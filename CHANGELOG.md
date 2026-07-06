@@ -8,6 +8,18 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [0.6.0] - 2026-07-06
 
+### Fixed
+
+- `GraphGenerator.CompleteBipartite` now rejects a negative right-side count
+  with `ArgumentOutOfRangeException` as documented, instead of silently
+  producing a smaller edgeless graph when the two counts summed to a
+  non-negative total.
+- `GraphDocument.EdgeData` documentation no longer claims document order
+  always matches the graph's edge enumeration order: multigraphs enumerate
+  edges grouped by source vertex, so foreign documents with interleaved
+  edge sources must be correlated by document position. The exporter
+  documentation now states the actual (still deterministic) edge order.
+
 ### Changed
 
 - The assembly is strong-name signed from this release (the key ships in

@@ -5,8 +5,9 @@ namespace Graph1x.Serialization;
 
 /// <summary>
 /// Exports graphs to the Graphviz DOT language. Output is deterministic
-/// (vertices and edges in insertion order, <c>\n</c> line endings) so it can
-/// be asserted, diffed, and cached; every identifier is quoted and escaped,
+/// (vertices in insertion order, edges in the graph's enumeration order —
+/// grouped by source vertex — and <c>\n</c> line endings) so it can be
+/// asserted, diffed, and cached; every identifier is quoted and escaped,
 /// so arbitrary vertex strings are safe.
 /// </summary>
 public static class GraphDotExtensions

@@ -123,6 +123,35 @@ public class GraphMlAttributeTests
     }
 
     [Fact]
+    public void ParseDocument_EdgesInterleavedAcrossSources_KeepsEdgeDataInDocumentOrder()
+    {
+        // Foreign documents may order edges freely; Graph1x's own exports
+        // group them by source vertex. EdgeData stays in document order, so
+        // it must be correlated by document position, not by zipping with
+        // the graph's edge enumeration.
+        const string xml = """
+            <graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+              <key id="w" for="edge" attr.name="w" attr.type="int" />
+              <graph id="G" edgedefault="directed">
+                <node id="a" />
+                <node id="b" />
+                <node id="c" />
+                <edge source="b" target="c"><data key="w">1</data></edge>
+                <edge source="a" target="b"><data key="w">2</data></edge>
+              </graph>
+            </graphml>
+            """;
+
+        var document = GraphMl.ParseDocument(xml);
+
+        Assert.Equal(1, document.EdgeData[0]["w"]);
+        Assert.Equal(2, document.EdgeData[1]["w"]);
+
+        // The graph itself enumerates edges grouped by source vertex.
+        Assert.Equal(new Edge<string>("a", "b"), document.Graph.Edges.First());
+    }
+
+    [Fact]
     public void ParseDocument_WithoutAttributes_YieldsEmptyData()
     {
         var graph = new UndirectedGraph<string, Edge<string>>();
