@@ -1,1 +1,9 @@
 #nullable enable
+Graph1x.Algorithms.GraphOperationsExtensions
+static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Func<TVertex, TVertex, TEdge>! edgeFactory) -> Graph1x.IMutableGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Complement<TVertex>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.Edge<TVertex>>! graph) -> Graph1x.IMutableGraph<TVertex, Graph1x.Edges.Edge<TVertex>>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Subgraph<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Collections.Generic.IEnumerable<TVertex>! vertices) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Subgraph<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Collections.Generic.IEnumerable<TVertex>! vertices) -> Graph1x.IMutableGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Union<TVertex, TEdge>(this Graph1x.IDirectedGraph<TVertex, TEdge>! first, Graph1x.IDirectedGraph<TVertex, TEdge>! second) -> Graph1x.IDirectedGraph<TVertex, TEdge>!
+static Graph1x.Algorithms.GraphOperationsExtensions.Union<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! first, Graph1x.IReadOnlyGraph<TVertex, TEdge>! second) -> Graph1x.IMutableGraph<TVertex, TEdge>!

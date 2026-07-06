@@ -35,6 +35,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
+| Operations | Induced subgraph, union, complement |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
 | Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
@@ -210,6 +211,11 @@ dag.TransitiveReduction();        // minimal edge set with the same reachability
 
 var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
 coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
+
+// Set operations return a new graph of the same family (inputs untouched):
+graph.Subgraph(["a", "b", "c"]);  // induced: kept vertices + edges between them
+first.Union(second);              // all vertices and edges of both (direction must agree)
+graph.Complement();               // edge exactly where the original has none (simple graphs)
 
 graph.Diameter();                 // longest shortest path (hops, or pass a weight selector)
 graph.Radius();                   // smallest eccentricity

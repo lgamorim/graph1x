@@ -1,4 +1,5 @@
 using Graph1x.Edges;
+using Graph1x.Internal;
 
 namespace Graph1x;
 
@@ -69,7 +70,7 @@ public static class GraphViewExtensions
         where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
-        return Copy(graph).AsReadOnly();
+        return GraphCloneCore.Copy(graph).AsReadOnly();
     }
 
     /// <summary>
@@ -87,31 +88,6 @@ public static class GraphViewExtensions
         where TEdge : IEdge<TVertex>
     {
         ArgumentNullException.ThrowIfNull(graph);
-        return (IDirectedGraph<TVertex, TEdge>)Copy(graph).AsReadOnly();
-    }
-
-    private static IMutableGraph<TVertex, TEdge> Copy<TVertex, TEdge>(IReadOnlyGraph<TVertex, TEdge> graph)
-        where TVertex : notnull
-        where TEdge : IEdge<TVertex>
-    {
-        IMutableGraph<TVertex, TEdge> copy = (graph.IsDirected, graph.AllowsParallelEdges) switch
-        {
-            (true, true) => new DirectedMultigraph<TVertex, TEdge>(graph.VertexComparer),
-            (true, false) => new DirectedGraph<TVertex, TEdge>(graph.VertexComparer),
-            (false, true) => new UndirectedMultigraph<TVertex, TEdge>(graph.VertexComparer),
-            (false, false) => new UndirectedGraph<TVertex, TEdge>(graph.VertexComparer),
-        };
-
-        foreach (var vertex in graph.Vertices)
-        {
-            copy.AddVertex(vertex);
-        }
-
-        foreach (var edge in graph.Edges)
-        {
-            copy.AddEdge(edge);
-        }
-
-        return copy;
+        return (IDirectedGraph<TVertex, TEdge>)GraphCloneCore.Copy(graph).AsReadOnly();
     }
 }

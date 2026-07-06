@@ -6,6 +6,15 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Graph set operations in `Graph1x.Algorithms`: `Subgraph` (induced by a
+  vertex selection; unknown vertices ignored), `Union` (operands must agree
+  on direction; result family and comparer come from the first), and
+  `Complement` (simple graphs only; never emits self-loops). Results are new
+  graphs matching the source's direction/parallel-edge policy, with
+  directed-typed overloads preserving `IDirectedGraph` dispatch.
+
 ## [0.5.0] - 2026-07-05
 
 ### Changed
