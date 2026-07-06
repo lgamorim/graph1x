@@ -1,5 +1,12 @@
 #nullable enable
+Graph1x.Algorithms.GraphClusteringExtensions
 Graph1x.Algorithms.GraphDagPathExtensions
+static Graph1x.Algorithms.GraphCentralityExtensions.EigenvectorCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, int maxIterations = 100, double tolerance = 1E-09, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphCentralityExtensions.KatzCentrality<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, double alpha = 0.1, double beta = 1, int maxIterations = 100, double tolerance = 1E-09, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphClusteringExtensions.AverageClusteringCoefficient<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> double
+static Graph1x.Algorithms.GraphClusteringExtensions.ClusteringCoefficients<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyDictionary<TVertex, double>!
+static Graph1x.Algorithms.GraphClusteringExtensions.GlobalClusteringCoefficient<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> double
+static Graph1x.Algorithms.GraphClusteringExtensions.LocalClusteringCoefficient<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex vertex) -> double
 Graph1x.Algorithms.GraphOperationsExtensions
 static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
 static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!

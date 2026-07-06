@@ -8,6 +8,15 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Clustering coefficients: `LocalClusteringCoefficient`,
+  `ClusteringCoefficients`, `AverageClusteringCoefficient`, and
+  `GlobalClusteringCoefficient` (transitivity). Direction is ignored,
+  self-loops never count, and multigraph neighbors count once.
+- Spectral centrality: `EigenvectorCentrality` (shifted power iteration,
+  so bipartite graphs cannot oscillate) and `KatzCentrality`
+  (attenuation `alpha` + base `beta`; the DAG-safe alternative), both
+  L2-normalized with PageRank-style optional parameters and cancellation.
+
 - DAG path algorithms via single-pass topological relaxation:
   `DagShortestPathsFrom`, `DagLongestPathsFrom` (both reuse
   `SingleSourceShortestPaths`), and `CriticalPath` (the maximum-weight path

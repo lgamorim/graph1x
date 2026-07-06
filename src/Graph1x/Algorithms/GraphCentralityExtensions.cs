@@ -7,8 +7,9 @@ namespace Graph1x.Algorithms;
 /// <summary>
 /// Centrality measures: degree, closeness (Wasserman-Faust scaled, so
 /// disconnected graphs need no special casing), betweenness via Brandes'
-/// algorithm (breadth-first for hop counts, Dijkstra-based for weights), and
-/// PageRank for directed graphs. On multigraphs, parallel edges count as
+/// algorithm (breadth-first for hop counts, Dijkstra-based for weights),
+/// PageRank for directed graphs, and the spectral pair — eigenvector and
+/// Katz — by power iteration. On multigraphs, parallel edges count as
 /// distinct shortest paths, which is the natural multigraph semantics.
 /// </summary>
 public static class GraphCentralityExtensions
@@ -361,6 +362,188 @@ public static class GraphCentralityExtensions
         }
 
         return ranks;
+    }
+
+    /// <summary>
+    /// Computes eigenvector centrality by shifted power iteration
+    /// (x ← (A + I)·x, so bipartite graphs cannot oscillate): each vertex's
+    /// score is proportional to the sum of its in-neighbors' scores
+    /// (neighbors, when undirected), L2-normalized. On DAGs the spectrum is
+    /// degenerate and scores drift toward the sinks without converging —
+    /// use <see cref="KatzCentrality{TVertex, TEdge}"/> there.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="maxIterations">The iteration cap, at least 1.</param>
+    /// <param name="tolerance">The L1 convergence threshold.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively between power iterations.</param>
+    /// <returns>Eigenvector centrality per vertex, L2-normalized (empty for the empty graph).</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxIterations"/> is below 1.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> EigenvectorCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        int maxIterations = 100,
+        double tolerance = 1e-9,
+        CancellationToken cancellationToken = default)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxIterations, 1);
+
+        var count = graph.VertexCount;
+        var scores = new Dictionary<TVertex, double>(count, graph.VertexComparer);
+        if (count == 0)
+        {
+            return scores;
+        }
+
+        foreach (var vertex in graph.Vertices)
+        {
+            scores[vertex] = 1.0 / count;
+        }
+
+        var next = new Dictionary<TVertex, double>(count, graph.VertexComparer);
+        for (var iteration = 0; iteration < maxIterations; iteration++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // The identity shift keeps every entry positive, so the norm
+            // below can never vanish.
+            foreach (var vertex in graph.Vertices)
+            {
+                next[vertex] = scores[vertex];
+            }
+
+            PushScores(graph, scores, next);
+
+            var norm = Math.Sqrt(next.Values.Sum(score => score * score));
+            var change = 0.0;
+            foreach (var vertex in graph.Vertices)
+            {
+                var normalized = next[vertex] / norm;
+                next[vertex] = normalized;
+                change += Math.Abs(normalized - scores[vertex]);
+            }
+
+            (scores, next) = (next, scores);
+            if (change < tolerance)
+            {
+                break;
+            }
+        }
+
+        return scores;
+    }
+
+    /// <summary>
+    /// Computes Katz centrality by fixed-point iteration: every vertex gets a
+    /// base score <paramref name="beta"/> plus <paramref name="alpha"/> times
+    /// its in-neighbors' scores (neighbors, when undirected), L2-normalized.
+    /// Unlike eigenvector centrality it stays meaningful on DAGs.
+    /// Convergence requires <paramref name="alpha"/> below the reciprocal of
+    /// the spectral radius; past the iteration cap the current values are
+    /// returned as-is.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure.</param>
+    /// <param name="alpha">The attenuation factor, above 0; 0.1 is the classic choice.</param>
+    /// <param name="beta">The base score every vertex starts from.</param>
+    /// <param name="maxIterations">The iteration cap, at least 1.</param>
+    /// <param name="tolerance">The L1 convergence threshold.</param>
+    /// <param name="cancellationToken">Cancels the computation cooperatively between iterations.</param>
+    /// <returns>Katz centrality per vertex, L2-normalized (empty for the empty graph).</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="alpha"/> is not positive or <paramref name="maxIterations"/> is below 1.</exception>
+    /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> KatzCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        double alpha = 0.1,
+        double beta = 1.0,
+        int maxIterations = 100,
+        double tolerance = 1e-9,
+        CancellationToken cancellationToken = default)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(alpha);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxIterations, 1);
+
+        var count = graph.VertexCount;
+        var scores = new Dictionary<TVertex, double>(count, graph.VertexComparer);
+        if (count == 0)
+        {
+            return scores;
+        }
+
+        foreach (var vertex in graph.Vertices)
+        {
+            scores[vertex] = 0.0;
+        }
+
+        var next = new Dictionary<TVertex, double>(count, graph.VertexComparer);
+        for (var iteration = 0; iteration < maxIterations; iteration++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (var vertex in graph.Vertices)
+            {
+                next[vertex] = 0.0;
+            }
+
+            PushScores(graph, scores, next);
+
+            var change = 0.0;
+            foreach (var vertex in graph.Vertices)
+            {
+                var score = beta + (alpha * next[vertex]);
+                next[vertex] = score;
+                change += Math.Abs(score - scores[vertex]);
+            }
+
+            (scores, next) = (next, scores);
+            if (change < tolerance)
+            {
+                break;
+            }
+        }
+
+        var norm = Math.Sqrt(scores.Values.Sum(score => score * score));
+        if (norm > 0.0)
+        {
+            foreach (var vertex in scores.Keys.ToList())
+            {
+                scores[vertex] /= norm;
+            }
+        }
+
+        return scores;
+    }
+
+    /// <summary>
+    /// One matrix-vector step, push form: every vertex sends its score along
+    /// its outgoing arcs (all incident arcs, when undirected), so the target
+    /// buffer receives each vertex's in-neighbor sum. Parallel edges push
+    /// once per instance.
+    /// </summary>
+    private static void PushScores<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        Dictionary<TVertex, double> scores,
+        Dictionary<TVertex, double> next)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        foreach (var vertex in graph.Vertices)
+        {
+            var score = scores[vertex];
+            foreach (var (neighbor, _) in GraphTraversalCore.OutgoingArcs(graph, vertex))
+            {
+                next[neighbor] += score;
+            }
+        }
     }
 
     /// <summary>

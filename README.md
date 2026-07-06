@@ -39,7 +39,8 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Operations | Induced subgraph, union, complement |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
-| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
+| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank, eigenvector, Katz |
+| Clustering | Local/average clustering coefficients, global transitivity |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
@@ -250,6 +251,14 @@ graph.DegreeCentrality();          // degree / (V-1)
 graph.ClosenessCentrality();       // Wasserman-Faust scaled; disconnected graphs fine
 graph.BetweennessCentrality();     // Brandes; weighted overload takes a selector
 network.PageRank(damping: 0.85);   // directed; ranks sum to 1, dangling nodes handled
+graph.EigenvectorCentrality();     // shifted power iteration, bipartite-safe
+graph.KatzCentrality(alpha: 0.1);  // stays meaningful on DAGs, where eigenvector degenerates
+
+// Clustering: how close each neighborhood is to a clique (direction ignored).
+graph.LocalClusteringCoefficient("a");
+graph.ClusteringCoefficients();        // all vertices at once
+graph.AverageClusteringCoefficient();
+graph.GlobalClusteringCoefficient();   // transitivity: 3·triangles / connected triples
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
