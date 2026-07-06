@@ -244,6 +244,15 @@ graph.BetweennessCentrality(cancellationToken);
 network.MaximumFlow(s, t, e => e.Capacity, cancellationToken);
 ```
 
+The per-source analyses — betweenness, closeness, and the distance metrics — are embarrassingly parallel, and overloads taking a `ParallelOptions` (degree of parallelism plus cancellation token) run them on all cores. The sequential paths stay untouched as the reference implementations:
+
+```csharp
+var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+graph.BetweennessCentrality(options);   // per-source Brandes passes in parallel
+graph.ClosenessCentrality(options);     // bit-identical to the sequential result
+graph.Diameter(options);                // also Radius, Center, Periphery, AveragePathLength
+```
+
 Centrality measures answer "which vertices matter":
 
 ```csharp

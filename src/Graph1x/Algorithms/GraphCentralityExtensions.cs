@@ -102,19 +102,91 @@ public static class GraphCentralityExtensions
         cancellationToken.ThrowIfCancellationRequested();
 
         var centrality = new Dictionary<TVertex, double>(graph.VertexComparer);
-        var vertexCount = graph.VertexCount;
         foreach (var vertex in graph.Vertices)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var distances = graph.ShortestPathsFrom(vertex, weightSelector).Distances;
-            var reachable = distances.Count; // includes the vertex itself at distance zero
-            var total = distances.Values.Sum(double.CreateChecked);
-            centrality[vertex] = reachable > 1 && total > 0
-                ? (reachable - 1.0) / (vertexCount - 1.0) * ((reachable - 1.0) / total)
-                : 0.0;
+            centrality[vertex] = ClosenessOf(graph, vertex, weightSelector);
         }
 
         return centrality;
+    }
+
+    /// <summary>
+    /// Gets hop-count closeness centrality with the per-vertex sweeps running
+    /// in parallel. The token inside <paramref name="parallelOptions"/>
+    /// cancels cooperatively between vertices.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure; only read, never mutated.</param>
+    /// <param name="parallelOptions">Degree of parallelism and cancellation.</param>
+    /// <returns>Closeness per vertex, identical to the sequential result.</returns>
+    /// <exception cref="OperationCanceledException">The token inside the options was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> ClosenessCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        ParallelOptions parallelOptions)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        => graph.ClosenessCentrality(_ => 1, parallelOptions);
+
+    /// <summary>
+    /// Gets weighted closeness centrality with the per-vertex sweeps running
+    /// in parallel. <paramref name="weightSelector"/> is invoked concurrently
+    /// and must be pure. Every vertex's score is computed independently, so
+    /// the result is identical to the sequential one.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to measure; only read, never mutated.</param>
+    /// <param name="weightSelector">Maps an edge to its weight; must be safe to call concurrently.</param>
+    /// <param name="parallelOptions">Degree of parallelism and cancellation.</param>
+    /// <returns>Closeness per vertex, identical to the sequential result.</returns>
+    /// <exception cref="OperationCanceledException">The token inside the options was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> ClosenessCentrality<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        ParallelOptions parallelOptions)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(weightSelector);
+        ArgumentNullException.ThrowIfNull(parallelOptions);
+        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+
+        var vertices = graph.Vertices.ToList();
+        var scores = new double[vertices.Count];
+        Parallel.For(
+            0,
+            vertices.Count,
+            parallelOptions,
+            index => scores[index] = ClosenessOf(graph, vertices[index], weightSelector));
+
+        var centrality = new Dictionary<TVertex, double>(vertices.Count, graph.VertexComparer);
+        for (var index = 0; index < vertices.Count; index++)
+        {
+            centrality[vertices[index]] = scores[index];
+        }
+
+        return centrality;
+    }
+
+    private static double ClosenessOf<TVertex, TEdge, TWeight>(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        TVertex vertex,
+        Func<TEdge, TWeight> weightSelector)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+    {
+        var distances = graph.ShortestPathsFrom(vertex, weightSelector).Distances;
+        var reachable = distances.Count; // includes the vertex itself at distance zero
+        var total = distances.Values.Sum(double.CreateChecked);
+        return reachable > 1 && total > 0
+            ? (reachable - 1.0) / (graph.VertexCount - 1.0) * ((reachable - 1.0) / total)
+            : 0.0;
     }
 
     /// <summary>Gets hop-count betweenness centrality (Brandes, breadth-first).</summary>
@@ -143,44 +215,31 @@ public static class GraphCentralityExtensions
     {
         ArgumentNullException.ThrowIfNull(graph);
         cancellationToken.ThrowIfCancellationRequested();
-        return BrandesAccumulate(graph, BreadthFirstStage, cancellationToken);
+        return BrandesAccumulate(graph, source => BreadthFirstStage(graph, source), cancellationToken);
+    }
 
-        (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
-            BreadthFirstStage(TVertex source)
-        {
-            var comparer = graph.VertexComparer;
-            var distance = new Dictionary<TVertex, int>(comparer) { [source] = 0 };
-            var sigma = new Dictionary<TVertex, double>(comparer) { [source] = 1.0 };
-            var predecessors = new Dictionary<TVertex, List<TVertex>>(comparer) { [source] = [] };
-            var order = new List<TVertex>();
-            var queue = new Queue<TVertex>();
-            queue.Enqueue(source);
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                order.Add(current);
-                foreach (var (neighbor, _) in GraphTraversalCore.OutgoingArcs(graph, current))
-                {
-                    if (!distance.TryGetValue(neighbor, out var known))
-                    {
-                        distance[neighbor] = distance[current] + 1;
-                        sigma[neighbor] = 0.0;
-                        predecessors[neighbor] = [];
-                        queue.Enqueue(neighbor);
-                        known = distance[neighbor];
-                    }
-
-                    if (known == distance[current] + 1)
-                    {
-                        sigma[neighbor] += sigma[current];
-                        predecessors[neighbor].Add(current);
-                    }
-                }
-            }
-
-            return (order, sigma, predecessors);
-        }
+    /// <summary>
+    /// Gets hop-count betweenness centrality with the per-source Brandes
+    /// passes running in parallel. The token inside
+    /// <paramref name="parallelOptions"/> cancels cooperatively between
+    /// sources.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The graph to measure; only read, never mutated.</param>
+    /// <param name="parallelOptions">Degree of parallelism and cancellation.</param>
+    /// <returns>Raw betweenness per vertex (undirected pair contributions counted once).</returns>
+    /// <exception cref="OperationCanceledException">The token inside the options was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        ParallelOptions parallelOptions)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(parallelOptions);
+        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+        return BrandesAccumulateParallel(graph, source => BreadthFirstStage(graph, source), parallelOptions);
     }
 
     /// <summary>Gets weighted betweenness centrality (Brandes over Dijkstra).</summary>
@@ -220,60 +279,136 @@ public static class GraphCentralityExtensions
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(weightSelector);
         cancellationToken.ThrowIfCancellationRequested();
-        return BrandesAccumulate(graph, DijkstraStage, cancellationToken);
+        return BrandesAccumulate(graph, source => DijkstraStage(graph, weightSelector, source), cancellationToken);
+    }
 
-        (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
-            DijkstraStage(TVertex source)
+    /// <summary>
+    /// Gets weighted betweenness centrality with the per-source Brandes
+    /// passes running in parallel. <paramref name="weightSelector"/> is
+    /// invoked concurrently and must be pure. The token inside
+    /// <paramref name="parallelOptions"/> cancels cooperatively between
+    /// sources.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <typeparam name="TWeight">The numeric weight type.</typeparam>
+    /// <param name="graph">The graph to measure; only read, never mutated.</param>
+    /// <param name="weightSelector">Maps an edge to its weight; must be safe to call concurrently.</param>
+    /// <param name="parallelOptions">Degree of parallelism and cancellation.</param>
+    /// <returns>Raw betweenness per vertex (undirected pair contributions counted once).</returns>
+    /// <exception cref="AggregateException">A per-source pass failed, e.g. with <see cref="NegativeWeightException"/>.</exception>
+    /// <exception cref="OperationCanceledException">The token inside the options was cancelled.</exception>
+    public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge, TWeight>(
+        this IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> weightSelector,
+        ParallelOptions parallelOptions)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(weightSelector);
+        ArgumentNullException.ThrowIfNull(parallelOptions);
+        parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+        return BrandesAccumulateParallel(graph, source => DijkstraStage(graph, weightSelector, source), parallelOptions);
+    }
+
+    private static (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
+        BreadthFirstStage<TVertex, TEdge>(IReadOnlyGraph<TVertex, TEdge> graph, TVertex source)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        var comparer = graph.VertexComparer;
+        var distance = new Dictionary<TVertex, int>(comparer) { [source] = 0 };
+        var sigma = new Dictionary<TVertex, double>(comparer) { [source] = 1.0 };
+        var predecessors = new Dictionary<TVertex, List<TVertex>>(comparer) { [source] = [] };
+        var order = new List<TVertex>();
+        var queue = new Queue<TVertex>();
+        queue.Enqueue(source);
+
+        while (queue.Count > 0)
         {
-            var comparer = graph.VertexComparer;
-            var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
-            var sigma = new Dictionary<TVertex, double>(comparer) { [source] = 1.0 };
-            var predecessors = new Dictionary<TVertex, List<TVertex>>(comparer) { [source] = [] };
-            var order = new List<TVertex>();
-            var settled = new HashSet<TVertex>(comparer);
-            var frontier = new PriorityQueue<TVertex, TWeight>();
-            frontier.Enqueue(source, TWeight.Zero);
-
-            while (frontier.TryDequeue(out var current, out _))
+            var current = queue.Dequeue();
+            order.Add(current);
+            foreach (var (neighbor, _) in GraphTraversalCore.OutgoingArcs(graph, current))
             {
-                if (!settled.Add(current))
+                if (!distance.TryGetValue(neighbor, out var known))
+                {
+                    distance[neighbor] = distance[current] + 1;
+                    sigma[neighbor] = 0.0;
+                    predecessors[neighbor] = [];
+                    queue.Enqueue(neighbor);
+                    known = distance[neighbor];
+                }
+
+                if (known == distance[current] + 1)
+                {
+                    sigma[neighbor] += sigma[current];
+                    predecessors[neighbor].Add(current);
+                }
+            }
+        }
+
+        return (order, sigma, predecessors);
+    }
+
+    private static (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)
+        DijkstraStage<TVertex, TEdge, TWeight>(
+            IReadOnlyGraph<TVertex, TEdge> graph,
+            Func<TEdge, TWeight> weightSelector,
+            TVertex source)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        where TWeight : INumber<TWeight>
+    {
+        var comparer = graph.VertexComparer;
+        var distance = new Dictionary<TVertex, TWeight>(comparer) { [source] = TWeight.Zero };
+        var sigma = new Dictionary<TVertex, double>(comparer) { [source] = 1.0 };
+        var predecessors = new Dictionary<TVertex, List<TVertex>>(comparer) { [source] = [] };
+        var order = new List<TVertex>();
+        var settled = new HashSet<TVertex>(comparer);
+        var frontier = new PriorityQueue<TVertex, TWeight>();
+        frontier.Enqueue(source, TWeight.Zero);
+
+        while (frontier.TryDequeue(out var current, out _))
+        {
+            if (!settled.Add(current))
+            {
+                continue;
+            }
+
+            order.Add(current);
+            foreach (var (neighbor, edge) in GraphTraversalCore.OutgoingArcs(graph, current))
+            {
+                var weight = weightSelector(edge);
+                if (weight < TWeight.Zero)
+                {
+                    throw new NegativeWeightException(
+                        $"Edge '{edge}' has negative weight {weight}; betweenness centrality requires non-negative weights.");
+                }
+
+                if (settled.Contains(neighbor))
                 {
                     continue;
                 }
 
-                order.Add(current);
-                foreach (var (neighbor, edge) in GraphTraversalCore.OutgoingArcs(graph, current))
+                var candidate = distance[current] + weight;
+                if (!distance.TryGetValue(neighbor, out var known) || candidate < known)
                 {
-                    var weight = weightSelector(edge);
-                    if (weight < TWeight.Zero)
-                    {
-                        throw new NegativeWeightException(
-                            $"Edge '{edge}' has negative weight {weight}; betweenness centrality requires non-negative weights.");
-                    }
-
-                    if (settled.Contains(neighbor))
-                    {
-                        continue;
-                    }
-
-                    var candidate = distance[current] + weight;
-                    if (!distance.TryGetValue(neighbor, out var known) || candidate < known)
-                    {
-                        distance[neighbor] = candidate;
-                        sigma[neighbor] = sigma[current];
-                        predecessors[neighbor] = [current];
-                        frontier.Enqueue(neighbor, candidate);
-                    }
-                    else if (candidate == known)
-                    {
-                        sigma[neighbor] += sigma[current];
-                        predecessors[neighbor].Add(current);
-                    }
+                    distance[neighbor] = candidate;
+                    sigma[neighbor] = sigma[current];
+                    predecessors[neighbor] = [current];
+                    frontier.Enqueue(neighbor, candidate);
+                }
+                else if (candidate == known)
+                {
+                    sigma[neighbor] += sigma[current];
+                    predecessors[neighbor].Add(current);
                 }
             }
-
-            return (order, sigma, predecessors);
         }
+
+        return (order, sigma, predecessors);
     }
 
     /// <summary>
@@ -569,36 +704,109 @@ public static class GraphCentralityExtensions
         foreach (var source in graph.Vertices)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var (order, sigma, predecessors) = stage(source);
-            var dependency = new Dictionary<TVertex, double>(comparer);
-            foreach (var vertex in order)
-            {
-                dependency[vertex] = 0.0;
-            }
-
-            for (var i = order.Count - 1; i >= 0; i--)
-            {
-                var vertex = order[i];
-                foreach (var predecessor in predecessors[vertex])
-                {
-                    dependency[predecessor] += sigma[predecessor] / sigma[vertex] * (1.0 + dependency[vertex]);
-                }
-
-                if (!comparer.Equals(vertex, source))
-                {
-                    centrality[vertex] += dependency[vertex];
-                }
-            }
+            AccumulateDependencies(source, stage(source), comparer, centrality);
         }
 
         if (!graph.IsDirected)
         {
-            foreach (var vertex in centrality.Keys.ToList())
-            {
-                centrality[vertex] /= 2.0;
-            }
+            HalveAll(centrality);
         }
 
         return centrality;
+    }
+
+    /// <summary>
+    /// The parallel counterpart of <see cref="BrandesAccumulate{TVertex, TEdge}"/>:
+    /// per-source passes run concurrently, each thread accumulating into its
+    /// own partial-score dictionary, merged under a lock at the end. Merge
+    /// order is nondeterministic, so results can differ from the sequential
+    /// reference by floating-point rounding only.
+    /// </summary>
+    private static Dictionary<TVertex, double> BrandesAccumulateParallel<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TVertex, (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors)> stage,
+        ParallelOptions parallelOptions)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        var comparer = graph.VertexComparer;
+        var centrality = new Dictionary<TVertex, double>(comparer);
+        foreach (var vertex in graph.Vertices)
+        {
+            centrality[vertex] = 0.0;
+        }
+
+        var gate = new object();
+        Parallel.ForEach(
+            graph.Vertices.ToList(),
+            parallelOptions,
+            () => new Dictionary<TVertex, double>(comparer),
+            (source, _, partial) =>
+            {
+                AccumulateDependencies(source, stage(source), comparer, partial);
+                return partial;
+            },
+            partial =>
+            {
+                lock (gate)
+                {
+                    foreach (var (vertex, score) in partial)
+                    {
+                        centrality[vertex] += score;
+                    }
+                }
+            });
+
+        if (!graph.IsDirected)
+        {
+            HalveAll(centrality);
+        }
+
+        return centrality;
+    }
+
+    /// <summary>
+    /// One source's Brandes dependency-accumulation phase: walk vertices in
+    /// reverse settlement order, pushing each vertex's dependency onto its
+    /// shortest-path predecessors, adding the result into
+    /// <paramref name="centrality"/>.
+    /// </summary>
+    private static void AccumulateDependencies<TVertex>(
+        TVertex source,
+        (List<TVertex> Order, Dictionary<TVertex, double> Sigma, Dictionary<TVertex, List<TVertex>> Predecessors) stage,
+        IEqualityComparer<TVertex> comparer,
+        Dictionary<TVertex, double> centrality)
+        where TVertex : notnull
+    {
+        var (order, sigma, predecessors) = stage;
+        var dependency = new Dictionary<TVertex, double>(comparer);
+        foreach (var vertex in order)
+        {
+            dependency[vertex] = 0.0;
+        }
+
+        for (var i = order.Count - 1; i >= 0; i--)
+        {
+            var vertex = order[i];
+            foreach (var predecessor in predecessors[vertex])
+            {
+                dependency[predecessor] += sigma[predecessor] / sigma[vertex] * (1.0 + dependency[vertex]);
+            }
+
+            if (!comparer.Equals(vertex, source))
+            {
+                centrality[vertex] = centrality.GetValueOrDefault(vertex) + dependency[vertex];
+            }
+        }
+    }
+
+    /// <summary>Halves every score: undirected accumulation visits each unordered pair from both endpoints.</summary>
+    private static void HalveAll<TVertex>(Dictionary<TVertex, double> centrality)
+        where TVertex : notnull
+    {
+        foreach (var vertex in centrality.Keys.ToList())
+        {
+            centrality[vertex] /= 2.0;
+        }
     }
 }

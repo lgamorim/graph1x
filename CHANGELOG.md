@@ -8,6 +8,16 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Parallel analysis overloads taking `System.Threading.Tasks.ParallelOptions`
+  (degree of parallelism + cancellation, composing with the 0.5.0 token
+  design) on the per-source algorithms: `BetweennessCentrality` (hop-count
+  and weighted), `ClosenessCentrality`, `Diameter`, `Radius`, `Center`,
+  `Periphery`, and `AveragePathLength`. Sequential paths are unchanged and
+  remain the reference implementations; per-vertex results (closeness,
+  eccentricity-based metrics) are bit-identical to sequential, accumulated
+  ones (betweenness) differ only by floating-point merge order. Benchmarks
+  compare both paths.
+
 - Attribute round-trips for GraphML and node-link JSON: one
   `GraphAttribute<T>` declaration (typed factories: String/Bool/Int/Long/
   Float/Double) drives both exporters via `VertexAttributes`/
