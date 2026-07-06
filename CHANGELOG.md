@@ -6,6 +6,15 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-06
+
+### Changed
+
+- The assembly is strong-name signed from this release (the key ships in
+  the repository — strong naming is identity, not security). .NET 8+
+  ignores strong names for loading, but strongly-named consumers can now
+  reference the package.
+
 ### Added
 
 - Parallel analysis overloads taking `System.Threading.Tasks.ParallelOptions`

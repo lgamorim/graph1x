@@ -10,8 +10,17 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <!-- Strong naming is identity, not security: the key ships in the
+             repository so anyone can build a compatible assembly. Signed from
+             1.0.0-track releases so strongly-named consumers can reference
+             the package; .NET 8+ itself ignores strong names for binding. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\Graph1x.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <PackageId>Graph1x</PackageId>
-        <Version>0.5.0</Version>
+        <Version>0.6.0</Version>
         <!-- NuGet.org ownership is account-based: the lgamorim account becomes
              the package owner by publishing it (the nuspec owners element is
              deprecated and not supported by SDK pack). -->
@@ -38,7 +47,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Graph1x.UnitTests" />
+        <InternalsVisibleTo Include="Graph1x.UnitTests" Key="0024000004800000140100000602000000240000525341310008000001000100fd15ed652c71f19319f15d1243dc38b9b6dcbb0a5ad8ec9226235020e725bef3b847f9b637b37e304dea413073726db69fca56f702f1235bd87ef9578e48b4c31ffd3fb0a7b0a4f91772f926eea4f56c05c439931c938e3aa0c900eadff8361715bd412ed336072d05fc5c97b3a01af5b2128d7f34f1e4b2175207452b7c62f3eac2e367208846721f47d0a20271dafa5a121546a444b99fad6539bcf956d7194d72ea30a35fd0cd1e510daf85cce49e3350a8d8614c8bd61aa1a52139dc098c0d0d0e0299e7ac7ff6e486d3934e105a9b2ed5d9accb1dc23e999af97c6c8220b8c6076a5be5b4b81ee746e02bc7489f6ccf58f94c501aaea762eebab63a38cd" />
     </ItemGroup>
 
     <ItemGroup>

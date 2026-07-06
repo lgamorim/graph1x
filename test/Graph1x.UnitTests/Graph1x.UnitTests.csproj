@@ -12,6 +12,10 @@
              token-accepting call. These are sub-second unit tests, and the
              cancellation suite passes specific tokens by design. -->
         <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+        <!-- Signed with the library's key so the InternalsVisibleTo friend
+             reference stays valid now that Graph1x is strong-named. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\Graph1x.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <ItemGroup>
