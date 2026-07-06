@@ -85,6 +85,7 @@ public static class GraphGenerator
     public static UndirectedGraph<int, Edge<int>> CompleteBipartite(int leftCount, int rightCount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(leftCount);
+        ArgumentOutOfRangeException.ThrowIfNegative(rightCount);
         var graph = WithVertices<UndirectedGraph<int, Edge<int>>>(new(), checked(leftCount + rightCount));
         for (var i = 0; i < leftCount; i++)
         {

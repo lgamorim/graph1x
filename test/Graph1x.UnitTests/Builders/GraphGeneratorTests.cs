@@ -151,6 +151,7 @@ public class GraphGeneratorTests
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.ErdosRenyi(5, -0.1, seed: 1));
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.ErdosRenyi(5, 1.1, seed: 1));
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.CompleteBipartite(-1, 2));
+        Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.CompleteBipartite(2, -1));
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.Star(-1));
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.Grid(-1, 2));
     }
