@@ -20,7 +20,7 @@
 
     <PropertyGroup>
         <PackageId>Graph1x</PackageId>
-        <Version>0.6.0</Version>
+        <Version>0.7.0</Version>
         <!-- NuGet.org ownership is account-based: the lgamorim account becomes
              the package owner by publishing it (the nuspec owners element is
              deprecated and not supported by SDK pack). -->

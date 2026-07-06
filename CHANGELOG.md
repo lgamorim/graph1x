@@ -6,6 +6,22 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-06
+
+### Added
+
+- Maximal clique enumeration: `EnumerateMaximalCliques` (Bron–Kerbosch with
+  Tomita pivoting), a lazy iterative generator so the caller controls the
+  cost of the exponential worst case by how far it enumerates. Direction is
+  ignored, self-loops never count, and multigraph neighbors count once —
+  the clustering-coefficient conventions. Deterministic order.
+
+- Mermaid flowchart export: `ToMermaid` with `MermaidExportOptions`
+  (vertex/edge label selectors and flow `Direction`). Nodes get synthetic
+  insertion-order identifiers (`v0`, `v1`, …) with the display label attached
+  at declaration, so arbitrary vertex strings are safe; labels use Mermaid
+  entity escaping. Output is deterministic, like the DOT exporter.
+
 ## [0.6.0] - 2026-07-06
 
 ### Fixed
