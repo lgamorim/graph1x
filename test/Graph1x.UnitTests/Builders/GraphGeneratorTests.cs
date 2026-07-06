@@ -154,4 +154,142 @@ public class GraphGeneratorTests
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.Star(-1));
         Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.Grid(-1, 2));
     }
+
+    [Fact]
+    public void BarabasiAlbert_HasTheClosedFormEdgeCount()
+    {
+        // m initial edgeless vertices, then every new vertex brings m edges.
+        var graph = GraphGenerator.BarabasiAlbert(50, edgesPerNewVertex: 3, seed: 42);
+
+        Assert.Equal(50, graph.VertexCount);
+        Assert.Equal(3 * (50 - 3), graph.EdgeCount);
+    }
+
+    [Fact]
+    public void BarabasiAlbert_IsConnected()
+    {
+        var graph = GraphGenerator.BarabasiAlbert(40, edgesPerNewVertex: 2, seed: 7);
+
+        Assert.True(graph.IsConnected());
+    }
+
+    [Fact]
+    public void BarabasiAlbert_HasNoSelfLoopsOrParallelEdges()
+    {
+        var graph = GraphGenerator.BarabasiAlbert(60, edgesPerNewVertex: 4, seed: 11);
+
+        Assert.All(graph.Edges, edge => Assert.NotEqual(edge.Source, edge.Target));
+        Assert.False(graph.AllowsParallelEdges); // simple graph enforces the rest
+    }
+
+    [Fact]
+    public void BarabasiAlbert_SameSeed_IsDeterministic()
+    {
+        var first = GraphGenerator.BarabasiAlbert(30, edgesPerNewVertex: 2, seed: 42);
+        var second = GraphGenerator.BarabasiAlbert(30, edgesPerNewVertex: 2, seed: 42);
+
+        Assert.Equal(first.Edges.ToHashSet(), second.Edges.ToHashSet());
+    }
+
+    [Fact]
+    public void BarabasiAlbert_DifferentSeeds_Differ()
+    {
+        var first = GraphGenerator.BarabasiAlbert(30, edgesPerNewVertex: 2, seed: 42);
+        var second = GraphGenerator.BarabasiAlbert(30, edgesPerNewVertex: 2, seed: 43);
+
+        Assert.NotEqual(first.Edges.ToHashSet(), second.Edges.ToHashSet());
+    }
+
+    [Fact]
+    public void BarabasiAlbert_MinimalSize_IsASingleAttachment()
+    {
+        // n = m + 1: the one new vertex attaches to all m initial vertices.
+        var graph = GraphGenerator.BarabasiAlbert(4, edgesPerNewVertex: 3, seed: 1);
+
+        Assert.Equal(3, graph.EdgeCount);
+        Assert.Equal(3, graph.Degree(3));
+    }
+
+    [Fact]
+    public void BarabasiAlbert_InvalidArguments_Throw()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.BarabasiAlbert(10, 0, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.BarabasiAlbert(10, -1, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.BarabasiAlbert(10, 10, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => GraphGenerator.BarabasiAlbert(10, 11, seed: 1));
+    }
+
+    [Fact]
+    public void WattsStrogatz_WithoutRewiring_IsTheExactRingLattice()
+    {
+        var graph = GraphGenerator.WattsStrogatz(10, nearestNeighbors: 4, rewiringProbability: 0.0, seed: 1);
+
+        Assert.Equal(10, graph.VertexCount);
+        Assert.Equal(10 * 4 / 2, graph.EdgeCount);
+        Assert.All(graph.Vertices, vertex => Assert.Equal(4, graph.Degree(vertex)));
+        Assert.True(graph.ContainsEdge(0, 1));
+        Assert.True(graph.ContainsEdge(0, 2));
+        Assert.True(graph.ContainsEdge(0, 9));
+        Assert.True(graph.ContainsEdge(0, 8));
+        Assert.False(graph.ContainsEdge(0, 3));
+    }
+
+    [Fact]
+    public void WattsStrogatz_FullRewiring_KeepsTheEdgeCount()
+    {
+        var graph = GraphGenerator.WattsStrogatz(20, nearestNeighbors: 4, rewiringProbability: 1.0, seed: 42);
+
+        Assert.Equal(20 * 4 / 2, graph.EdgeCount);
+    }
+
+    [Fact]
+    public void WattsStrogatz_RewiringNeverCreatesSelfLoopsOrParallelEdges()
+    {
+        var graph = GraphGenerator.WattsStrogatz(25, nearestNeighbors: 6, rewiringProbability: 0.7, seed: 3);
+
+        Assert.All(graph.Edges, edge => Assert.NotEqual(edge.Source, edge.Target));
+        Assert.Equal(25 * 6 / 2, graph.EdgeCount); // duplicates would have collapsed
+    }
+
+    [Fact]
+    public void WattsStrogatz_SameSeed_IsDeterministic()
+    {
+        var first = GraphGenerator.WattsStrogatz(30, 4, 0.5, seed: 42);
+        var second = GraphGenerator.WattsStrogatz(30, 4, 0.5, seed: 42);
+
+        Assert.Equal(first.Edges.ToHashSet(), second.Edges.ToHashSet());
+    }
+
+    [Fact]
+    public void WattsStrogatz_DifferentSeeds_Differ()
+    {
+        var first = GraphGenerator.WattsStrogatz(30, 4, 0.5, seed: 42);
+        var second = GraphGenerator.WattsStrogatz(30, 4, 0.5, seed: 43);
+
+        Assert.NotEqual(first.Edges.ToHashSet(), second.Edges.ToHashSet());
+    }
+
+    [Fact]
+    public void WattsStrogatz_ZeroNeighbors_IsEdgeless()
+    {
+        var graph = GraphGenerator.WattsStrogatz(5, nearestNeighbors: 0, rewiringProbability: 0.5, seed: 1);
+
+        Assert.Equal(5, graph.VertexCount);
+        Assert.Equal(0, graph.EdgeCount);
+    }
+
+    [Fact]
+    public void WattsStrogatz_InvalidArguments_Throw()
+    {
+        Assert.Throws<ArgumentException>(
+            () => GraphGenerator.WattsStrogatz(10, nearestNeighbors: 3, rewiringProbability: 0.5, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => GraphGenerator.WattsStrogatz(10, nearestNeighbors: 10, rewiringProbability: 0.5, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => GraphGenerator.WattsStrogatz(10, nearestNeighbors: -2, rewiringProbability: 0.5, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => GraphGenerator.WattsStrogatz(10, nearestNeighbors: 4, rewiringProbability: -0.1, seed: 1));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => GraphGenerator.WattsStrogatz(10, nearestNeighbors: 4, rewiringProbability: 1.1, seed: 1));
+    }
 }

@@ -8,6 +8,11 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Random-graph generators with realistic structure: `BarabasiAlbert`
+  (preferential attachment; connected, simple, exactly m·(n−m) edges) and
+  `WattsStrogatz` (ring lattice with in-place rewiring, so the edge count
+  is always n·k/2). Seeded and deterministic like the existing generators.
+
 - Clustering coefficients: `LocalClusteringCoefficient`,
   `ClusteringCoefficients`, `AverageClusteringCoefficient`, and
   `GlobalClusteringCoefficient` (transitivity). Direction is ignored,

@@ -44,7 +44,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
-| Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
+| Generators | Seeded Erdős–Rényi, Barabási–Albert, Watts–Strogatz, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
 
@@ -280,7 +280,7 @@ teams.ToCliqueExpansion();          // co-membership graph (2-section)
 teams.ToBipartiteIncidenceGraph();  // lossless vertex/hyperedge bipartite graph
 ```
 
-Ready-made structures for tests, demos, and benchmarks come from `GraphGenerator` (`ErdosRenyi(n, p, seed)`, `Complete(n)`, `Grid(w, h)`, …) — seeded, so results are reproducible.
+Ready-made structures for tests, demos, and benchmarks come from `GraphGenerator` (`ErdosRenyi(n, p, seed)`, `Complete(n)`, `Grid(w, h)`, …) — seeded, so results are reproducible. For realistic degree distributions there are `BarabasiAlbert(n, m, seed)` (preferential attachment, scale-free) and `WattsStrogatz(n, k, p, seed)` (ring lattice with rewiring, small-world).
 
 Hand out graphs without handing out mutation — live views and immutable snapshots both stay fully algorithm-compatible (directed views keep directed dispatch):
 
