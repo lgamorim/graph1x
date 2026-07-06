@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
 [![Docs](https://github.com/lgamorim/graph1x/actions/workflows/docs.yml/badge.svg)](https://lgamorim.github.io/graph1x/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 **[API documentation →](https://lgamorim.github.io/graph1x/)**
 
@@ -389,3 +390,7 @@ Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack,
 - `src/Graph1x` — the library
 - `test/Graph1x.UnitTests` — xUnit v3 test suite
 - `bench/Graph1x.Benchmarks` — BenchmarkDotNet suite (`dotnet run -c Release --project bench/Graph1x.Benchmarks`; seeded `GraphGenerator` fixtures, `--job Dry` for a smoke run)
+
+## License
+
+Copyright 2026 Luís Amorim. Licensed under the [Apache License 2.0](LICENSE).
