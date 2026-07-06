@@ -25,4 +25,16 @@ public sealed record GraphMlExportOptions<TVertex, TEdge>
     /// <c>weight</c> key is declared and every edge carries a data element.
     /// </summary>
     public Func<TEdge, double>? EdgeWeight { get; init; }
+
+    /// <summary>
+    /// Gets the vertex attributes to export: each declares a typed
+    /// <c>&lt;key for="node"&gt;</c> element and a data element per vertex.
+    /// </summary>
+    public IReadOnlyList<GraphAttribute<TVertex>> VertexAttributes { get; init; } = [];
+
+    /// <summary>
+    /// Gets the edge attributes to export: each declares a typed
+    /// <c>&lt;key for="edge"&gt;</c> element and a data element per edge.
+    /// </summary>
+    public IReadOnlyList<GraphAttribute<TEdge>> EdgeAttributes { get; init; } = [];
 }

@@ -6,6 +6,74 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-06
+
+### Fixed
+
+- `GraphGenerator.CompleteBipartite` now rejects a negative right-side count
+  with `ArgumentOutOfRangeException` as documented, instead of silently
+  producing a smaller edgeless graph when the two counts summed to a
+  non-negative total.
+- `GraphDocument.EdgeData` documentation no longer claims document order
+  always matches the graph's edge enumeration order: multigraphs enumerate
+  edges grouped by source vertex, so foreign documents with interleaved
+  edge sources must be correlated by document position. The exporter
+  documentation now states the actual (still deterministic) edge order.
+
+### Changed
+
+- The assembly is strong-name signed from this release (the key ships in
+  the repository — strong naming is identity, not security). .NET 8+
+  ignores strong names for loading, but strongly-named consumers can now
+  reference the package.
+
+### Added
+
+- Parallel analysis overloads taking `System.Threading.Tasks.ParallelOptions`
+  (degree of parallelism + cancellation, composing with the 0.5.0 token
+  design) on the per-source algorithms: `BetweennessCentrality` (hop-count
+  and weighted), `ClosenessCentrality`, `Diameter`, `Radius`, `Center`,
+  `Periphery`, and `AveragePathLength`. Sequential paths are unchanged and
+  remain the reference implementations; per-vertex results (closeness,
+  eccentricity-based metrics) are bit-identical to sequential, accumulated
+  ones (betweenness) differ only by floating-point merge order. Benchmarks
+  compare both paths.
+
+- Attribute round-trips for GraphML and node-link JSON: one
+  `GraphAttribute<T>` declaration (typed factories: String/Bool/Int/Long/
+  Float/Double) drives both exporters via `VertexAttributes`/
+  `EdgeAttributes` on the existing option records; `GraphMl.ParseDocument`
+  and `GraphJson.ParseDocument` return a `GraphDocument` carrying the graph
+  plus typed per-vertex and per-edge attribute data. Existing `Parse*`
+  entry points are unchanged; the JSON path stays reflection-free.
+
+- Random-graph generators with realistic structure: `BarabasiAlbert`
+  (preferential attachment; connected, simple, exactly m·(n−m) edges) and
+  `WattsStrogatz` (ring lattice with in-place rewiring, so the edge count
+  is always n·k/2). Seeded and deterministic like the existing generators.
+
+- Clustering coefficients: `LocalClusteringCoefficient`,
+  `ClusteringCoefficients`, `AverageClusteringCoefficient`, and
+  `GlobalClusteringCoefficient` (transitivity). Direction is ignored,
+  self-loops never count, and multigraph neighbors count once.
+- Spectral centrality: `EigenvectorCentrality` (shifted power iteration,
+  so bipartite graphs cannot oscillate) and `KatzCentrality`
+  (attenuation `alpha` + base `beta`; the DAG-safe alternative), both
+  L2-normalized with PageRank-style optional parameters and cancellation.
+
+- DAG path algorithms via single-pass topological relaxation:
+  `DagShortestPathsFrom`, `DagLongestPathsFrom` (both reuse
+  `SingleSourceShortestPaths`), and `CriticalPath` (the maximum-weight path
+  anywhere in the DAG). Negative weights are supported; cyclic input throws
+  `GraphCycleException`.
+
+- Graph set operations in `Graph1x.Algorithms`: `Subgraph` (induced by a
+  vertex selection; unknown vertices ignored), `Union` (operands must agree
+  on direction; result family and comparer come from the first), and
+  `Complement` (simple graphs only; never emits self-loops). Results are new
+  graphs matching the source's direction/parallel-edge policy, with
+  directed-typed overloads preserving `IDirectedGraph` dispatch.
+
 ## [0.5.0] - 2026-07-05
 
 ### Changed

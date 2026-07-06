@@ -52,6 +52,11 @@ public static class GraphJsonExtensions
             {
                 writer.WriteStartObject();
                 writer.WriteString("id", vertexId(vertex));
+                foreach (var attribute in options.VertexAttributes)
+                {
+                    attribute.GetValue(vertex).WriteTo(writer, attribute.Name);
+                }
+
                 writer.WriteEndObject();
             }
 
@@ -66,6 +71,11 @@ public static class GraphJsonExtensions
                 if (options.EdgeWeight is not null)
                 {
                     writer.WriteNumber("weight", options.EdgeWeight(edge));
+                }
+
+                foreach (var attribute in options.EdgeAttributes)
+                {
+                    attribute.GetValue(edge).WriteTo(writer, attribute.Name);
                 }
 
                 writer.WriteEndObject();

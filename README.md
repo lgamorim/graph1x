@@ -21,7 +21,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Built milestone by milestone with TDD (tests written before the implementation); 600+ unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, and its public API surface is analyzer-locked against accidental breaking changes.
+Built milestone by milestone with TDD (tests written before the implementation); nearly 800 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible, strong-name signed, and its public API surface is analyzer-locked against accidental breaking changes.
 
 | Area | Contents |
 |---|---|
@@ -31,17 +31,20 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
+| DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
+| Operations | Induced subgraph, union, complement |
 | Coloring | DSatur heuristic (`ColorVertices`), exact on bipartite graphs |
 | Distance metrics | Eccentricity, diameter, radius, center/periphery, average path length |
-| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank |
+| Centrality | Degree, closeness (Wasserman-Faust), Brandes betweenness, PageRank, eigenvector, Katz |
+| Clustering | Local/average clustering coefficients, global transitivity |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
-| Generators | Seeded Erdős–Rényi, complete, bipartite, path, cycle, star, grid |
+| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips with typed vertex/edge attributes |
+| Generators | Seeded Erdős–Rényi, Barabási–Albert, Watts–Strogatz, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
 
@@ -156,6 +159,16 @@ new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhatt
 
 Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
 
+On DAGs, a single topological pass beats both and takes negative weights in stride — plus the longest-path queries that are intractable on general graphs:
+
+```csharp
+dag.DagShortestPathsFrom("compile");    // SingleSourceShortestPaths, negative weights OK
+dag.DagLongestPathsFrom("compile");     // same shape, maximizing
+dag.CriticalPath();                     // heaviest path anywhere (scheduling/CPM)
+```
+
+These throw `GraphCycleException` on cyclic input, like `TopologicalSort`.
+
 Minimum spanning trees (undirected graphs; disconnected input yields a spanning forest):
 
 ```csharp
@@ -211,6 +224,11 @@ dag.TransitiveReduction();        // minimal edge set with the same reachability
 var coloring = graph.ColorVertices();  // DSatur; ColorCount bounds the chromatic number
 coloring.ColorOf("a");                 // 0-based color, adjacent vertices always differ
 
+// Set operations return a new graph of the same family (inputs untouched):
+graph.Subgraph(["a", "b", "c"]);  // induced: kept vertices + edges between them
+first.Union(second);              // all vertices and edges of both (direction must agree)
+graph.Complement();               // edge exactly where the original has none (simple graphs)
+
 graph.Diameter();                 // longest shortest path (hops, or pass a weight selector)
 graph.Radius();                   // smallest eccentricity
 graph.Center();                   // vertices at eccentricity == radius
@@ -226,6 +244,15 @@ graph.BetweennessCentrality(cancellationToken);
 network.MaximumFlow(s, t, e => e.Capacity, cancellationToken);
 ```
 
+The per-source analyses — betweenness, closeness, and the distance metrics — are embarrassingly parallel, and overloads taking a `ParallelOptions` (degree of parallelism plus cancellation token) run them on all cores. The sequential paths stay untouched as the reference implementations:
+
+```csharp
+var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+graph.BetweennessCentrality(options);   // per-source Brandes passes in parallel
+graph.ClosenessCentrality(options);     // bit-identical to the sequential result
+graph.Diameter(options);                // also Radius, Center, Periphery, AveragePathLength
+```
+
 Centrality measures answer "which vertices matter":
 
 ```csharp
@@ -233,6 +260,14 @@ graph.DegreeCentrality();          // degree / (V-1)
 graph.ClosenessCentrality();       // Wasserman-Faust scaled; disconnected graphs fine
 graph.BetweennessCentrality();     // Brandes; weighted overload takes a selector
 network.PageRank(damping: 0.85);   // directed; ranks sum to 1, dangling nodes handled
+graph.EigenvectorCentrality();     // shifted power iteration, bipartite-safe
+graph.KatzCentrality(alpha: 0.1);  // stays meaningful on DAGs, where eigenvector degenerates
+
+// Clustering: how close each neighborhood is to a clique (direction ignored).
+graph.LocalClusteringCoefficient("a");
+graph.ClusteringCoefficients();        // all vertices at once
+graph.AverageClusteringCoefficient();
+graph.GlobalClusteringCoefficient();   // transitivity: 3·triangles / connected triples
 ```
 
 For dense graphs, `DirectedAdjacencyMatrixGraph` and `UndirectedAdjacencyMatrixGraph` offer O(1) edge lookup behind the exact same `IMutableGraph` contract (they pass the same contract test suite as the adjacency-list types).
@@ -254,7 +289,7 @@ teams.ToCliqueExpansion();          // co-membership graph (2-section)
 teams.ToBipartiteIncidenceGraph();  // lossless vertex/hyperedge bipartite graph
 ```
 
-Ready-made structures for tests, demos, and benchmarks come from `GraphGenerator` (`ErdosRenyi(n, p, seed)`, `Complete(n)`, `Grid(w, h)`, …) — seeded, so results are reproducible.
+Ready-made structures for tests, demos, and benchmarks come from `GraphGenerator` (`ErdosRenyi(n, p, seed)`, `Complete(n)`, `Grid(w, h)`, …) — seeded, so results are reproducible. For realistic degree distributions there are `BarabasiAlbert(n, m, seed)` (preferential attachment, scale-free) and `WattsStrogatz(n, k, p, seed)` (ring lattice with rewiring, small-world).
 
 Hand out graphs without handing out mutation — live views and immutable snapshots both stay fully algorithm-compatible (directed views keep directed dispatch):
 
@@ -282,6 +317,24 @@ GraphML round-trips for persistence and interop with other tools:
 var xml = graph.ToGraphMl();                    // weights via GraphMlExportOptions.EdgeWeight
 var restored = GraphMl.Parse(xml);              // direction auto-detected from edgedefault
 GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
+```
+
+Arbitrary vertex/edge attributes survive the round-trip — declare them once and the same declaration drives GraphML (typed `<key>` elements) and JSON (typed properties):
+
+```csharp
+var xml = graph.ToGraphMl(new GraphMlExportOptions<City, Edge<City>>
+{
+    VertexAttributes =
+    [
+        GraphAttribute<City>.String("name", c => c.Name),
+        GraphAttribute<City>.Int("population", c => c.Population),
+    ],
+});
+
+var doc = GraphMl.ParseDocument(xml);       // GraphJson.ParseDocument for JSON
+doc.Graph;                                  // the structure, as usual
+doc.VertexData["Lisbon"]["population"];     // 545000 — typed per the key declaration
+doc.EdgeData[0];                            // per-edge attributes, in insertion order
 ```
 
 JSON uses the node-link shape shared with NetworkX/D3 (`{ "directed": …, "nodes": […], "edges": […] }`), written without reflection:

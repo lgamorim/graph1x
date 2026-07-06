@@ -6,9 +6,10 @@ namespace Graph1x.Serialization;
 
 /// <summary>
 /// Exports graphs to GraphML (http://graphml.graphdrawing.org). Vertices are
-/// declared first (isolated ones included) and edges follow in insertion
-/// order; XML escaping is handled by the writer, so arbitrary vertex strings
-/// are safe. Weights are written with the invariant culture.
+/// declared first (isolated ones included) and edges follow in the graph's
+/// enumeration order (grouped by source vertex); XML escaping is handled by
+/// the writer, so arbitrary vertex strings are safe. Weights are written with
+/// the invariant culture.
 /// </summary>
 public static class GraphMlExtensions
 {
@@ -50,7 +51,9 @@ public static class GraphMlExtensions
 
         foreach (var vertex in graph.Vertices)
         {
-            graphElement.Add(new XElement(Namespace + "node", new XAttribute("id", vertexId(vertex))));
+            var nodeElement = new XElement(Namespace + "node", new XAttribute("id", vertexId(vertex)));
+            AddDataElements(nodeElement, options.VertexAttributes, vertex);
+            graphElement.Add(nodeElement);
         }
 
         foreach (var edge in graph.Edges)
@@ -68,6 +71,7 @@ public static class GraphMlExtensions
                     options.EdgeWeight(edge).ToString(CultureInfo.InvariantCulture)));
             }
 
+            AddDataElements(edgeElement, options.EdgeAttributes, edge);
             graphElement.Add(edgeElement);
         }
 
@@ -82,7 +86,44 @@ public static class GraphMlExtensions
                 new XAttribute("attr.type", "double")));
         }
 
+        AddKeyDeclarations(root, options.VertexAttributes, "node");
+        AddKeyDeclarations(root, options.EdgeAttributes, "edge");
+
         root.Add(graphElement);
         return new XDocument(new XDeclaration("1.0", "utf-8", null), root).ToString();
     }
+
+    private static void AddKeyDeclarations<T>(XElement root, IReadOnlyList<GraphAttribute<T>> attributes, string domain)
+    {
+        foreach (var attribute in attributes)
+        {
+            root.Add(new XElement(
+                Namespace + "key",
+                new XAttribute("id", attribute.Name),
+                new XAttribute("for", domain),
+                new XAttribute("attr.name", attribute.Name),
+                new XAttribute("attr.type", AttributeTypeName(attribute.Type))));
+        }
+    }
+
+    private static void AddDataElements<T>(XElement element, IReadOnlyList<GraphAttribute<T>> attributes, T item)
+    {
+        foreach (var attribute in attributes)
+        {
+            if (attribute.GetValue(item).ToGraphMlText() is { } text)
+            {
+                element.Add(new XElement(Namespace + "data", new XAttribute("key", attribute.Name), text));
+            }
+        }
+    }
+
+    internal static string AttributeTypeName(GraphAttributeType type) => type switch
+    {
+        GraphAttributeType.String => "string",
+        GraphAttributeType.Bool => "boolean",
+        GraphAttributeType.Int => "int",
+        GraphAttributeType.Long => "long",
+        GraphAttributeType.Float => "float",
+        _ => "double",
+    };
 }

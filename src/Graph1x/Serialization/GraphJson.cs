@@ -78,6 +78,84 @@ public static class GraphJson
             (s, t, element) => new WeightedEdge<string, double>(s, t, ReadWeight(element)));
     }
 
+    /// <summary>
+    /// Parses a node-link JSON document into structure plus attributes:
+    /// every non-structural scalar property becomes an attribute
+    /// (<see cref="string"/>, <see cref="double"/>, or <see cref="bool"/>);
+    /// nulls, arrays, and nested objects are ignored. Directedness follows
+    /// the <c>directed</c> property.
+    /// </summary>
+    /// <param name="json">The JSON document text.</param>
+    /// <returns>The parsed document: graph, vertex data, and edge data.</returns>
+    /// <exception cref="FormatException">The document is not well-formed node-link JSON.</exception>
+    public static GraphDocument ParseDocument(string json)
+    {
+        using var document = LoadDocument(json);
+        var root = RootObject(document);
+
+        IMutableGraph<string, Edge<string>> graph = IsDirected(root)
+            ? new DirectedMultigraph<string, Edge<string>>()
+            : new UndirectedMultigraph<string, Edge<string>>();
+        var vertexData = new Dictionary<string, IReadOnlyDictionary<string, object>>();
+        var edgeData = new List<IReadOnlyDictionary<string, object>>();
+
+        if (root.TryGetProperty("nodes", out var nodes))
+        {
+            RequireArray(nodes, "nodes");
+            foreach (var node in nodes.EnumerateArray())
+            {
+                var id = RequiredString(node, "id", "node");
+                graph.AddVertex(id);
+                vertexData[id] = ReadScalarProperties(node, "id");
+            }
+        }
+
+        if (root.TryGetProperty("edges", out var edges))
+        {
+            RequireArray(edges, "edges");
+            foreach (var edge in edges.EnumerateArray())
+            {
+                var source = RequiredString(edge, "source", "edge");
+                var target = RequiredString(edge, "target", "edge");
+                graph.AddEdge(new Edge<string>(source, target));
+                edgeData.Add(ReadScalarProperties(edge, "source", "target"));
+            }
+        }
+
+        return new GraphDocument(graph, vertexData, edgeData);
+    }
+
+    private static IReadOnlyDictionary<string, object> ReadScalarProperties(
+        JsonElement element,
+        params string[] structuralNames)
+    {
+        var data = new Dictionary<string, object>();
+        foreach (var property in element.EnumerateObject())
+        {
+            if (structuralNames.Contains(property.Name))
+            {
+                continue;
+            }
+
+            switch (property.Value.ValueKind)
+            {
+                case JsonValueKind.String:
+                    data[property.Name] = property.Value.GetString()!;
+                    break;
+                case JsonValueKind.Number:
+                    data[property.Name] = property.Value.GetDouble();
+                    break;
+                case JsonValueKind.True or JsonValueKind.False:
+                    data[property.Name] = property.Value.GetBoolean();
+                    break;
+                default:
+                    break; // nulls, arrays, and objects are ignored for forward compatibility
+            }
+        }
+
+        return data;
+    }
+
     private static JsonDocument LoadDocument(string json)
     {
         ArgumentNullException.ThrowIfNull(json);

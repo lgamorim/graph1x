@@ -35,6 +35,13 @@ public interface IMutableGraph<TVertex, TEdge> : IReadOnlyGraph<TVertex, TEdge>
     bool RemoveVertex(TVertex vertex);
 
     /// <summary>Removes <paramref name="edge"/> from the graph. Endpoint vertices stay.</summary>
+    /// <remarks>
+    /// The stored edge must equal <paramref name="edge"/> under the edge
+    /// type's default equality — <see cref="IReadOnlyGraph{TVertex, TEdge}.VertexComparer"/>
+    /// locates the endpoints but never compares payloads. To remove an edge
+    /// by its endpoints alone, use the endpoint-based overloads on the
+    /// concrete graph types.
+    /// </remarks>
     /// <param name="edge">The edge to remove.</param>
     /// <returns><see langword="true"/> if removed; <see langword="false"/> if it was not present.</returns>
     bool RemoveEdge(TEdge edge);
