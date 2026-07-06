@@ -75,6 +75,134 @@ public static class GraphMl
             RequireDirection(xml, directed: false),
             (source, target, element) => new WeightedEdge<string, double>(source, target, ReadWeight(element, weightKey)));
 
+    /// <summary>
+    /// Parses a GraphML document into structure plus attributes: data
+    /// elements are resolved through the document's <c>&lt;key&gt;</c>
+    /// declarations (id → attr.name) and typed per their <c>attr.type</c>;
+    /// undeclared keys import as strings. Directedness follows
+    /// <c>edgedefault</c>.
+    /// </summary>
+    /// <param name="xml">The GraphML document text.</param>
+    /// <returns>The parsed document: graph, vertex data, and edge data.</returns>
+    /// <exception cref="FormatException">The document is not well-formed GraphML or a value does not match its declared type.</exception>
+    public static GraphDocument ParseDocument(string xml)
+    {
+        var (graphElement, isDirected) = ReadGraphElement(xml);
+        var keys = ReadKeyDeclarations(graphElement);
+
+        IMutableGraph<string, Edge<string>> graph = isDirected
+            ? new DirectedMultigraph<string, Edge<string>>()
+            : new UndirectedMultigraph<string, Edge<string>>();
+        var vertexData = new Dictionary<string, IReadOnlyDictionary<string, object>>();
+        var edgeData = new List<IReadOnlyDictionary<string, object>>();
+
+        foreach (var element in graphElement.Elements())
+        {
+            switch (element.Name.LocalName)
+            {
+                case "node":
+                    var id = element.Attribute("id")?.Value
+                        ?? throw new FormatException("A <node> element is missing the required id attribute.");
+                    graph.AddVertex(id);
+                    vertexData[id] = ReadDataElements(element, keys);
+                    break;
+
+                case "edge":
+                    var source = element.Attribute("source")?.Value
+                        ?? throw new FormatException("An <edge> element is missing the required source attribute.");
+                    var target = element.Attribute("target")?.Value
+                        ?? throw new FormatException("An <edge> element is missing the required target attribute.");
+                    graph.AddEdge(new Edge<string>(source, target));
+                    edgeData.Add(ReadDataElements(element, keys));
+                    break;
+
+                default:
+                    break; // unknown elements are ignored for forward compatibility
+            }
+        }
+
+        return new GraphDocument(graph, vertexData, edgeData);
+    }
+
+    private static Dictionary<string, (string Name, GraphAttributeType Type)> ReadKeyDeclarations(
+        XElement graphElement)
+    {
+        var keys = new Dictionary<string, (string Name, GraphAttributeType Type)>();
+        var root = graphElement.Parent;
+        if (root is null)
+        {
+            return keys;
+        }
+
+        foreach (var key in root.Elements().Where(e => e.Name.LocalName == "key"))
+        {
+            var id = key.Attribute("id")?.Value;
+            if (id is null)
+            {
+                continue; // malformed key declarations are ignored, like other unknown content
+            }
+
+            var name = key.Attribute("attr.name")?.Value ?? id;
+            var type = key.Attribute("attr.type")?.Value switch
+            {
+                "boolean" => GraphAttributeType.Bool,
+                "int" => GraphAttributeType.Int,
+                "long" => GraphAttributeType.Long,
+                "float" => GraphAttributeType.Float,
+                "double" => GraphAttributeType.Double,
+                _ => GraphAttributeType.String,
+            };
+            keys[id] = (name, type);
+        }
+
+        return keys;
+    }
+
+    private static IReadOnlyDictionary<string, object> ReadDataElements(
+        XElement element,
+        Dictionary<string, (string Name, GraphAttributeType Type)> keys)
+    {
+        var data = new Dictionary<string, object>();
+        foreach (var child in element.Elements().Where(e => e.Name.LocalName == "data"))
+        {
+            var keyId = child.Attribute("key")?.Value;
+            if (keyId is null)
+            {
+                continue;
+            }
+
+            var (name, type) = keys.TryGetValue(keyId, out var declared)
+                ? declared
+                : (keyId, GraphAttributeType.String);
+            data[name] = ParseTypedValue(child.Value, type, name);
+        }
+
+        return data;
+    }
+
+    private static object ParseTypedValue(string text, GraphAttributeType type, string name) => type switch
+    {
+        GraphAttributeType.String => text,
+        GraphAttributeType.Bool => text switch
+        {
+            "true" or "1" => true,
+            "false" or "0" => false,
+            _ => throw new FormatException($"Attribute '{name}' value '{text}' is not a valid boolean."),
+        },
+        GraphAttributeType.Int => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue)
+            ? intValue
+            : throw new FormatException($"Attribute '{name}' value '{text}' is not a valid int."),
+        GraphAttributeType.Long => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var longValue)
+            ? longValue
+            : throw new FormatException($"Attribute '{name}' value '{text}' is not a valid long."),
+        GraphAttributeType.Float => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var floatValue)
+            ? floatValue
+            : throw new FormatException($"Attribute '{name}' value '{text}' is not a valid float."),
+        _ => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var doubleValue)
+            ? doubleValue
+            : throw new FormatException($"Attribute '{name}' value '{text}' is not a valid double."),
+    };
+
     private static (XElement Graph, bool IsDirected) ReadGraphElement(string xml)
     {
         ArgumentNullException.ThrowIfNull(xml);

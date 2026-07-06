@@ -43,7 +43,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Clustering | Local/average clustering coefficients, global transitivity |
 | Construction | Fluent `GraphBuilder` with typed `Build()` |
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
-| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips |
+| Serialization | Graphviz DOT export; GraphML and node-link JSON round-trips with typed vertex/edge attributes |
 | Generators | Seeded Erdős–Rényi, Barabási–Albert, Watts–Strogatz, complete, bipartite, path, cycle, star, grid |
 
 ## Usage
@@ -308,6 +308,24 @@ GraphML round-trips for persistence and interop with other tools:
 var xml = graph.ToGraphMl();                    // weights via GraphMlExportOptions.EdgeWeight
 var restored = GraphMl.Parse(xml);              // direction auto-detected from edgedefault
 GraphMl.ParseDirectedWeighted(xml);             // typed weighted variants
+```
+
+Arbitrary vertex/edge attributes survive the round-trip — declare them once and the same declaration drives GraphML (typed `<key>` elements) and JSON (typed properties):
+
+```csharp
+var xml = graph.ToGraphMl(new GraphMlExportOptions<City, Edge<City>>
+{
+    VertexAttributes =
+    [
+        GraphAttribute<City>.String("name", c => c.Name),
+        GraphAttribute<City>.Int("population", c => c.Population),
+    ],
+});
+
+var doc = GraphMl.ParseDocument(xml);       // GraphJson.ParseDocument for JSON
+doc.Graph;                                  // the structure, as usual
+doc.VertexData["Lisbon"]["population"];     // 545000 — typed per the key declaration
+doc.EdgeData[0];                            // per-edge attributes, in insertion order
 ```
 
 JSON uses the node-link shape shared with NetworkX/D3 (`{ "directed": …, "nodes": […], "edges": […] }`), written without reflection:

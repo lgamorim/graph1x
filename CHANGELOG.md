@@ -8,6 +8,14 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Attribute round-trips for GraphML and node-link JSON: one
+  `GraphAttribute<T>` declaration (typed factories: String/Bool/Int/Long/
+  Float/Double) drives both exporters via `VertexAttributes`/
+  `EdgeAttributes` on the existing option records; `GraphMl.ParseDocument`
+  and `GraphJson.ParseDocument` return a `GraphDocument` carrying the graph
+  plus typed per-vertex and per-edge attribute data. Existing `Parse*`
+  entry points are unchanged; the JSON path stays reflection-free.
+
 - Random-graph generators with realistic structure: `BarabasiAlbert`
   (preferential attachment; connected, simple, exactly m·(n−m) edges) and
   `WattsStrogatz` (ring lattice with in-place rewiring, so the edge count

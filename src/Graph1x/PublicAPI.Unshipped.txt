@@ -9,6 +9,36 @@ static Graph1x.Algorithms.GraphClusteringExtensions.GlobalClusteringCoefficient<
 static Graph1x.Algorithms.GraphClusteringExtensions.LocalClusteringCoefficient<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex vertex) -> double
 static Graph1x.Builders.GraphGenerator.BarabasiAlbert(int vertexCount, int edgesPerNewVertex, int seed) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
 static Graph1x.Builders.GraphGenerator.WattsStrogatz(int vertexCount, int nearestNeighbors, double rewiringProbability, int seed) -> Graph1x.UndirectedGraph<int, Graph1x.Edges.Edge<int>>!
+Graph1x.Serialization.GraphAttribute<T>
+Graph1x.Serialization.GraphAttribute<T>.Name.get -> string!
+Graph1x.Serialization.GraphAttribute<T>.Type.get -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.Bool = 1 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.Double = 5 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.Float = 4 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.Int = 2 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.Long = 3 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphAttributeType.String = 0 -> Graph1x.Serialization.GraphAttributeType
+Graph1x.Serialization.GraphDocument
+Graph1x.Serialization.GraphDocument.EdgeData.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyDictionary<string!, object!>!>!
+Graph1x.Serialization.GraphDocument.Graph.get -> Graph1x.IMutableGraph<string!, Graph1x.Edges.Edge<string!>>!
+Graph1x.Serialization.GraphDocument.VertexData.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, object!>!>!
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.EdgeAttributes.get -> System.Collections.Generic.IReadOnlyList<Graph1x.Serialization.GraphAttribute<TEdge>!>!
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.EdgeAttributes.init -> void
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.VertexAttributes.get -> System.Collections.Generic.IReadOnlyList<Graph1x.Serialization.GraphAttribute<TVertex>!>!
+Graph1x.Serialization.GraphJsonExportOptions<TVertex, TEdge>.VertexAttributes.init -> void
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.EdgeAttributes.get -> System.Collections.Generic.IReadOnlyList<Graph1x.Serialization.GraphAttribute<TEdge>!>!
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.EdgeAttributes.init -> void
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.VertexAttributes.get -> System.Collections.Generic.IReadOnlyList<Graph1x.Serialization.GraphAttribute<TVertex>!>!
+Graph1x.Serialization.GraphMlExportOptions<TVertex, TEdge>.VertexAttributes.init -> void
+static Graph1x.Serialization.GraphAttribute<T>.Bool(string! name, System.Func<T, bool>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphAttribute<T>.Double(string! name, System.Func<T, double>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphAttribute<T>.Float(string! name, System.Func<T, float>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphAttribute<T>.Int(string! name, System.Func<T, int>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphAttribute<T>.Long(string! name, System.Func<T, long>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphAttribute<T>.String(string! name, System.Func<T, string?>! value) -> Graph1x.Serialization.GraphAttribute<T>!
+static Graph1x.Serialization.GraphJson.ParseDocument(string! json) -> Graph1x.Serialization.GraphDocument!
+static Graph1x.Serialization.GraphMl.ParseDocument(string! xml) -> Graph1x.Serialization.GraphDocument!
 Graph1x.Algorithms.GraphOperationsExtensions
 static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, System.Func<TEdge, TWeight>! weightSelector) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
 static Graph1x.Algorithms.GraphDagPathExtensions.CriticalPath<TVertex, TWeight>(this Graph1x.IDirectedGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph) -> Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!
