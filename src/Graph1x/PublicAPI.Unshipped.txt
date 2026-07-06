@@ -1,5 +1,7 @@
 #nullable enable
+Graph1x.Algorithms.GraphCliqueExtensions
 Graph1x.Serialization.GraphMermaidExtensions
+static Graph1x.Algorithms.GraphCliqueExtensions.EnumerateMaximalCliques<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IEnumerable<System.Collections.Generic.IReadOnlyList<TVertex>!>!
 Graph1x.Serialization.MermaidDirection
 Graph1x.Serialization.MermaidDirection.BottomToTop = 2 -> Graph1x.Serialization.MermaidDirection
 Graph1x.Serialization.MermaidDirection.LeftToRight = 1 -> Graph1x.Serialization.MermaidDirection
