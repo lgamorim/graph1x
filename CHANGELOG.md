@@ -6,6 +6,14 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Mermaid flowchart export: `ToMermaid` with `MermaidExportOptions`
+  (vertex/edge label selectors and flow `Direction`). Nodes get synthetic
+  insertion-order identifiers (`v0`, `v1`, …) with the display label attached
+  at declaration, so arbitrary vertex strings are safe; labels use Mermaid
+  entity escaping. Output is deterministic, like the DOT exporter.
+
 ## [0.6.0] - 2026-07-06
 
 ### Fixed
