@@ -40,7 +40,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
-| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
+| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut; min-cost max-flow (successive shortest paths with potentials) |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Operations | Induced subgraph, union, complement |
@@ -214,6 +214,12 @@ result.FlowValue;           // max flow == min cut capacity
 result.EdgeFlows;           // flow per edge (parallel edges listed individually)
 result.MinCutEdges;         // the bottleneck edges
 result.SourceSideOfMinCut;  // the residual-reachable vertex set
+
+// Cheapest way to ship the maximum flow: capacities plus per-unit costs.
+// Negative costs are fine as long as no negative-cost cycle is reachable.
+var cheapest = network.MinimumCostMaximumFlow("s", "t", e => e.Capacity, e => e.Cost);
+cheapest.FlowValue;         // same value as MaximumFlow
+cheapest.TotalCost;         // sum of flow × cost, minimized (assignment problems fall out)
 ```
 
 Maximum bipartite matching (undirected bipartite graphs; the partition is derived automatically):

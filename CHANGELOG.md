@@ -8,6 +8,16 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Minimum-cost maximum flow: `MinCostMaximumFlow` (successive shortest
+  augmenting paths with vertex potentials — Bellman-Ford once for initial
+  potentials, Dijkstra on reduced costs per augmentation) plus the
+  `MinimumCostMaximumFlow` extension entry point. Capacity and cost come
+  from separate selectors; negative costs are supported until a
+  negative-cost cycle is reachable from the source
+  (`NegativeCycleException`). The result adds `TotalCost` to the familiar
+  flow-value/per-edge-flow shape, and unit capacities make it an
+  assignment-problem solver.
+
 - Biconnected components (`BiconnectedComponents`: maximal edge sets where
   any two edges share a simple cycle; bridges come out as single-edge
   components, articulation points are the vertices in more than one) and

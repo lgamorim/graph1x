@@ -44,14 +44,19 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
     private readonly List<TWeight> _capacity;
     private readonly List<TWeight> _flow;
     private readonly List<TEdge> _origin;
+    private readonly List<TWeight>? _cost;
 
-    internal ResidualNetwork(IDirectedGraph<TVertex, TEdge> graph, Func<TEdge, TWeight> capacitySelector)
+    internal ResidualNetwork(
+        IDirectedGraph<TVertex, TEdge> graph,
+        Func<TEdge, TWeight> capacitySelector,
+        Func<TEdge, TWeight>? costSelector = null)
     {
         var arcCapacity = 2 * graph.EdgeCount;
         _arcHead = new List<int>(arcCapacity);
         _capacity = new List<TWeight>(arcCapacity);
         _flow = new List<TWeight>(arcCapacity);
         _origin = new List<TEdge>(arcCapacity);
+        _cost = costSelector is null ? null : new List<TWeight>(arcCapacity);
 
         _comparer = graph.VertexComparer;
         _vertices = graph.Vertices.ToArray();
@@ -82,10 +87,18 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
             }
 
             AddArcPair(_index[edge.Source], _index[edge.Target], capacity, edge);
+            if (costSelector is not null)
+            {
+                var cost = costSelector(edge);
+                _cost!.Add(cost);   // forward arc: pay the cost
+                _cost.Add(-cost);   // reverse arc: refund it when cancelling flow
+            }
         }
     }
 
     internal int VertexCount => _vertices.Length;
+
+    internal int ArcCount => _arcHead.Count;
 
     internal int IndexOf(TVertex vertex) => _index[vertex];
 
@@ -93,7 +106,16 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
 
     internal int Head(int arc) => _arcHead[arc];
 
+    internal int Tail(int arc) => _arcHead[arc ^ 1];
+
     internal TWeight Residual(int arc) => _capacity[arc] - _flow[arc];
+
+    internal TWeight Flow(int arc) => _flow[arc];
+
+    internal TEdge Origin(int arc) => _origin[arc];
+
+    /// <summary>Per-arc cost; only available when a cost selector was supplied.</summary>
+    internal TWeight Cost(int arc) => _cost![arc];
 
     internal void Push(int arc, TWeight amount)
     {

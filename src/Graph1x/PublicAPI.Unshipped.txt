@@ -1,3 +1,16 @@
 ﻿#nullable enable
+Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>.FindMinimumCostMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>.FindMinimumCostMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!
+Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>.MinCostMaximumFlow(System.Func<TEdge, TWeight>! capacitySelector, System.Func<TEdge, TWeight>! costSelector) -> void
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>.EdgeFlows.get -> System.Collections.Generic.IReadOnlyList<(TEdge Edge, TWeight Flow)>!
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>.FlowValue.get -> TWeight
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>.Sink.get -> TVertex
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>.Source.get -> TVertex
+Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>.TotalCost.get -> TWeight
+Graph1x.Algorithms.GraphMinimumCostFlowExtensions
+static Graph1x.Algorithms.GraphMinimumCostFlowExtensions.MinimumCostMaximumFlow<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Func<TEdge, TWeight>! capacitySelector, System.Func<TEdge, TWeight>! costSelector) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!
+static Graph1x.Algorithms.GraphMinimumCostFlowExtensions.MinimumCostMaximumFlow<TVertex, TEdge, TWeight>(this Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Func<TEdge, TWeight>! capacitySelector, System.Func<TEdge, TWeight>! costSelector, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!
 static Graph1x.Algorithms.GraphConnectivityExtensions.BiconnectedComponents<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<TEdge>!>!
 static Graph1x.Algorithms.GraphConnectivityExtensions.TwoEdgeConnectedComponents<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
