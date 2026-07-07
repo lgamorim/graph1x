@@ -1,4 +1,7 @@
 ﻿#nullable enable
+Graph1x.Algorithms.GraphKShortestPathsExtensions
+static Graph1x.Algorithms.GraphKShortestPathsExtensions.EnumerateShortestPaths<TVertex, TEdge, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, TVertex source, TVertex target, System.Func<TEdge, TWeight>! weightSelector) -> System.Collections.Generic.IEnumerable<Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!>!
+static Graph1x.Algorithms.GraphKShortestPathsExtensions.EnumerateShortestPaths<TVertex, TWeight>(this Graph1x.IReadOnlyGraph<TVertex, Graph1x.Edges.WeightedEdge<TVertex, TWeight>>! graph, TVertex source, TVertex target) -> System.Collections.Generic.IEnumerable<Graph1x.Algorithms.ShortestPathResult<TVertex, TWeight>!>!
 Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
 Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
 Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!

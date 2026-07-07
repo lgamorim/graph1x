@@ -8,6 +8,13 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- K-shortest paths: `EnumerateShortestPaths` (Yen's algorithm), a lazy
+  sequence of simple paths in nondecreasing total weight — `.Take(k)` is the
+  classic k-shortest query and enumeration cost is caller-controlled, like
+  the clique enumerator. Paths are vertex-distinct (parallel edges only
+  contribute their cheapest weight); non-negative weights required, matching
+  Dijkstra; unreachable targets yield an empty sequence.
+
 - Johnson's all-pairs shortest paths: `JohnsonAllShortestPaths`, the sparse
   alternative to Floyd-Warshall — one Bellman-Ford pass from an implicit
   virtual source (no graph mutation) sets potentials, then Dijkstra runs per

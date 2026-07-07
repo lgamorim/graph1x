@@ -37,7 +37,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points, biconnected and 2-edge-connected components |
-| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, Johnson (sparse all-pairs), A* |
+| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, Johnson (sparse all-pairs), A*, Yen k-shortest (lazy) |
 | DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut; min-cost max-flow (successive shortest paths with potentials) |
@@ -187,6 +187,13 @@ new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhatt
 ```
 
 Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
+
+Need alternatives, not just the optimum? Yen's algorithm enumerates simple paths lazily in nondecreasing weight — take as many as you need and stop paying:
+
+```csharp
+graph.EnumerateShortestPaths("LIS", "MAD").Take(3);   // 3 cheapest routes
+graph.EnumerateShortestPaths("a", "z", e => e.Toll);  // any edge type + selector
+```
 
 On DAGs, a single topological pass beats both and takes negative weights in stride — plus the longest-path queries that are intractable on general graphs:
 
