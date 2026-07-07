@@ -8,6 +8,14 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ### Added
 
+- Johnson's all-pairs shortest paths: `JohnsonAllShortestPaths`, the sparse
+  alternative to Floyd-Warshall — one Bellman-Ford pass from an implicit
+  virtual source (no graph mutation) sets potentials, then Dijkstra runs per
+  source on reduced weights. Same `AllPairsShortestPaths` result type, same
+  negative-weight support and `NegativeCycleException`, plus a
+  `ParallelOptions` overload running per-source passes on all cores with
+  results identical to the sequential path.
+
 - Minimum-cost maximum flow: `MinCostMaximumFlow` (successive shortest
   augmenting paths with vertex potentials — Bellman-Ford once for initial
   potentials, Dijkstra on reduced costs per augmentation) plus the

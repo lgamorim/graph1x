@@ -1,4 +1,9 @@
 ﻿#nullable enable
+Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
+Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.Compute(Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph, System.Threading.Tasks.ParallelOptions! parallelOptions) -> Graph1x.Algorithms.AllPairsShortestPaths<TVertex, TWeight>!
+Graph1x.Algorithms.JohnsonAllShortestPaths<TVertex, TEdge, TWeight>.JohnsonAllShortestPaths(System.Func<TEdge, TWeight>! weightSelector) -> void
 Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>
 Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>.FindMinimumCostMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!
 Graph1x.Algorithms.MinCostMaximumFlow<TVertex, TEdge, TWeight>.FindMinimumCostMaximumFlow(Graph1x.IDirectedGraph<TVertex, TEdge>! graph, TVertex source, TVertex sink, System.Threading.CancellationToken cancellationToken) -> Graph1x.Algorithms.MinimumCostFlowResult<TVertex, TEdge, TWeight>!

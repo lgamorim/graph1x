@@ -37,7 +37,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
 | Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points, biconnected and 2-edge-connected components |
-| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
+| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, Johnson (sparse all-pairs), A* |
 | DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
 | Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut; min-cost max-flow (successive shortest paths with potentials) |
@@ -178,6 +178,10 @@ new BellmanFordShortestPath<string, WeightedEdge<string, int>, int>(e => e.Weigh
 new FloydWarshallAllShortestPaths<string, WeightedEdge<string, int>, int>(e => e.Weight)
     .Compute(graph)
     .Between("a", "b");
+// Sparse graph? Johnson's reweighting beats O(V³): same result type, same
+// negative-weight support, plus a ParallelOptions overload for per-source runs.
+new JohnsonAllShortestPaths<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .Compute(graph, new ParallelOptions { MaxDegreeOfParallelism = 4 });
 new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhattan)
     .FindPath(grid, start, goal);
 ```
