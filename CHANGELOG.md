@@ -6,6 +6,17 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-07-07
+
+First stable release. The public API is identical to 1.0.0-rc.1 (and to the
+surface shipped in 0.7.0): zero API delta through the release candidate.
+
+From this release, versioning follows SemVer strictly: breaking changes to
+the public API only in a new major version; additions in minor versions;
+fixes in patch versions. The API surface is analyzer-locked
+(Microsoft.CodeAnalysis.PublicApiAnalyzers), so any accidental change is a
+build error.
+
 ## [1.0.0-rc.1] - 2026-07-06
 
 Release candidate for 1.0.0. The public API surface shipped in 0.7.0 is
