@@ -6,6 +6,16 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Biconnected components (`BiconnectedComponents`: maximal edge sets where
+  any two edges share a simple cycle; bridges come out as single-edge
+  components, articulation points are the vertices in more than one) and
+  2-edge-connected components (`TwoEdgeConnectedComponents`: the vertex
+  partition left after removing all bridges). Both ride the existing
+  iterative low-link DFS that already produced bridges and articulation
+  points, so all four views agree by construction.
+
 ## [1.0.1] - 2026-07-15
 
 Correctness and packaging fixes found after the 1.0.0 release. No API changes,

@@ -36,7 +36,7 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
-| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points, biconnected and 2-edge-connected components |
 | Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
 | DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
@@ -243,6 +243,8 @@ graph.FindBipartition();          // the two vertex sets, or null
 graph.Transpose();                // reversed copy of a directed graph
 graph.FindBridges();              // edges whose removal disconnects (undirected)
 graph.FindArticulationPoints();   // cut vertices (undirected)
+graph.BiconnectedComponents();    // maximal 2-connected edge sets; bridges are singletons
+graph.TwoEdgeConnectedComponents(); // vertex partition after removing all bridges
 dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
 dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
 

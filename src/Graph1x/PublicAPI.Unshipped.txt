@@ -1,1 +1,3 @@
 ﻿#nullable enable
+static Graph1x.Algorithms.GraphConnectivityExtensions.BiconnectedComponents<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<TEdge>!>!
+static Graph1x.Algorithms.GraphConnectivityExtensions.TwoEdgeConnectedComponents<TVertex, TEdge>(this Graph1x.IReadOnlyGraph<TVertex, TEdge>! graph) -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlySet<TVertex>!>!
