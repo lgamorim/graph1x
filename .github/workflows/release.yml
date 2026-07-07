@@ -56,8 +56,13 @@ jobs:
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$GITHUB_REF_NAME"
-          packages/*.nupkg packages/*.snupkg
-          --title "$GITHUB_REF_NAME"
-          --notes-file release-notes.md
+        # SemVer prerelease tags (a - after the version, e.g. v1.0.0-rc.1)
+        # are marked as prereleases on the GitHub Release.
+        run: |
+          prerelease=""
+          case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease";; esac
+          gh release create "$GITHUB_REF_NAME" \
+            packages/*.nupkg packages/*.snupkg \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            $prerelease

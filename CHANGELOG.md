@@ -6,6 +6,19 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.0.0-rc.1] - 2026-07-06
+
+Release candidate for 1.0.0. The public API surface shipped in 0.7.0 is
+frozen: no API changes between this candidate and 1.0.0.
+
+### Changed
+
+- The LICENSE copyright notice names the copyright holder (Copyright 2026
+  Luís Amorim) instead of the stock Apache 2.0 placeholder, and the README
+  shows the Apache 2.0 license badge and a License section.
+- The release workflow marks SemVer prerelease tags (a `-` after the
+  version, like this candidate) as prereleases on the GitHub Release.
+
 ## [0.7.0] - 2026-07-06
 
 ### Added
