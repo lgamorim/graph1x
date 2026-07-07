@@ -26,9 +26,9 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Graph1x 1.0 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy.
+Graph1x 1.1 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy.
 
-Built milestone by milestone with TDD (tests written before the implementation); over 830 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible and strong-name signed.
+Built milestone by milestone with TDD (tests written before the implementation); over 900 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible and strong-name signed.
 
 | Area | Contents |
 |---|---|

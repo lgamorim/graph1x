@@ -6,6 +6,8 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-07
+
 ### Added
 
 - K-shortest paths: `EnumerateShortestPaths` (Yen's algorithm), a lazy
