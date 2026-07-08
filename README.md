@@ -1,5 +1,7 @@
 # Graph1x
 
+<img src="assets/logo.png" alt="Graph1x logo" width="128" />
+
 [![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
 [![Docs](https://github.com/lgamorim/graph1x/actions/workflows/docs.yml/badge.svg)](https://lgamorim.github.io/graph1x/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)

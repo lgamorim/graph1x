@@ -29,6 +29,7 @@
         <PackageTags>graph;graphs;algorithms;dijkstra;topological-sort;mst;hypergraph;multigraph;dag</PackageTags>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
         <RepositoryUrl>https://github.com/lgamorim/graph1x</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>
@@ -44,6 +45,7 @@
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\assets\logo.png" Pack="true" PackagePath="icon.png" />
     </ItemGroup>
 
     <ItemGroup>
