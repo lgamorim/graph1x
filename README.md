@@ -395,6 +395,11 @@ Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack,
 - `test/Graph1x.UnitTests` — xUnit v3 test suite
 - `bench/Graph1x.Benchmarks` — BenchmarkDotNet suite (`dotnet run -c Release --project bench/Graph1x.Benchmarks`; seeded `GraphGenerator` fixtures, `--job Dry` for a smoke run)
 
+## Acknowledgments
+
+Graph1x was built test-first in collaboration with Claude Fable — each milestone
+was designed, implemented, and reviewed with the model before being merged.
+
 ## License
 
 Copyright 2026 Luís Amorim. Licensed under the [Apache License 2.0](LICENSE).
