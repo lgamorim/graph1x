@@ -2,13 +2,9 @@
 
 <img src="https://raw.githubusercontent.com/lgamorim/graph1x/master/assets/logo.png" alt="Graph1x logo" width="128" />
 
-[![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
-[![Docs](https://github.com/lgamorim/graph1x/actions/workflows/docs.yml/badge.svg)](https://lgamorim.github.io/graph1x/)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-
-**[API documentation →](https://lgamorim.github.io/graph1x/)**
-
 A .NET library for creating, mutating, and analyzing graphs, built with modern C# and developed test-first.
+
+**[API documentation →](https://lgamorim.github.io/graph1x/)** · **[Source, benchmarks & full README on GitHub →](https://github.com/lgamorim/graph1x)**
 
 ## Goals
 
@@ -24,9 +20,7 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Graph1x 1.0 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy.
-
-Built milestone by milestone with TDD (tests written before the implementation); over 830 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible and strong-name signed.
+Graph1x 1.0 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy. Over 830 unit tests (written test-first, including a shared contract suite every graph type must pass) run on Linux and Windows against .NET 8 and .NET 10. The library is trim/Native-AOT compatible, strong-name signed, and ships Source Link with a symbols package.
 
 | Area | Contents |
 |---|---|
@@ -365,41 +359,6 @@ GraphJson.Parse(json);                          // direction auto-detected
 GraphJson.ParseUndirectedWeighted(json);        // typed weighted variants
 ```
 
-## Building
-
-```
-dotnet build Graph1x.sln
-dotnet test Graph1x.sln
-```
-
-The library targets **.NET 8 (LTS)** and **.NET 10**; the test suite runs against both. Building requires the .NET 10 SDK. Warnings are treated as errors and .NET analyzers run at the latest analysis level.
-
-## Performance
-
-Selected numbers from the BenchmarkDotNet suite (ShortRun job, .NET 10, single dev machine — run `bench/Graph1x.Benchmarks` yourself for rigorous figures):
-
-| Scenario | Result |
-|---|---|
-| `ShortestPathsFrom` vs one `ShortestPath` per target (50×50 grid, 2 500 targets) | ~0.5 ms vs ~554 ms — **~1 100× faster**, ~1 100× fewer allocations |
-| A* (Manhattan) vs Dijkstra, corner to corner on the same grid | ~30 µs vs ~435 µs — **~14× faster** |
-| Edmonds-Karp vs Dinic (random networks, 50–150 vertices) | EK slightly ahead at these sizes (Dinic ratio 1.03–1.22×) — Dinic's level-graph overhead pays off on larger/denser networks |
-| 0.5.0 allocation pass (pre-sized collections, PageRank buffer reuse) | BFS 100k: −18% allocations/−25% time; Dijkstra runs: −34–36% allocations; components: −25% allocations |
-
-## Releasing
-
-Pushing a `v*` tag (e.g. `v0.3.0`) runs the release workflow: build, test, pack, publish to NuGet.org (requires the `NUGET_API_KEY` repository secret), and create a GitHub Release with notes from [CHANGELOG.md](CHANGELOG.md). Running the workflow manually performs a dry run that stops after packing.
-
-## Project layout
-
-- `src/Graph1x` — the library
-- `test/Graph1x.UnitTests` — xUnit v3 test suite
-- `bench/Graph1x.Benchmarks` — BenchmarkDotNet suite (`dotnet run -c Release --project bench/Graph1x.Benchmarks`; seeded `GraphGenerator` fixtures, `--job Dry` for a smoke run)
-
-## Acknowledgments
-
-Graph1x was built test-first in collaboration with Claude Fable — each milestone
-was designed, implemented, and reviewed with the model before being merged.
-
 ## License
 
-Copyright 2026 Luís Amorim. Licensed under the [Apache License 2.0](LICENSE).
+Copyright 2026 Luís Amorim. Licensed under the [Apache License 2.0](https://github.com/lgamorim/graph1x/blob/master/LICENSE).
