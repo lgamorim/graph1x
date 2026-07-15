@@ -32,7 +32,19 @@ jobs:
         run: dotnet build Graph1x.sln -c Release --no-restore
 
       - name: Test (net8.0 on the .NET 8 runtime, net10.0 on .NET 10)
-        run: dotnet test Graph1x.sln -c Release --no-build
+        run: >
+          dotnet test Graph1x.sln -c Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
+        with:
+          directory: ./coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Pack
         run: dotnet pack src/Graph1x/Graph1x.csproj -c Release --no-build

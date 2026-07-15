@@ -6,6 +6,23 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-07-15
+
+Minor fixes found after the 1.0.0 release. No API changes.
+
+### Fixed
+
+- The NuGet.org package readme now renders the logo: the image is a Markdown
+  reference (NuGet strips the bare `<img>` HTML) and the package ships a
+  dedicated `icon.png` rather than reusing `logo.png`.
+- The documentation site shows the Graph1x logo in the navbar instead of the
+  default DocFX logo.
+
+### Changed
+
+- Both READMEs gained CI and coverage badges and a "How this was built"
+  disclosure; CI now publishes coverage to Codecov.
+
 ## [1.0.0] - 2026-07-07
 
 First stable release. The public API is identical to 1.0.0-rc.1 (and to the
