@@ -22,6 +22,10 @@ see below.
   three weighted overloads. Strictly positive weights were, and remain, correct;
   the hop-count overloads were never affected. Support for zero-weight edges is
   planned for a future release.
+- `ToMermaid` now escapes `#` as `#35;` in vertex and edge labels. Mermaid reads
+  `#` as the start of an entity escape, so a label containing one rendered as
+  different text — and the literal label `#quot;` was indistinguishable from a
+  label holding a real quote.
 - The NuGet.org package readme now renders the logo: the image is a Markdown
   reference (NuGet strips the bare `<img>` HTML) and the package ships a
   dedicated `icon.png` rather than reusing `logo.png`.
