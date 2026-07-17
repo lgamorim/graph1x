@@ -1,8 +1,10 @@
 namespace Graph1x.Algorithms;
 
 /// <summary>
-/// Thrown when an algorithm that requires non-negative edge weights (such as
-/// Dijkstra or A*) encounters a negative weight.
+/// Thrown when an edge weight falls outside the domain an algorithm requires:
+/// a negative weight where non-negative ones are needed (Dijkstra, A*, maximum
+/// flow), or a non-positive weight where strictly positive ones are needed
+/// (weighted betweenness centrality).
 /// </summary>
 public class NegativeWeightException : InvalidOperationException
 {

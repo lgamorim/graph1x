@@ -7,10 +7,11 @@ namespace Graph1x.Algorithms;
 /// <summary>
 /// Centrality measures: degree, closeness (Wasserman-Faust scaled, so
 /// disconnected graphs need no special casing), betweenness via Brandes'
-/// algorithm (breadth-first for hop counts, Dijkstra-based for weights),
-/// PageRank for directed graphs, and the spectral pair — eigenvector and
-/// Katz — by power iteration. On multigraphs, parallel edges count as
-/// distinct shortest paths, which is the natural multigraph semantics.
+/// algorithm (breadth-first for hop counts, Dijkstra-based for weights, which
+/// requires strictly positive weights), PageRank for directed graphs, and the
+/// spectral pair — eigenvector and Katz — by power iteration. On multigraphs,
+/// parallel edges count as distinct shortest paths, which is the natural
+/// multigraph semantics.
 /// </summary>
 public static class GraphCentralityExtensions
 {
@@ -242,14 +243,14 @@ public static class GraphCentralityExtensions
         return BrandesAccumulateParallel(graph, source => BreadthFirstStage(graph, source), parallelOptions);
     }
 
-    /// <summary>Gets weighted betweenness centrality (Brandes over Dijkstra).</summary>
+    /// <summary>Gets weighted betweenness centrality (Brandes over Dijkstra), which requires strictly positive weights.</summary>
     /// <typeparam name="TVertex">The vertex type.</typeparam>
     /// <typeparam name="TEdge">The edge type.</typeparam>
     /// <typeparam name="TWeight">The numeric weight type.</typeparam>
     /// <param name="graph">The graph to measure.</param>
-    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="weightSelector">Maps an edge to its weight; every weight must be above zero.</param>
     /// <returns>Raw betweenness per vertex (undirected pair contributions counted once).</returns>
-    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    /// <exception cref="NegativeWeightException">A zero or negative edge weight was encountered.</exception>
     public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge, TWeight>(
         this IReadOnlyGraph<TVertex, TEdge> graph,
         Func<TEdge, TWeight> weightSelector)
@@ -258,15 +259,15 @@ public static class GraphCentralityExtensions
         where TWeight : INumber<TWeight>
         => graph.BetweennessCentrality(weightSelector, CancellationToken.None);
 
-    /// <summary>Gets weighted betweenness centrality, observing <paramref name="cancellationToken"/> between source vertices.</summary>
+    /// <summary>Gets weighted betweenness centrality (strictly positive weights), observing <paramref name="cancellationToken"/> between source vertices.</summary>
     /// <typeparam name="TVertex">The vertex type.</typeparam>
     /// <typeparam name="TEdge">The edge type.</typeparam>
     /// <typeparam name="TWeight">The numeric weight type.</typeparam>
     /// <param name="graph">The graph to measure.</param>
-    /// <param name="weightSelector">Maps an edge to its weight.</param>
+    /// <param name="weightSelector">Maps an edge to its weight; every weight must be above zero.</param>
     /// <param name="cancellationToken">Cancels the computation cooperatively.</param>
     /// <returns>Raw betweenness per vertex.</returns>
-    /// <exception cref="NegativeWeightException">A negative edge weight was encountered.</exception>
+    /// <exception cref="NegativeWeightException">A zero or negative edge weight was encountered.</exception>
     /// <exception cref="OperationCanceledException">The token was cancelled.</exception>
     public static IReadOnlyDictionary<TVertex, double> BetweennessCentrality<TVertex, TEdge, TWeight>(
         this IReadOnlyGraph<TVertex, TEdge> graph,
@@ -283,17 +284,17 @@ public static class GraphCentralityExtensions
     }
 
     /// <summary>
-    /// Gets weighted betweenness centrality with the per-source Brandes
-    /// passes running in parallel. <paramref name="weightSelector"/> is
-    /// invoked concurrently and must be pure. The token inside
-    /// <paramref name="parallelOptions"/> cancels cooperatively between
-    /// sources.
+    /// Gets weighted betweenness centrality (strictly positive weights) with
+    /// the per-source Brandes passes running in parallel.
+    /// <paramref name="weightSelector"/> is invoked concurrently and must be
+    /// pure. The token inside <paramref name="parallelOptions"/> cancels
+    /// cooperatively between sources.
     /// </summary>
     /// <typeparam name="TVertex">The vertex type.</typeparam>
     /// <typeparam name="TEdge">The edge type.</typeparam>
     /// <typeparam name="TWeight">The numeric weight type.</typeparam>
     /// <param name="graph">The graph to measure; only read, never mutated.</param>
-    /// <param name="weightSelector">Maps an edge to its weight; must be safe to call concurrently.</param>
+    /// <param name="weightSelector">Maps an edge to its weight; every weight must be above zero, and it must be safe to call concurrently.</param>
     /// <param name="parallelOptions">Degree of parallelism and cancellation.</param>
     /// <returns>Raw betweenness per vertex (undirected pair contributions counted once).</returns>
     /// <exception cref="AggregateException">A per-source pass failed, e.g. with <see cref="NegativeWeightException"/>.</exception>
@@ -381,10 +382,14 @@ public static class GraphCentralityExtensions
             foreach (var (neighbor, edge) in GraphTraversalCore.OutgoingArcs(graph, current))
             {
                 var weight = weightSelector(edge);
-                if (weight < TWeight.Zero)
+                if (weight <= TWeight.Zero)
                 {
+                    // Counting shortest paths needs every vertex settled after
+                    // all of its shortest-path predecessors. A zero-weight edge
+                    // ties predecessor and successor at the same distance, so
+                    // the settle order can invert them and silently lose paths.
                     throw new NegativeWeightException(
-                        $"Edge '{edge}' has negative weight {weight}; betweenness centrality requires non-negative weights.");
+                        $"Edge '{edge}' has weight {weight}; betweenness centrality requires strictly positive weights.");
                 }
 
                 if (settled.Contains(neighbor))

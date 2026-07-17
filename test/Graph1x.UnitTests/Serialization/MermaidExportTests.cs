@@ -64,6 +64,46 @@ public class MermaidExportTests
     }
 
     [Fact]
+    public void Hashes_AreEscapedAsEntities()
+    {
+        // '#' introduces Mermaid's entity escapes, so a literal one must be
+        // escaped itself or the label renders as something else entirely.
+        var graph = new DirectedGraph<string, Edge<string>>();
+        graph.AddVertex("C# 13");
+
+        Assert.Contains("v0[\"C#35; 13\"]", graph.ToMermaid());
+    }
+
+    [Fact]
+    public void HashEscape_DoesNotCollideWithAnEscapedQuote()
+    {
+        // Distinct labels must produce distinct output: without escaping '#',
+        // the literal text "#quot;" renders identically to a real quote.
+        var graph = new DirectedGraph<string, Edge<string>>();
+        graph.AddVertex("say #quot;hi#quot;");
+        graph.AddVertex("say \"hi\"");
+
+        var mermaid = graph.ToMermaid();
+
+        Assert.Contains("v0[\"say #35;quot;hi#35;quot;\"]", mermaid);
+        Assert.Contains("v1[\"say #quot;hi#quot;\"]", mermaid);
+    }
+
+    [Fact]
+    public void Hashes_AreEscapedInEdgeLabels()
+    {
+        var graph = new DirectedGraph<string, Edge<string>>();
+        graph.AddEdge(new Edge<string>("a", "b"));
+
+        var mermaid = graph.ToMermaid(new MermaidExportOptions<string, Edge<string>>
+        {
+            EdgeLabel = _ => "#1",
+        });
+
+        Assert.Contains("v0 -->|\"#35;1\"| v1", mermaid);
+    }
+
+    [Fact]
     public void Newlines_BecomeLineBreakTags()
     {
         var graph = new DirectedGraph<string, Edge<string>>();

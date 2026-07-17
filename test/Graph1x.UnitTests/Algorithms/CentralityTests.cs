@@ -134,6 +134,60 @@ public class CentralityTests
     }
 
     [Fact]
+    public void Betweenness_Weighted_ZeroWeight_ThrowsNegativeWeightException()
+    {
+        var graph = new DirectedGraph<string, WeightedEdge<string, double>>();
+        graph.AddEdge(new WeightedEdge<string, double>("a", "b", 0.0));
+
+        Assert.Throws<NegativeWeightException>(() => graph.BetweennessCentrality(e => e.Weight));
+    }
+
+    [Fact]
+    public void Betweenness_Weighted_ZeroWeight_ThrowsWithCancellationTokenOverload()
+    {
+        var graph = new DirectedGraph<string, WeightedEdge<string, double>>();
+        graph.AddEdge(new WeightedEdge<string, double>("a", "b", 0.0));
+
+        Assert.Throws<NegativeWeightException>(
+            () => graph.BetweennessCentrality(e => e.Weight, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Betweenness_Weighted_ZeroWeight_ThrowsWithParallelOverload()
+    {
+        var graph = new DirectedGraph<string, WeightedEdge<string, double>>();
+        graph.AddEdge(new WeightedEdge<string, double>("a", "b", 0.0));
+
+        // Parallel.ForEach wraps a body failure, per the overload's contract.
+        var exception = Assert.Throws<AggregateException>(() => graph.BetweennessCentrality(
+            e => e.Weight,
+            new ParallelOptions { CancellationToken = TestContext.Current.CancellationToken }));
+
+        Assert.Contains(exception.InnerExceptions, inner => inner is NegativeWeightException);
+    }
+
+    [Fact]
+    public void Betweenness_Weighted_NegativeWeight_ThrowsNegativeWeightException()
+    {
+        var graph = new DirectedGraph<string, WeightedEdge<string, int>>();
+        graph.AddEdge(new WeightedEdge<string, int>("a", "b", -1));
+
+        Assert.Throws<NegativeWeightException>(() => graph.BetweennessCentrality(e => e.Weight));
+    }
+
+    [Fact]
+    public void Betweenness_Weighted_ZeroWeightInSeparateComponent_IsStillRejected()
+    {
+        // Every vertex takes a turn as source, so the guard must fire even for
+        // an edge no sweep from the first component ever relaxes.
+        var graph = new DirectedGraph<string, WeightedEdge<string, double>>();
+        graph.AddEdge(new WeightedEdge<string, double>("a", "b", 1.0));
+        graph.AddEdge(new WeightedEdge<string, double>("x", "y", 0.0));
+
+        Assert.Throws<NegativeWeightException>(() => graph.BetweennessCentrality(e => e.Weight));
+    }
+
+    [Fact]
     public void Betweenness_AgreesWithBruteForce_OnSeededRandomGraph()
     {
         var random = new Random(20260705);

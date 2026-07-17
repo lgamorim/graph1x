@@ -1,10 +1,15 @@
+![Graph1x logo](https://raw.githubusercontent.com/lgamorim/graph1x/master/assets/logo.png)
+
 # Graph1x
 
-<img src="https://raw.githubusercontent.com/lgamorim/graph1x/master/assets/logo.png" alt="Graph1x logo" width="128" />
+[![CI](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml/badge.svg)](https://github.com/lgamorim/graph1x/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/lgamorim/graph1x/branch/master/graph/badge.svg)](https://codecov.io/gh/lgamorim/graph1x)
 
 A .NET library for creating, mutating, and analyzing graphs, built with modern C# and developed test-first.
 
-**[API documentation →](https://lgamorim.github.io/graph1x/)** · **[Source, benchmarks & full README on GitHub →](https://github.com/lgamorim/graph1x)**
+**[API documentation →](https://lgamorim.github.io/graph1x/)**
+
+**[Source, benchmarks & full README on GitHub →](https://github.com/lgamorim/graph1x)**
 
 ## Goals
 
@@ -45,6 +50,23 @@ Graph1x 1.0 is stable. The public API follows [Semantic Versioning](https://semv
 | Views | `AsReadOnly()` live views, `ToFrozen()` immutable snapshots |
 | Serialization | Graphviz DOT and Mermaid flowchart export; GraphML and node-link JSON round-trips with typed vertex/edge attributes |
 | Generators | Seeded Erdős–Rényi, Barabási–Albert, Watts–Strogatz, complete, bipartite, path, cycle, star, grid |
+
+## How this was built
+
+Graph1x was written by Claude Fable under my direction. I set the scope and decided
+what to build; I did not author the implementations.
+
+This matters for how you read the guarantees above. The structural ones are real and
+mechanically enforced: the API surface is analyzer-locked, every graph backend passes
+the same contract suite, and CI runs the full test suite on both target frameworks.
+But the tests were generated alongside the code by the same model — that demonstrates
+internal consistency, not independent verification. The correctness of the algorithm
+implementations, particularly the centrality measures and the flow algorithms, has not
+been validated against an outside reference.
+
+If you are evaluating Graph1x for anything load-bearing, review the implementations you
+depend on. Bug reports and corrections are genuinely welcome — they are the fastest way
+this library gets trustworthy.
 
 ## Usage
 

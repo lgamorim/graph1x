@@ -89,6 +89,12 @@ public static class GraphMermaidExtensions
         {
             switch (character)
             {
+                case '#':
+                    // Mermaid reads '#' as the start of an entity escape, so a
+                    // literal one must become an entity itself — otherwise the
+                    // label "#quot;" would render as the quote below.
+                    builder.Append("#35;");
+                    break;
                 case '"':
                     builder.Append("#quot;");
                     break;
