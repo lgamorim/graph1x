@@ -218,6 +218,32 @@ public class MinCostFlowTests
     }
 
     [Fact]
+    public void MinimumCostMaximumFlow_ExtensionWithPreCancelledToken_ThrowsOperationCanceledException()
+    {
+        var graph = Network(new CostEdge("s", "t", 1, 1));
+        using var source = new CancellationTokenSource();
+        source.Cancel();
+
+        Assert.Throws<OperationCanceledException>(
+            () => graph.MinimumCostMaximumFlow("s", "t", edge => edge.Capacity, edge => edge.Cost, source.Token));
+    }
+
+    [Fact]
+    public void MinimumCostMaximumFlow_ExtensionWithLiveToken_MatchesTheAlgorithmClass()
+    {
+        var graph = Network(
+            new CostEdge("s", "a", 2, 1),
+            new CostEdge("a", "t", 2, 3));
+        var token = TestContext.Current.CancellationToken;
+
+        var viaExtension = graph.MinimumCostMaximumFlow("s", "t", edge => edge.Capacity, edge => edge.Cost, token);
+        var viaClass = Algorithm().FindMinimumCostMaximumFlow(graph, "s", "t", token);
+
+        Assert.Equal(viaClass.FlowValue, viaExtension.FlowValue);
+        Assert.Equal(viaClass.TotalCost, viaExtension.TotalCost);
+    }
+
+    [Fact]
     public void MinCostMaximumFlow_NullArguments_Throw()
     {
         Assert.Throws<ArgumentNullException>(
