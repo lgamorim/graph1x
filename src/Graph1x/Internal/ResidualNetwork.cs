@@ -93,21 +93,13 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
 
     internal int VertexCount => _vertices.Length;
 
-    internal int ArcCount => _arcHead.Count;
-
     internal int IndexOf(TVertex vertex) => _index[vertex];
 
     internal IReadOnlyList<int> IncidentArcs(int vertex) => _incidentArcs[vertex];
 
     internal int Head(int arc) => _arcHead[arc];
 
-    internal int Tail(int arc) => _arcHead[arc ^ 1];
-
     internal TWeight Residual(int arc) => _capacity[arc] - _flow[arc];
-
-    internal TWeight Flow(int arc) => _flow[arc];
-
-    internal TEdge Origin(int arc) => _origin[arc];
 
     // _cost is allocated exactly when the constructor received a cost selector,
     // and only the cost-aware strategy (min-cost flow) asks for it, so the
@@ -210,21 +202,50 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
             }
         }
 
-        var edgeFlows = new List<(TEdge Edge, TWeight Flow)>();
         var cutEdges = new List<TEdge>();
-        for (var arc = 0; arc < _arcHead.Count; arc += 2)
+        foreach (var arc in ForwardArcs())
         {
-            var tail = _arcHead[arc + 1];
-            var head = _arcHead[arc];
-            edgeFlows.Add((_origin[arc], _flow[arc]));
-            if (reachable[tail] && !reachable[head])
+            if (reachable[_arcHead[arc ^ 1]] && !reachable[_arcHead[arc]])
             {
                 cutEdges.Add(_origin[arc]);
             }
         }
 
         return new MaximumFlowResult<TVertex, TEdge, TWeight>(
-            source, sink, total, edgeFlows, sourceSide, cutEdges);
+            source, sink, total, EdgeFlows(), sourceSide, cutEdges);
+    }
+
+    /// <summary>The flow on every original edge (parallel edges individually), in edge-insertion order.</summary>
+    internal List<(TEdge Edge, TWeight Flow)> EdgeFlows()
+    {
+        var edgeFlows = new List<(TEdge Edge, TWeight Flow)>(_arcHead.Count / 2);
+        foreach (var arc in ForwardArcs())
+        {
+            edgeFlows.Add((_origin[arc], _flow[arc]));
+        }
+
+        return edgeFlows;
+    }
+
+    /// <summary>The total cost of the current flow (flow × cost summed over the original edges); requires a cost selector.</summary>
+    internal TWeight TotalCost()
+    {
+        var total = TWeight.Zero;
+        foreach (var arc in ForwardArcs())
+        {
+            total += _flow[arc] * Cost(arc);
+        }
+
+        return total;
+    }
+
+    /// <summary>The arcs that correspond to original edges: forward arcs sit at even ids, their reverse partners at id + 1.</summary>
+    private IEnumerable<int> ForwardArcs()
+    {
+        for (var arc = 0; arc < _arcHead.Count; arc += 2)
+        {
+            yield return arc;
+        }
     }
 
     /// <summary>

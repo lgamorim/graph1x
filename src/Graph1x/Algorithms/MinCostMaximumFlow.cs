@@ -144,30 +144,11 @@ public sealed class MinCostMaximumFlow<TVertex, TEdge, TWeight>
                 }
             }
 
-            var bottleneck = network.Residual(parentArc[sinkIndex]);
-            for (var vertex = network.Tail(parentArc[sinkIndex]); vertex != sourceIndex; vertex = network.Tail(parentArc[vertex]))
-            {
-                bottleneck = TWeight.Min(bottleneck, network.Residual(parentArc[vertex]));
-            }
-
-            for (var vertex = sinkIndex; vertex != sourceIndex; vertex = network.Tail(parentArc[vertex]))
-            {
-                network.Push(parentArc[vertex], bottleneck);
-            }
-
-            total += bottleneck;
+            total += network.Augment(parentArc, sourceIndex, sinkIndex);
         }
 
-        var edgeFlows = new List<(TEdge Edge, TWeight Flow)>(network.ArcCount / 2);
-        var totalCost = TWeight.Zero;
-        for (var arc = 0; arc < network.ArcCount; arc += 2)
-        {
-            var flow = network.Flow(arc);
-            edgeFlows.Add((network.Origin(arc), flow));
-            totalCost += flow * network.Cost(arc);
-        }
-
-        return new MinimumCostFlowResult<TVertex, TEdge, TWeight>(source, sink, total, totalCost, edgeFlows);
+        return new MinimumCostFlowResult<TVertex, TEdge, TWeight>(
+            source, sink, total, network.TotalCost(), network.EdgeFlows());
     }
 
     /// <summary>
@@ -187,32 +168,34 @@ public sealed class MinCostMaximumFlow<TVertex, TEdge, TWeight>
         for (var pass = 0; pass < vertexCount; pass++)
         {
             var relaxed = false;
-            for (var arc = 0; arc < network.ArcCount; arc++)
+            for (var tail = 0; tail < vertexCount; tail++)
             {
-                if (network.Residual(arc) <= TWeight.Zero)
-                {
-                    continue;
-                }
-
-                var tail = network.Tail(arc);
                 if (!hasPotential[tail])
                 {
                     continue;
                 }
 
-                var head = network.Head(arc);
-                var candidate = potential[tail] + network.Cost(arc);
-                if (!hasPotential[head] || candidate < potential[head])
+                foreach (var arc in network.IncidentArcs(tail))
                 {
-                    if (pass == vertexCount - 1)
+                    if (network.Residual(arc) <= TWeight.Zero)
                     {
-                        throw new NegativeCycleException(
-                            "The network contains a negative-cost cycle reachable from the source; minimum-cost flow is undefined.");
+                        continue;
                     }
 
-                    hasPotential[head] = true;
-                    potential[head] = candidate;
-                    relaxed = true;
+                    var head = network.Head(arc);
+                    var candidate = potential[tail] + network.Cost(arc);
+                    if (!hasPotential[head] || candidate < potential[head])
+                    {
+                        if (pass == vertexCount - 1)
+                        {
+                            throw new NegativeCycleException(
+                                "The network contains a negative-cost cycle reachable from the source; minimum-cost flow is undefined.");
+                        }
+
+                        hasPotential[head] = true;
+                        potential[head] = candidate;
+                        relaxed = true;
+                    }
                 }
             }
 
