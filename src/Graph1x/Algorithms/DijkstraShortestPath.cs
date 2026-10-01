@@ -102,52 +102,13 @@ public sealed class DijkstraShortestPath<TVertex, TEdge, TWeight> : IShortestPat
         bool hasTarget,
         TVertex? target,
         CancellationToken cancellationToken = default)
-    {
-        var comparer = graph.VertexComparer;
-        var capacity = graph.VertexCount;
-        var distance = new Dictionary<TVertex, TWeight>(capacity, comparer) { [source] = TWeight.Zero };
-        var predecessor = new Dictionary<TVertex, TVertex>(capacity, comparer);
-        var settled = new HashSet<TVertex>(capacity, comparer);
-        var frontier = new PriorityQueue<TVertex, TWeight>(capacity);
-        frontier.Enqueue(source, TWeight.Zero);
-
-        while (frontier.TryDequeue(out var current, out _))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (!settled.Add(current))
-            {
-                continue;
-            }
-
-            if (hasTarget && comparer.Equals(current, target!))
-            {
-                break;
-            }
-
-            foreach (var (neighbor, edge) in GraphTraversalCore.OutgoingArcs(graph, current))
-            {
-                var weight = _weightSelector(edge);
-                if (weight < TWeight.Zero)
-                {
-                    throw new NegativeWeightException(
-                        $"Edge '{edge}' has negative weight {weight}; Dijkstra requires non-negative weights. Use Bellman-Ford instead.");
-                }
-
-                if (settled.Contains(neighbor))
-                {
-                    continue;
-                }
-
-                var candidate = distance[current] + weight;
-                if (!distance.TryGetValue(neighbor, out var known) || candidate < known)
-                {
-                    distance[neighbor] = candidate;
-                    predecessor[neighbor] = current;
-                    frontier.Enqueue(neighbor, candidate);
-                }
-            }
-        }
-
-        return (distance, predecessor);
-    }
+        => DijkstraCore.Relax(
+            graph,
+            _weightSelector,
+            source,
+            hasTarget,
+            target,
+            skipArc: null,
+            "Dijkstra requires non-negative weights. Use Bellman-Ford instead.",
+            cancellationToken);
 }

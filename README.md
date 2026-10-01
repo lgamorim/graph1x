@@ -26,9 +26,9 @@ On top of the data structures, the library ships the classic algorithm suite: BF
 
 ## Status
 
-Graph1x 1.0 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy.
+Graph1x 1.1 is stable. The public API follows [Semantic Versioning](https://semver.org): breaking changes only in a new major version, additions in minors, fixes in patches — and the API surface is analyzer-locked, so compatibility is enforced by the build, not just by policy.
 
-Built milestone by milestone with TDD (tests written before the implementation); over 830 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible and strong-name signed.
+Built milestone by milestone with TDD (tests written before the implementation); over 900 unit tests cover the edge cases, including a shared contract suite that every graph implementation must pass. CI runs the full suite on Linux and Windows against both target frameworks, and the package ships Source Link with a symbols package for debugging. The library is trim/Native-AOT compatible and strong-name signed.
 
 | Area | Contents |
 |---|---|
@@ -36,11 +36,11 @@ Built milestone by milestone with TDD (tests written before the implementation);
 | Traversal | BFS, DFS pre/post-order (lazy, iterative) |
 | Cycles | `HasCycle`/`FindCycle`, Kahn topological sort |
 | Eulerian trails | `HasEulerianCircuit`/`Path`, Hierholzer `FindEulerianCircuit`/`Path` |
-| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points |
-| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, A* |
+| Connectivity | Connected/weakly connected components, Tarjan SCC, condensation, bridges, articulation points, biconnected and 2-edge-connected components |
+| Shortest paths | Dijkstra, Bellman-Ford, Floyd-Warshall, Johnson (sparse all-pairs), A*, Yen k-shortest (lazy) |
 | DAG paths | Topological relaxation: shortest/longest paths, critical path |
 | Spanning trees | Kruskal, Prim (forests on disconnected input) |
-| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut |
+| Flow networks | Edmonds-Karp and Dinic maximum flow with certifying minimum cut; min-cost max-flow (successive shortest paths with potentials) |
 | Matching | Hopcroft-Karp maximum bipartite matching |
 | Structure | Density, degree sequence, bipartiteness, transpose, transitive closure/reduction |
 | Operations | Induced subgraph, union, complement |
@@ -178,11 +178,22 @@ new BellmanFordShortestPath<string, WeightedEdge<string, int>, int>(e => e.Weigh
 new FloydWarshallAllShortestPaths<string, WeightedEdge<string, int>, int>(e => e.Weight)
     .Compute(graph)
     .Between("a", "b");
+// Sparse graph? Johnson's reweighting beats O(V³): same result type, same
+// negative-weight support, plus a ParallelOptions overload for per-source runs.
+new JohnsonAllShortestPaths<string, WeightedEdge<string, int>, int>(e => e.Weight)
+    .Compute(graph, new ParallelOptions { MaxDegreeOfParallelism = 4 });
 new AStarShortestPath<Cell, WeightedEdge<Cell, int>, int>(e => e.Weight, Manhattan)
     .FindPath(grid, start, goal);
 ```
 
 Dijkstra and A* reject negative weights with `NegativeWeightException` and point you to Bellman-Ford.
+
+Need alternatives, not just the optimum? Yen's algorithm enumerates simple paths lazily in nondecreasing weight — take as many as you need and stop paying:
+
+```csharp
+graph.EnumerateShortestPaths("LIS", "MAD").Take(3);   // 3 cheapest routes
+graph.EnumerateShortestPaths("a", "z", e => e.Toll);  // any edge type + selector
+```
 
 On DAGs, a single topological pass beats both and takes negative weights in stride — plus the longest-path queries that are intractable on general graphs:
 
@@ -214,6 +225,12 @@ result.FlowValue;           // max flow == min cut capacity
 result.EdgeFlows;           // flow per edge (parallel edges listed individually)
 result.MinCutEdges;         // the bottleneck edges
 result.SourceSideOfMinCut;  // the residual-reachable vertex set
+
+// Cheapest way to ship the maximum flow: capacities plus per-unit costs.
+// Negative costs are fine as long as no negative-cost cycle is reachable.
+var cheapest = network.MinimumCostMaximumFlow("s", "t", e => e.Capacity, e => e.Cost);
+cheapest.FlowValue;         // same value as MaximumFlow
+cheapest.TotalCost;         // sum of flow × cost, minimized (assignment problems fall out)
 ```
 
 Maximum bipartite matching (undirected bipartite graphs; the partition is derived automatically):
@@ -243,6 +260,8 @@ graph.FindBipartition();          // the two vertex sets, or null
 graph.Transpose();                // reversed copy of a directed graph
 graph.FindBridges();              // edges whose removal disconnects (undirected)
 graph.FindArticulationPoints();   // cut vertices (undirected)
+graph.BiconnectedComponents();    // maximal 2-connected edge sets; bridges are singletons
+graph.TwoEdgeConnectedComponents(); // vertex partition after removing all bridges
 dag.TransitiveClosure();          // u->v for every non-empty path; cycles gain self-loops
 dag.TransitiveReduction();        // minimal edge set with the same reachability (DAGs only)
 

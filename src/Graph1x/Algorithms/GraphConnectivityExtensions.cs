@@ -25,40 +25,7 @@ public static class GraphConnectivityExtensions
     {
         ArgumentNullException.ThrowIfNull(graph);
 
-        var comparer = graph.VertexComparer;
-        var visited = new HashSet<TVertex>(graph.VertexCount, comparer);
-        var components = new List<IReadOnlySet<TVertex>>();
-
-        foreach (var root in graph.Vertices)
-        {
-            if (visited.Contains(root))
-            {
-                continue;
-            }
-
-            var component = new HashSet<TVertex>(comparer) { root };
-            visited.Add(root);
-            var queue = new Queue<TVertex>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                foreach (var edge in graph.AdjacentEdges(current))
-                {
-                    var other = GraphTraversalCore.OtherEndpoint(graph, edge, current);
-                    if (visited.Add(other))
-                    {
-                        component.Add(other);
-                        queue.Enqueue(other);
-                    }
-                }
-            }
-
-            components.Add(component);
-        }
-
-        return components;
+        return ComponentsIgnoringDirection(graph, isBlocked: null);
     }
 
     /// <summary>
@@ -193,7 +160,7 @@ public static class GraphConnectivityExtensions
     public static IReadOnlyList<TEdge> FindBridges<TVertex, TEdge>(this IReadOnlyGraph<TVertex, TEdge> graph)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
-        => FindCutElements(graph).Bridges;
+        => FindCutElements(graph, collectComponents: false).Bridges;
 
     /// <summary>
     /// Finds the articulation points (cut vertices) of an undirected graph:
@@ -207,14 +174,132 @@ public static class GraphConnectivityExtensions
     public static IReadOnlySet<TVertex> FindArticulationPoints<TVertex, TEdge>(this IReadOnlyGraph<TVertex, TEdge> graph)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
-        => FindCutElements(graph).ArticulationPoints;
+        => FindCutElements(graph, collectComponents: false).ArticulationPoints;
 
     /// <summary>
-    /// One iterative low-link DFS computing bridges and articulation points
-    /// together (the same discovery/low-link machinery answers both).
+    /// Computes the biconnected components of an undirected graph: maximal
+    /// edge sets in which any two edges lie on a common simple cycle. Every
+    /// non-loop edge belongs to exactly one component; bridges form
+    /// single-edge components, self-loops belong to none, and articulation
+    /// points are exactly the vertices appearing in more than one component.
     /// </summary>
-    private static (IReadOnlyList<TEdge> Bridges, IReadOnlySet<TVertex> ArticulationPoints) FindCutElements<TVertex, TEdge>(
-        IReadOnlyGraph<TVertex, TEdge> graph)
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The undirected graph to partition.</param>
+    /// <returns>One edge list per biconnected component.</returns>
+    /// <exception cref="ArgumentException"><paramref name="graph"/> is directed.</exception>
+    public static IReadOnlyList<IReadOnlyList<TEdge>> BiconnectedComponents<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+        => FindCutElements(graph, collectComponents: true).Components;
+
+    /// <summary>
+    /// Computes the 2-edge-connected components of an undirected graph: the
+    /// connected components that remain after removing all bridges. Every
+    /// vertex belongs to exactly one component; vertices attached only by
+    /// bridges (or isolated) form singleton components.
+    /// </summary>
+    /// <typeparam name="TVertex">The vertex type.</typeparam>
+    /// <typeparam name="TEdge">The edge type.</typeparam>
+    /// <param name="graph">The undirected graph to partition.</param>
+    /// <returns>One vertex set per 2-edge-connected component.</returns>
+    /// <exception cref="ArgumentException"><paramref name="graph"/> is directed.</exception>
+    public static IReadOnlyList<IReadOnlySet<TVertex>> TwoEdgeConnectedComponents<TVertex, TEdge>(
+        this IReadOnlyGraph<TVertex, TEdge> graph)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        var bridges = FindCutElements(graph, collectComponents: false).Bridges;
+        var comparer = graph.VertexComparer;
+
+        // A bridge is the only edge between its endpoints (a parallel pair is
+        // never a bridge), so skipping the endpoint pair skips exactly the
+        // bridge and nothing else.
+        var bridgeNeighbors = new Dictionary<TVertex, HashSet<TVertex>>(comparer);
+        foreach (var bridge in bridges)
+        {
+            AddPair(bridge.Source, bridge.Target);
+            AddPair(bridge.Target, bridge.Source);
+        }
+
+        return ComponentsIgnoringDirection(
+            graph,
+            (current, other) => bridgeNeighbors.TryGetValue(current, out var blocked) && blocked.Contains(other));
+
+        void AddPair(TVertex from, TVertex to)
+        {
+            if (!bridgeNeighbors.TryGetValue(from, out var set))
+            {
+                set = new HashSet<TVertex>(comparer);
+                bridgeNeighbors[from] = set;
+            }
+
+            set.Add(to);
+        }
+    }
+
+    /// <summary>
+    /// Breadth-first flood fill over incident edges with direction ignored,
+    /// one component per unvisited root. <paramref name="isBlocked"/>
+    /// (current, other) refuses to cross an arc, which is how bridge removal
+    /// is expressed without copying the graph.
+    /// </summary>
+    private static IReadOnlyList<IReadOnlySet<TVertex>> ComponentsIgnoringDirection<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TVertex, TVertex, bool>? isBlocked)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        var comparer = graph.VertexComparer;
+        var visited = new HashSet<TVertex>(graph.VertexCount, comparer);
+        var components = new List<IReadOnlySet<TVertex>>();
+
+        foreach (var root in graph.Vertices)
+        {
+            if (!visited.Add(root))
+            {
+                continue;
+            }
+
+            var component = new HashSet<TVertex>(comparer) { root };
+            var queue = new Queue<TVertex>();
+            queue.Enqueue(root);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                foreach (var edge in graph.AdjacentEdges(current))
+                {
+                    var other = GraphTraversalCore.OtherEndpoint(graph, edge, current);
+                    if (isBlocked is not null && isBlocked(current, other))
+                    {
+                        continue;
+                    }
+
+                    if (visited.Add(other))
+                    {
+                        component.Add(other);
+                        queue.Enqueue(other);
+                    }
+                }
+            }
+
+            components.Add(component);
+        }
+
+        return components;
+    }
+
+    /// <summary>
+    /// One iterative low-link DFS computing bridges, articulation points, and
+    /// (on request) biconnected components together — the same discovery/
+    /// low-link machinery answers all three. Components are collected on an
+    /// edge stack popped at each articulation boundary, using stack depths
+    /// rather than edge equality so equal-valued parallel edges stay distinct.
+    /// </summary>
+    private static (IReadOnlyList<TEdge> Bridges, IReadOnlySet<TVertex> ArticulationPoints, IReadOnlyList<IReadOnlyList<TEdge>> Components) FindCutElements<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph, bool collectComponents)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
     {
@@ -222,7 +307,8 @@ public static class GraphConnectivityExtensions
         if (graph.IsDirected)
         {
             throw new ArgumentException(
-                "Bridges and articulation points are defined for undirected graphs.", nameof(graph));
+                "Bridges, articulation points, and biconnected components are defined for undirected graphs.",
+                nameof(graph));
         }
 
         var comparer = graph.VertexComparer;
@@ -230,6 +316,8 @@ public static class GraphConnectivityExtensions
         var low = new Dictionary<TVertex, int>(comparer);
         var bridges = new List<TEdge>();
         var articulationPoints = new HashSet<TVertex>(comparer);
+        var components = new List<IReadOnlyList<TEdge>>();
+        var edgeStack = collectComponents ? new List<TEdge>() : null;
         var time = 0;
 
         foreach (var root in graph.Vertices)
@@ -259,21 +347,34 @@ public static class GraphConnectivityExtensions
                     {
                         discovery[other] = low[other] = time++;
                         frame.ChildCount++;
+                        var edgeStackBase = edgeStack?.Count ?? 0;
+                        edgeStack?.Add(edge);
                         stack.Push(new CutFrame<TVertex, TEdge>(other, graph.AdjacentEdges(other).GetEnumerator())
                         {
                             HasParent = true,
-                            Parent = frame.Vertex,
                             TreeEdge = edge,
+                            EdgeStackBase = edgeStackBase,
                         });
                         continue;
                     }
 
-                    // The single tree edge back to the parent is not a back
-                    // edge; skip it exactly once so a parallel edge still counts.
-                    if (frame.HasParent && !frame.SkippedParentEdge && comparer.Equals(other, frame.Parent!))
+                    // The tree edge is enumerated again from the child's side.
+                    // Skip that one instance, matched by edge identity rather
+                    // than by endpoint: a parallel twin also leads back to the
+                    // parent, and IReadOnlyGraph promises no cross-endpoint
+                    // ordering, so endpoint matching could skip the twin and
+                    // stack the tree edge twice.
+                    if (frame.HasParent && !frame.SkippedParentEdge && EqualityComparer<TEdge>.Default.Equals(edge, frame.TreeEdge))
                     {
                         frame.SkippedParentEdge = true;
                         continue;
+                    }
+
+                    // Each undirected edge is enumerated from both endpoints;
+                    // stack a back edge only from the descendant's side.
+                    if (otherDiscovery < discovery[frame.Vertex])
+                    {
+                        edgeStack?.Add(edge);
                     }
 
                     low[frame.Vertex] = Math.Min(low[frame.Vertex], otherDiscovery);
@@ -296,6 +397,22 @@ public static class GraphConnectivityExtensions
                     {
                         articulationPoints.Add(parent.Vertex);
                     }
+
+                    // Articulation boundary (including bridges and root
+                    // children): everything stacked since the tree edge to
+                    // this child is one biconnected component.
+                    if (edgeStack is not null && low[frame.Vertex] >= discovery[parent.Vertex])
+                    {
+                        var count = edgeStack.Count - frame.EdgeStackBase;
+                        var component = new List<TEdge>(count);
+                        for (var i = frame.EdgeStackBase; i < edgeStack.Count; i++)
+                        {
+                            component.Add(edgeStack[i]);
+                        }
+
+                        edgeStack.RemoveRange(frame.EdgeStackBase, count);
+                        components.Add(component);
+                    }
                 }
                 else if (frame.ChildCount >= 2)
                 {
@@ -304,7 +421,7 @@ public static class GraphConnectivityExtensions
             }
         }
 
-        return (bridges, articulationPoints);
+        return (bridges, articulationPoints, components);
     }
 
     private sealed class CutFrame<TVertex, TEdge>(TVertex vertex, IEnumerator<TEdge> edges)
@@ -317,12 +434,12 @@ public static class GraphConnectivityExtensions
 
         public bool HasParent { get; init; }
 
-        public TVertex? Parent { get; init; }
-
         public TEdge? TreeEdge { get; init; }
 
         public bool SkippedParentEdge { get; set; }
 
         public int ChildCount { get; set; }
+
+        public int EdgeStackBase { get; init; }
     }
 }

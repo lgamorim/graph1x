@@ -61,18 +61,18 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
 
         var dist = new TWeight[count, count];
         var reachable = new bool[count, count];
-        var next = new int[count, count];
+        var predecessor = new int[count, count];
 
         for (var i = 0; i < count; i++)
         {
             for (var j = 0; j < count; j++)
             {
-                next[i, j] = -1;
+                predecessor[i, j] = -1;
             }
 
             dist[i, i] = TWeight.Zero;
             reachable[i, i] = true;
-            next[i, i] = i;
+            predecessor[i, i] = i;
         }
 
         foreach (var edge in graph.Edges)
@@ -109,7 +109,7 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
                     {
                         dist[i, j] = candidate;
                         reachable[i, j] = true;
-                        next[i, j] = next[i, k];
+                        predecessor[i, j] = predecessor[k, j];
                     }
                 }
             }
@@ -124,7 +124,7 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
             }
         }
 
-        return new AllPairsShortestPaths<TVertex, TWeight>(vertices, index, dist, reachable, next);
+        return new AllPairsShortestPaths<TVertex, TWeight>(vertices, index, dist, reachable, predecessor);
 
         void RelaxArc(int source, int target, TWeight weight)
         {
@@ -133,73 +133,8 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
             {
                 dist[source, target] = weight;
                 reachable[source, target] = true;
-                next[source, target] = target;
+                predecessor[source, target] = source;
             }
         }
-    }
-}
-
-/// <summary>
-/// The result of a Floyd-Warshall computation: shortest distances and paths
-/// between every pair of vertices, queryable via <see cref="Between"/>.
-/// </summary>
-/// <typeparam name="TVertex">The vertex type.</typeparam>
-/// <typeparam name="TWeight">The numeric weight type.</typeparam>
-public sealed class AllPairsShortestPaths<TVertex, TWeight>
-    where TVertex : notnull
-    where TWeight : INumber<TWeight>
-{
-    private readonly TVertex[] _vertices;
-    private readonly Dictionary<TVertex, int> _index;
-    private readonly TWeight[,] _dist;
-    private readonly bool[,] _reachable;
-    private readonly int[,] _next;
-
-    internal AllPairsShortestPaths(
-        TVertex[] vertices,
-        Dictionary<TVertex, int> index,
-        TWeight[,] dist,
-        bool[,] reachable,
-        int[,] next)
-    {
-        _vertices = vertices;
-        _index = index;
-        _dist = dist;
-        _reachable = reachable;
-        _next = next;
-    }
-
-    /// <summary>Gets the shortest path from <paramref name="source"/> to <paramref name="target"/>.</summary>
-    /// <param name="source">The start vertex.</param>
-    /// <param name="target">The end vertex.</param>
-    /// <returns>The query result, unreachable when no path exists.</returns>
-    /// <exception cref="ArgumentException">Either vertex was not part of the analyzed graph.</exception>
-    public ShortestPathResult<TVertex, TWeight> Between(TVertex source, TVertex target)
-    {
-        var from = IndexOf(source, nameof(source));
-        var to = IndexOf(target, nameof(target));
-
-        if (!_reachable[from, to])
-        {
-            return new ShortestPathResult<TVertex, TWeight>(source, target);
-        }
-
-        var path = new List<TVertex> { _vertices[from] };
-        var current = from;
-        while (current != to)
-        {
-            current = _next[current, to];
-            path.Add(_vertices[current]);
-        }
-
-        return new ShortestPathResult<TVertex, TWeight>(source, target, _dist[from, to], path);
-    }
-
-    private int IndexOf(TVertex vertex, string paramName)
-    {
-        ArgumentNullException.ThrowIfNull(vertex, paramName);
-        return _index.TryGetValue(vertex, out var position)
-            ? position
-            : throw new ArgumentException($"Vertex '{vertex}' was not part of the analyzed graph.", paramName);
     }
 }

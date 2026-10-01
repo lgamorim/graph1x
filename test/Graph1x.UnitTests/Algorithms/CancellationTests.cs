@@ -32,7 +32,8 @@ public class CancellationTests
     public static TheoryData<string> CancellableOperations => new(
         "FloydWarshall", "DijkstraPathsFrom", "BellmanFordPathsFrom", "ShortestPathsFromFacade",
         "Betweenness", "BetweennessWeighted", "Closeness", "ClosenessWeighted", "PageRank",
-        "EdmondsKarp", "Dinic", "MaximumFlowFacade", "TransitiveClosure", "TransitiveReduction",
+        "EdmondsKarp", "Dinic", "MaximumFlowFacade", "MinCostFlow", "MinCostFlowFacade",
+        "Johnson", "JohnsonParallel", "TransitiveClosure", "TransitiveReduction",
         "Condense", "Diameter", "AveragePathLength");
 
     private static void Run(string operation, IDirectedGraph<int, WeightedEdge<int, int>> graph, CancellationToken token)
@@ -91,6 +92,21 @@ public class CancellationTests
                 break;
             case "MaximumFlowFacade":
                 graph.MaximumFlow(0, 19, e => e.Weight, token);
+                break;
+            case "MinCostFlow":
+                new MinCostMaximumFlow<int, WeightedEdge<int, int>, int>(e => e.Weight, e => e.Weight)
+                    .FindMinimumCostMaximumFlow(graph, 0, 19, token);
+                break;
+            case "MinCostFlowFacade":
+                graph.MinimumCostMaximumFlow(0, 19, e => e.Weight, e => e.Weight, token);
+                break;
+            case "Johnson":
+                new JohnsonAllShortestPaths<int, WeightedEdge<int, int>, int>(e => e.Weight)
+                    .Compute(graph, token);
+                break;
+            case "JohnsonParallel":
+                new JohnsonAllShortestPaths<int, WeightedEdge<int, int>, int>(e => e.Weight)
+                    .Compute(graph, new ParallelOptions { CancellationToken = token });
                 break;
             case "TransitiveClosure":
                 graph.TransitiveClosure((s, t) => new WeightedEdge<int, int>(s, t, 0), token);
@@ -190,6 +206,54 @@ public class CancellationTests
         });
 
         Assert.Throws<OperationCanceledException>(() => algorithm.FindMaximumFlow(graph, 0, 19, source.Token));
+    }
+
+    [Fact]
+    public void MidComputation_JohnsonObservesCancellationBetweenSources()
+    {
+        // The weight selector runs while the workspace is built, before the
+        // per-source loop, so cancelling from it exercises the per-source
+        // check rather than the entry check.
+        var graph = Network();
+        using var source = new CancellationTokenSource();
+        var calls = 0;
+        var algorithm = new JohnsonAllShortestPaths<int, WeightedEdge<int, int>, int>(edge =>
+        {
+            if (++calls == 30)
+            {
+                source.Cancel();
+            }
+
+            return edge.Weight;
+        });
+
+        Assert.Throws<OperationCanceledException>(() => algorithm.Compute(graph, source.Token));
+        Assert.True(calls >= 30);
+    }
+
+    [Fact]
+    public void MidComputation_MinCostFlowObservesCancellationBetweenAugmentations()
+    {
+        // The capacity selector runs while the residual network is built,
+        // before the first augmentation, so cancelling from it exercises the
+        // per-augmentation check rather than the entry check.
+        var graph = Network();
+        using var source = new CancellationTokenSource();
+        var calls = 0;
+        var algorithm = new MinCostMaximumFlow<int, WeightedEdge<int, int>, int>(
+            edge =>
+            {
+                if (++calls == 40)
+                {
+                    source.Cancel();
+                }
+
+                return edge.Weight;
+            },
+            edge => edge.Weight);
+
+        Assert.Throws<OperationCanceledException>(() => algorithm.FindMinimumCostMaximumFlow(graph, 0, 19, source.Token));
+        Assert.True(calls >= 40);
     }
 
     [Fact]
