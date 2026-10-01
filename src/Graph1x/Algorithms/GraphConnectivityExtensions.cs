@@ -25,40 +25,7 @@ public static class GraphConnectivityExtensions
     {
         ArgumentNullException.ThrowIfNull(graph);
 
-        var comparer = graph.VertexComparer;
-        var visited = new HashSet<TVertex>(graph.VertexCount, comparer);
-        var components = new List<IReadOnlySet<TVertex>>();
-
-        foreach (var root in graph.Vertices)
-        {
-            if (visited.Contains(root))
-            {
-                continue;
-            }
-
-            var component = new HashSet<TVertex>(comparer) { root };
-            visited.Add(root);
-            var queue = new Queue<TVertex>();
-            queue.Enqueue(root);
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                foreach (var edge in graph.AdjacentEdges(current))
-                {
-                    var other = GraphTraversalCore.OtherEndpoint(graph, edge, current);
-                    if (visited.Add(other))
-                    {
-                        component.Add(other);
-                        queue.Enqueue(other);
-                    }
-                }
-            }
-
-            components.Add(component);
-        }
-
-        return components;
+        return ComponentsIgnoringDirection(graph, isBlocked: null);
     }
 
     /// <summary>
@@ -256,6 +223,35 @@ public static class GraphConnectivityExtensions
             AddPair(bridge.Target, bridge.Source);
         }
 
+        return ComponentsIgnoringDirection(
+            graph,
+            (current, other) => bridgeNeighbors.TryGetValue(current, out var blocked) && blocked.Contains(other));
+
+        void AddPair(TVertex from, TVertex to)
+        {
+            if (!bridgeNeighbors.TryGetValue(from, out var set))
+            {
+                set = new HashSet<TVertex>(comparer);
+                bridgeNeighbors[from] = set;
+            }
+
+            set.Add(to);
+        }
+    }
+
+    /// <summary>
+    /// Breadth-first flood fill over incident edges with direction ignored,
+    /// one component per unvisited root. <paramref name="isBlocked"/>
+    /// (current, other) refuses to cross an arc, which is how bridge removal
+    /// is expressed without copying the graph.
+    /// </summary>
+    private static IReadOnlyList<IReadOnlySet<TVertex>> ComponentsIgnoringDirection<TVertex, TEdge>(
+        IReadOnlyGraph<TVertex, TEdge> graph,
+        Func<TVertex, TVertex, bool>? isBlocked)
+        where TVertex : notnull
+        where TEdge : IEdge<TVertex>
+    {
+        var comparer = graph.VertexComparer;
         var visited = new HashSet<TVertex>(graph.VertexCount, comparer);
         var components = new List<IReadOnlySet<TVertex>>();
 
@@ -276,7 +272,7 @@ public static class GraphConnectivityExtensions
                 foreach (var edge in graph.AdjacentEdges(current))
                 {
                     var other = GraphTraversalCore.OtherEndpoint(graph, edge, current);
-                    if (bridgeNeighbors.TryGetValue(current, out var blocked) && blocked.Contains(other))
+                    if (isBlocked is not null && isBlocked(current, other))
                     {
                         continue;
                     }
@@ -293,17 +289,6 @@ public static class GraphConnectivityExtensions
         }
 
         return components;
-
-        void AddPair(TVertex from, TVertex to)
-        {
-            if (!bridgeNeighbors.TryGetValue(from, out var set))
-            {
-                set = new HashSet<TVertex>(comparer);
-                bridgeNeighbors[from] = set;
-            }
-
-            set.Add(to);
-        }
     }
 
     /// <summary>
