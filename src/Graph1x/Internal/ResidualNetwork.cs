@@ -86,13 +86,8 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
                 continue; // self-loops cannot carry source-to-sink flow
             }
 
-            AddArcPair(_index[edge.Source], _index[edge.Target], capacity, edge);
-            if (costSelector is not null)
-            {
-                var cost = costSelector(edge);
-                _cost!.Add(cost);   // forward arc: pay the cost
-                _cost.Add(-cost);   // reverse arc: refund it when cancelling flow
-            }
+            var cost = costSelector is null ? TWeight.Zero : costSelector(edge);
+            AddArcPair(_index[edge.Source], _index[edge.Target], capacity, cost, edge);
         }
     }
 
@@ -114,6 +109,9 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
 
     internal TEdge Origin(int arc) => _origin[arc];
 
+    // _cost is allocated exactly when the constructor received a cost selector,
+    // and only the cost-aware strategy (min-cost flow) asks for it, so the
+    // null-forgiving operator cannot be observed to fail here.
     /// <summary>Per-arc cost; only available when a cost selector was supplied.</summary>
     internal TWeight Cost(int arc) => _cost![arc];
 
@@ -229,18 +227,25 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
             source, sink, total, edgeFlows, sourceSide, cutEdges);
     }
 
-    private void AddArcPair(int tail, int head, TWeight capacity, TEdge origin)
+    /// <summary>
+    /// Appends a forward arc and its reverse partner together, so every
+    /// per-arc list (the optional cost list included) stays aligned by
+    /// construction rather than by caller discipline.
+    /// </summary>
+    private void AddArcPair(int tail, int head, TWeight capacity, TWeight cost, TEdge origin)
     {
         _incidentArcs[tail].Add(_arcHead.Count);
         _arcHead.Add(head);
         _capacity.Add(capacity);
         _flow.Add(TWeight.Zero);
         _origin.Add(origin);
+        _cost?.Add(cost);   // forward arc: pay the cost
 
         _incidentArcs[head].Add(_arcHead.Count);
         _arcHead.Add(tail);
         _capacity.Add(TWeight.Zero);
         _flow.Add(TWeight.Zero);
         _origin.Add(origin);
+        _cost?.Add(-cost);  // reverse arc: refund it when cancelling flow
     }
 }
