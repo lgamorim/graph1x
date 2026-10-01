@@ -122,6 +122,30 @@ public class BiconnectedComponentsTests
     }
 
     [Fact]
+    public void BiconnectedComponents_ParallelEdgesWithEndpointSpecificOrdering_KeepsBothEdges()
+    {
+        // IReadOnlyGraph promises no cross-endpoint ordering: a custom graph
+        // may list b's incident edges in a different order than a's. The
+        // parent skip must then match the tree edge itself, not "any edge back
+        // to the parent", or the tree edge is counted twice and its twin lost.
+        var inner = new UndirectedMultigraph<string, IdentityEdge>();
+        var first = new IdentityEdge("a", "b");
+        var second = new IdentityEdge("a", "b");
+        var bridge = new IdentityEdge("b", "c");
+        inner.AddEdge(first);
+        inner.AddEdge(second);
+        inner.AddEdge(bridge);
+        var graph = new ReversedIncidenceGraph(inner, "b");
+
+        var components = graph.BiconnectedComponents();
+
+        Assert.Equal(2, components.Count);
+        var cycle = Assert.Single(components, component => component.Count == 2);
+        Assert.Contains(first, cycle);
+        Assert.Contains(second, cycle);
+    }
+
+    [Fact]
     public void BiconnectedComponents_SelfLoops_AppearInNoComponent()
     {
         var graph = Undirected(("a", "a"), ("a", "b"));
@@ -203,6 +227,45 @@ public class BiconnectedComponentsTests
 
         var inMultiple = membership.Where(pair => pair.Value >= 2).Select(pair => pair.Key).ToHashSet();
         Assert.Equal(graph.FindArticulationPoints().ToHashSet(), inMultiple);
+    }
+
+    /// <summary>An edge with reference identity, so parallel copies stay distinguishable.</summary>
+    private sealed class IdentityEdge(string source, string target) : IEdge<string>
+    {
+        public string Source { get; } = source;
+
+        public string Target { get; } = target;
+    }
+
+    /// <summary>
+    /// Read-only view that enumerates one vertex's incident edges in reverse,
+    /// modelling a graph whose per-vertex storage has no shared ordering.
+    /// </summary>
+    private sealed class ReversedIncidenceGraph(UndirectedMultigraph<string, IdentityEdge> inner, string reversedVertex)
+        : IReadOnlyGraph<string, IdentityEdge>
+    {
+        public int VertexCount => inner.VertexCount;
+
+        public int EdgeCount => inner.EdgeCount;
+
+        public bool IsDirected => inner.IsDirected;
+
+        public bool AllowsParallelEdges => inner.AllowsParallelEdges;
+
+        public IEqualityComparer<string> VertexComparer => inner.VertexComparer;
+
+        public IEnumerable<string> Vertices => inner.Vertices;
+
+        public IEnumerable<IdentityEdge> Edges => inner.Edges;
+
+        public bool ContainsVertex(string vertex) => inner.ContainsVertex(vertex);
+
+        public bool ContainsEdge(string source, string target) => inner.ContainsEdge(source, target);
+
+        public int Degree(string vertex) => inner.Degree(vertex);
+
+        public IEnumerable<IdentityEdge> AdjacentEdges(string vertex)
+            => vertex == reversedVertex ? inner.AdjacentEdges(vertex).Reverse() : inner.AdjacentEdges(vertex);
     }
 
     [Fact]

@@ -367,16 +367,19 @@ public static class GraphConnectivityExtensions
                         stack.Push(new CutFrame<TVertex, TEdge>(other, graph.AdjacentEdges(other).GetEnumerator())
                         {
                             HasParent = true,
-                            Parent = frame.Vertex,
                             TreeEdge = edge,
                             EdgeStackBase = edgeStackBase,
                         });
                         continue;
                     }
 
-                    // The single tree edge back to the parent is not a back
-                    // edge; skip it exactly once so a parallel edge still counts.
-                    if (frame.HasParent && !frame.SkippedParentEdge && comparer.Equals(other, frame.Parent!))
+                    // The tree edge is enumerated again from the child's side.
+                    // Skip that one instance, matched by edge identity rather
+                    // than by endpoint: a parallel twin also leads back to the
+                    // parent, and IReadOnlyGraph promises no cross-endpoint
+                    // ordering, so endpoint matching could skip the twin and
+                    // stack the tree edge twice.
+                    if (frame.HasParent && !frame.SkippedParentEdge && EqualityComparer<TEdge>.Default.Equals(edge, frame.TreeEdge))
                     {
                         frame.SkippedParentEdge = true;
                         continue;
@@ -445,8 +448,6 @@ public static class GraphConnectivityExtensions
         public IEnumerator<TEdge> Edges { get; } = edges;
 
         public bool HasParent { get; init; }
-
-        public TVertex? Parent { get; init; }
 
         public TEdge? TreeEdge { get; init; }
 
