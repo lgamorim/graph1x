@@ -152,10 +152,12 @@ public sealed class MinCostMaximumFlow<TVertex, TEdge, TWeight>
     }
 
     /// <summary>
-    /// Bellman-Ford from the source over the initial residual arcs, producing
-    /// the potentials that make all reduced costs non-negative. Vertices
-    /// unreachable from the source get no potential; they can never lie on an
-    /// augmenting path, so later Dijkstra runs skip them.
+    /// Potentials that make every initial reduced cost non-negative. When no
+    /// edge cost is negative the zero vector already qualifies, so the
+    /// Θ(V·E) Bellman-Ford pass is skipped. Otherwise Bellman-Ford from the
+    /// source over the initial residual arcs computes them; vertices
+    /// unreachable from the source get no potential, and since they can never
+    /// lie on an augmenting path, later Dijkstra runs skip them.
     /// </summary>
     private static (TWeight[] Potential, bool[] HasPotential) InitialPotentials(
         ResidualNetwork<TVertex, TEdge, TWeight> network, int sourceIndex)
@@ -163,6 +165,12 @@ public sealed class MinCostMaximumFlow<TVertex, TEdge, TWeight>
         var vertexCount = network.VertexCount;
         var potential = new TWeight[vertexCount];
         var hasPotential = new bool[vertexCount];
+        if (!network.HasNegativeCost())
+        {
+            Array.Fill(hasPotential, true);
+            return (potential, hasPotential);
+        }
+
         hasPotential[sourceIndex] = true;
 
         for (var pass = 0; pass < vertexCount; pass++)

@@ -239,6 +239,20 @@ internal sealed class ResidualNetwork<TVertex, TEdge, TWeight>
         return total;
     }
 
+    /// <summary>Whether any original edge carries a negative cost; requires a cost selector.</summary>
+    internal bool HasNegativeCost()
+    {
+        foreach (var arc in ForwardArcs())
+        {
+            if (Cost(arc) < TWeight.Zero)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>The arcs that correspond to original edges: forward arcs sit at even ids, their reverse partners at id + 1.</summary>
     private IEnumerable<int> ForwardArcs()
     {
