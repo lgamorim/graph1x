@@ -23,6 +23,36 @@ public class JohnsonTests
         where TVertex : notnull
         => new(edge => edge.Weight);
 
+    /// <summary>
+    /// Checks that a reconstructed path really runs source → target over
+    /// existing edges and that its cheapest-arc weight sum equals Distance.
+    /// </summary>
+    private static void AssertValidPath<TVertex>(
+        IReadOnlyGraph<TVertex, WeightedEdge<TVertex, int>> graph,
+        ShortestPathResult<TVertex, int> result)
+        where TVertex : notnull
+    {
+        Assert.True(result.IsReachable);
+        Assert.Equal(result.Source, result.Path[0]);
+        Assert.Equal(result.Target, result.Path[^1]);
+
+        var comparer = graph.VertexComparer;
+        var total = 0;
+        for (var i = 0; i < result.Path.Count - 1; i++)
+        {
+            var from = result.Path[i];
+            var to = result.Path[i + 1];
+            var arcs = graph.AdjacentEdges(from)
+                .Where(edge => (comparer.Equals(edge.Source, from) && comparer.Equals(edge.Target, to))
+                    || (!graph.IsDirected && comparer.Equals(edge.Target, from) && comparer.Equals(edge.Source, to)))
+                .ToList();
+            Assert.NotEmpty(arcs);
+            total += arcs.Min(edge => edge.Weight);
+        }
+
+        Assert.Equal(result.Distance, total);
+    }
+
     [Fact]
     public void Compute_MatchesFloydWarshall_OnRandomDirectedGraphs()
     {
@@ -88,6 +118,7 @@ public class JohnsonTests
                 if (expected.IsReachable)
                 {
                     Assert.Equal(expected.Distance, actual.Distance);
+                    AssertValidPath(graph, actual);
                 }
             }
         }
@@ -149,6 +180,67 @@ public class JohnsonTests
                 if (expected.IsReachable)
                 {
                     Assert.Equal(expected.Distance, actual.Distance);
+                    AssertValidPath(graph, actual);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void Between_ZeroWeightCycleWithTiedRoutes_ReconstructsPath()
+    {
+        // Rows a and b break the a->p->t / b->q->t tie differently, so a
+        // reconstruction that hops across rows ping-pongs between a and b.
+        var graph = Directed(
+            ("a", "b", 0), ("b", "a", 0),
+            ("a", "p", 1), ("a", "f", 1),
+            ("b", "q", 1), ("b", "f", 1),
+            ("p", "t", 1), ("q", "t", 1));
+
+        var result = Johnson<string>().Compute(graph);
+
+        var path = result.Between("a", "t");
+        Assert.Equal(2, path.Distance);
+        AssertValidPath(graph, path);
+        AssertValidPath(graph, result.Between("b", "t"));
+    }
+
+    [Fact]
+    public void Between_RandomGraphsWithZeroWeightEdges_ReconstructsValidPaths()
+    {
+        foreach (var seed in new[] { 5, 23, 101 })
+        {
+            var random = GraphGenerator.ErdosRenyiDirected(25, 0.15, seed);
+            var graph = new DirectedGraph<int, WeightedEdge<int, int>>();
+            foreach (var vertex in random.Vertices)
+            {
+                graph.AddVertex(vertex);
+            }
+
+            foreach (var edge in random.Edges)
+            {
+                graph.AddEdge(new WeightedEdge<int, int>(
+                    edge.Source, edge.Target, (edge.Source * 7 + edge.Target) % 3)); // many zero-weight cycles
+            }
+
+            var johnson = new JohnsonAllShortestPaths<int, WeightedEdge<int, int>, int>(e => e.Weight)
+                .Compute(graph);
+            var floydWarshall = new FloydWarshallAllShortestPaths<int, WeightedEdge<int, int>, int>(e => e.Weight)
+                .Compute(graph);
+
+            foreach (var source in graph.Vertices)
+            {
+                foreach (var target in graph.Vertices)
+                {
+                    var expected = floydWarshall.Between(source, target);
+                    var actual = johnson.Between(source, target);
+                    Assert.Equal(expected.IsReachable, actual.IsReachable);
+                    if (expected.IsReachable)
+                    {
+                        Assert.Equal(expected.Distance, actual.Distance);
+                        AssertValidPath(graph, expected);
+                        AssertValidPath(graph, actual);
+                    }
                 }
             }
         }

@@ -61,18 +61,18 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
 
         var dist = new TWeight[count, count];
         var reachable = new bool[count, count];
-        var next = new int[count, count];
+        var predecessor = new int[count, count];
 
         for (var i = 0; i < count; i++)
         {
             for (var j = 0; j < count; j++)
             {
-                next[i, j] = -1;
+                predecessor[i, j] = -1;
             }
 
             dist[i, i] = TWeight.Zero;
             reachable[i, i] = true;
-            next[i, i] = i;
+            predecessor[i, i] = i;
         }
 
         foreach (var edge in graph.Edges)
@@ -109,7 +109,7 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
                     {
                         dist[i, j] = candidate;
                         reachable[i, j] = true;
-                        next[i, j] = next[i, k];
+                        predecessor[i, j] = predecessor[k, j];
                     }
                 }
             }
@@ -124,7 +124,7 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
             }
         }
 
-        return new AllPairsShortestPaths<TVertex, TWeight>(vertices, index, dist, reachable, next);
+        return new AllPairsShortestPaths<TVertex, TWeight>(vertices, index, dist, reachable, predecessor);
 
         void RelaxArc(int source, int target, TWeight weight)
         {
@@ -133,15 +133,16 @@ public sealed class FloydWarshallAllShortestPaths<TVertex, TEdge, TWeight>
             {
                 dist[source, target] = weight;
                 reachable[source, target] = true;
-                next[source, target] = target;
+                predecessor[source, target] = source;
             }
         }
     }
 }
 
 /// <summary>
-/// The result of a Floyd-Warshall computation: shortest distances and paths
-/// between every pair of vertices, queryable via <see cref="Between"/>.
+/// The result of an all-pairs shortest-path computation (Floyd-Warshall or
+/// Johnson): shortest distances and paths between every pair of vertices,
+/// queryable via <see cref="Between"/>.
 /// </summary>
 /// <typeparam name="TVertex">The vertex type.</typeparam>
 /// <typeparam name="TWeight">The numeric weight type.</typeparam>
@@ -153,20 +154,27 @@ public sealed class AllPairsShortestPaths<TVertex, TWeight>
     private readonly Dictionary<TVertex, int> _index;
     private readonly TWeight[,] _dist;
     private readonly bool[,] _reachable;
-    private readonly int[,] _next;
+    private readonly int[,] _predecessor;
 
+    /// <summary>
+    /// Wraps the computed matrices. <paramref name="predecessor"/> is
+    /// row-local: <c>predecessor[s, v]</c> is the vertex before <c>v</c> on
+    /// <c>s</c>'s shortest path to <c>v</c>, and every row must form a tree
+    /// rooted at <c>s</c>. Reconstruction walks a single row, so different
+    /// rows may break ties independently.
+    /// </summary>
     internal AllPairsShortestPaths(
         TVertex[] vertices,
         Dictionary<TVertex, int> index,
         TWeight[,] dist,
         bool[,] reachable,
-        int[,] next)
+        int[,] predecessor)
     {
         _vertices = vertices;
         _index = index;
         _dist = dist;
         _reachable = reachable;
-        _next = next;
+        _predecessor = predecessor;
     }
 
     /// <summary>Gets the shortest path from <paramref name="source"/> to <paramref name="target"/>.</summary>
@@ -184,14 +192,15 @@ public sealed class AllPairsShortestPaths<TVertex, TWeight>
             return new ShortestPathResult<TVertex, TWeight>(source, target);
         }
 
-        var path = new List<TVertex> { _vertices[from] };
-        var current = from;
-        while (current != to)
+        var path = new List<TVertex> { _vertices[to] };
+        var current = to;
+        while (current != from)
         {
-            current = _next[current, to];
+            current = _predecessor[from, current];
             path.Add(_vertices[current]);
         }
 
+        path.Reverse();
         return new ShortestPathResult<TVertex, TWeight>(source, target, _dist[from, to], path);
     }
 

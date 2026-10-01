@@ -101,7 +101,7 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
         private readonly TWeight[] _potential;
         private readonly TWeight[,] _dist;
         private readonly bool[,] _reachable;
-        private readonly int[,] _next;
+        private readonly int[,] _predecessor;
 
         internal Workspace(IReadOnlyGraph<TVertex, TEdge> graph, Func<TEdge, TWeight> weightSelector)
         {
@@ -141,12 +141,12 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
 
             _dist = new TWeight[count, count];
             _reachable = new bool[count, count];
-            _next = new int[count, count];
+            _predecessor = new int[count, count];
             for (var i = 0; i < count; i++)
             {
                 for (var j = 0; j < count; j++)
                 {
-                    _next[i, j] = -1;
+                    _predecessor[i, j] = -1;
                 }
             }
         }
@@ -155,7 +155,7 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
 
         /// <summary>
         /// Dijkstra over reduced weights from one source, writing that
-        /// source's row of the distance/reachability/next-hop matrices.
+        /// source's row of the distance/reachability/predecessor matrices.
         /// </summary>
         internal void ComputeRow(int source)
         {
@@ -164,7 +164,6 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
             var reached = new bool[count];
             var settled = new bool[count];
             var parent = new int[count];
-            var settleOrder = new List<int>(count);
             var queue = new PriorityQueue<int, TWeight>(count);
 
             reached[source] = true;
@@ -179,7 +178,6 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
                 }
 
                 settled[current] = true;
-                settleOrder.Add(current);
                 foreach (var (target, reducedWeight) in _adjacency[current])
                 {
                     if (settled[target])
@@ -198,27 +196,28 @@ public sealed class JohnsonAllShortestPaths<TVertex, TEdge, TWeight>
                 }
             }
 
-            // Un-reweight into real distances and derive next hops: vertices
-            // settle in shortest-path-tree order, so a parent's next hop is
-            // always resolved before its children need it.
+            // Un-reweight into real distances. The Dijkstra parents are this
+            // row's own shortest-path tree, which is exactly what row-local
+            // reconstruction needs: rows may break ties differently, so a hop
+            // pointer from one row must never be followed into another.
             _dist[source, source] = TWeight.Zero;
             _reachable[source, source] = true;
-            _next[source, source] = source;
-            foreach (var vertex in settleOrder)
+            _predecessor[source, source] = source;
+            for (var vertex = 0; vertex < count; vertex++)
             {
-                if (vertex == source)
+                if (vertex == source || !settled[vertex])
                 {
                     continue;
                 }
 
                 _dist[source, vertex] = distance[vertex] + _potential[vertex] - _potential[source];
                 _reachable[source, vertex] = true;
-                _next[source, vertex] = parent[vertex] == source ? vertex : _next[source, parent[vertex]];
+                _predecessor[source, vertex] = parent[vertex];
             }
         }
 
         internal AllPairsShortestPaths<TVertex, TWeight> BuildResult()
-            => new(_vertices, _index, _dist, _reachable, _next);
+            => new(_vertices, _index, _dist, _reachable, _predecessor);
 
         /// <summary>
         /// Bellman-Ford from an implicit virtual source connected to every
