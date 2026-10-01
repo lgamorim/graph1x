@@ -29,6 +29,7 @@ public static class GraphKShortestPathsExtensions
     /// <returns>The simple paths, cheapest first.</returns>
     /// <exception cref="ArgumentException">Either endpoint is not in the graph.</exception>
     /// <exception cref="NegativeWeightException">An edge with negative weight is encountered during enumeration.</exception>
+    /// <exception cref="InvalidOperationException">The graph lost an edge of an already-yielded path between enumeration steps.</exception>
     public static IEnumerable<ShortestPathResult<TVertex, TWeight>> EnumerateShortestPaths<TVertex, TEdge, TWeight>(
         this IReadOnlyGraph<TVertex, TEdge> graph,
         TVertex source,
@@ -59,6 +60,7 @@ public static class GraphKShortestPathsExtensions
     /// <returns>The simple paths, cheapest first.</returns>
     /// <exception cref="ArgumentException">Either endpoint is not in the graph.</exception>
     /// <exception cref="NegativeWeightException">An edge with negative weight is encountered during enumeration.</exception>
+    /// <exception cref="InvalidOperationException">The graph lost an edge of an already-yielded path between enumeration steps.</exception>
     public static IEnumerable<ShortestPathResult<TVertex, TWeight>> EnumerateShortestPaths<TVertex, TWeight>(
         this IReadOnlyGraph<TVertex, WeightedEdge<TVertex, TWeight>> graph,
         TVertex source,
@@ -168,7 +170,12 @@ public static class GraphKShortestPathsExtensions
         return true;
     }
 
-    /// <summary>The cheapest arc weight between two adjacent vertices (parallel edges collapse to the cheapest).</summary>
+    /// <summary>
+    /// The cheapest arc weight between two consecutive path vertices (parallel
+    /// edges collapse to the cheapest). The enumerator re-reads the live graph
+    /// on every step, so the arc can only be missing if the graph lost it
+    /// since the path was yielded.
+    /// </summary>
     private static TWeight MinArcWeight<TVertex, TEdge, TWeight>(
         IReadOnlyGraph<TVertex, TEdge> graph,
         Func<TEdge, TWeight> weightSelector,
@@ -196,7 +203,13 @@ public static class GraphKShortestPathsExtensions
             }
         }
 
-        return best; // callers only ask about consecutive path vertices, so a match always exists
+        if (!found)
+        {
+            throw new InvalidOperationException(
+                $"No edge from '{from}' to '{to}' exists any more; the graph was modified during enumeration.");
+        }
+
+        return best;
     }
 
     /// <summary>

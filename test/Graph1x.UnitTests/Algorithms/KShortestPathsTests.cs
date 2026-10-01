@@ -209,6 +209,22 @@ public class KShortestPathsTests
     }
 
     [Fact]
+    public void EnumerateShortestPaths_RootEdgeRemovedMidEnumeration_ThrowsInvalidOperationException()
+    {
+        // The enumerator re-reads the live graph on every MoveNext. Losing an
+        // edge of the previous path must surface as an error, not as a root
+        // weight of zero that makes later distances too small.
+        var graph = Directed(("a", "b", 1), ("b", "c", 1), ("a", "c", 5));
+        using var paths = graph.EnumerateShortestPaths("a", "c").GetEnumerator();
+        Assert.True(paths.MoveNext());
+        Assert.Equal(["a", "b", "c"], paths.Current.Path);
+
+        graph.RemoveEdge(new WeightedEdge<string, int>("a", "b", 1));
+
+        Assert.Throws<InvalidOperationException>(() => paths.MoveNext());
+    }
+
+    [Fact]
     public void EnumerateShortestPaths_InvalidArguments_ThrowEagerly()
     {
         var graph = Directed(("a", "b", 1));
