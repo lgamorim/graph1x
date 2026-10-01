@@ -13,6 +13,8 @@ namespace Graph1x.Algorithms;
 /// </summary>
 public static class GraphKShortestPathsExtensions
 {
+    private const string NonNegativeRequirement = "k-shortest-path enumeration requires non-negative weights.";
+
     /// <summary>
     /// Lazily enumerates the simple paths from <paramref name="source"/> to
     /// <paramref name="target"/> in nondecreasing total weight (Yen's
@@ -229,60 +231,17 @@ public static class GraphKShortestPathsExtensions
         where TWeight : INumber<TWeight>
     {
         var comparer = graph.VertexComparer;
-        var distance = new Dictionary<TVertex, TWeight>(comparer) { [from] = TWeight.Zero };
-        var predecessor = new Dictionary<TVertex, TVertex>(comparer);
-        var settled = new HashSet<TVertex>(comparer);
-        var frontier = new PriorityQueue<TVertex, TWeight>();
-        frontier.Enqueue(from, TWeight.Zero);
+        Func<TVertex, TVertex, bool>? skipArc = bannedVertices is null && bannedFirstHops is null
+            ? null
+            : (current, neighbor) => (bannedVertices?.Contains(neighbor) ?? false)
+                || (comparer.Equals(current, from) && (bannedFirstHops?.Contains(neighbor) ?? false));
 
-        while (frontier.TryDequeue(out var current, out _))
-        {
-            if (!settled.Add(current))
-            {
-                continue;
-            }
+        var (distance, predecessor) = DijkstraCore.Relax(
+            graph, weightSelector, from, hasTarget: true, target, skipArc, NonNegativeRequirement);
 
-            if (comparer.Equals(current, target))
-            {
-                break;
-            }
-
-            var isSpur = comparer.Equals(current, from);
-            foreach (var (neighbor, edge) in GraphTraversalCore.OutgoingArcs(graph, current))
-            {
-                var weight = CheckedWeight(weightSelector, edge);
-                if (settled.Contains(neighbor)
-                    || (bannedVertices?.Contains(neighbor) ?? false)
-                    || (isSpur && (bannedFirstHops?.Contains(neighbor) ?? false)))
-                {
-                    continue;
-                }
-
-                var candidate = distance[current] + weight;
-                if (!distance.TryGetValue(neighbor, out var known) || candidate < known)
-                {
-                    distance[neighbor] = candidate;
-                    predecessor[neighbor] = current;
-                    frontier.Enqueue(neighbor, candidate);
-                }
-            }
-        }
-
-        if (!distance.TryGetValue(target, out var total) || !settled.Contains(target))
-        {
-            return null;
-        }
-
-        var path = new List<TVertex> { target };
-        var walker = target;
-        while (!comparer.Equals(walker, from))
-        {
-            walker = predecessor[walker];
-            path.Add(walker);
-        }
-
-        path.Reverse();
-        return (path, total);
+        return distance.TryGetValue(target, out var total)
+            ? (GraphTraversalCore.BuildPath(from, target, predecessor, comparer), total)
+            : null;
     }
 
     private static TWeight CheckedWeight<TEdge, TWeight>(Func<TEdge, TWeight> weightSelector, TEdge edge)
@@ -292,7 +251,7 @@ public static class GraphKShortestPathsExtensions
         if (weight < TWeight.Zero)
         {
             throw new NegativeWeightException(
-                $"Edge '{edge}' has negative weight {weight}; k-shortest-path enumeration requires non-negative weights.");
+                $"Edge '{edge}' has negative weight {weight}; {NonNegativeRequirement}");
         }
 
         return weight;
