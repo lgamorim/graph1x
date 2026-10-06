@@ -6,6 +6,43 @@ All notable changes to Graph1x are documented in this file. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-07
+
+### Added
+
+- K-shortest paths: `EnumerateShortestPaths` (Yen's algorithm), a lazy
+  sequence of simple paths in nondecreasing total weight — `.Take(k)` is the
+  classic k-shortest query and enumeration cost is caller-controlled, like
+  the clique enumerator. Paths are vertex-distinct (parallel edges only
+  contribute their cheapest weight); non-negative weights required, matching
+  Dijkstra; unreachable targets yield an empty sequence.
+
+- Johnson's all-pairs shortest paths: `JohnsonAllShortestPaths`, the sparse
+  alternative to Floyd-Warshall — one Bellman-Ford pass from an implicit
+  virtual source (no graph mutation) sets potentials, then Dijkstra runs per
+  source on reduced weights. Same `AllPairsShortestPaths` result type, same
+  negative-weight support and `NegativeCycleException`, plus a
+  `ParallelOptions` overload running per-source passes on all cores with
+  results identical to the sequential path.
+
+- Minimum-cost maximum flow: `MinCostMaximumFlow` (successive shortest
+  augmenting paths with vertex potentials — Bellman-Ford once for initial
+  potentials, Dijkstra on reduced costs per augmentation) plus the
+  `MinimumCostMaximumFlow` extension entry point. Capacity and cost come
+  from separate selectors; negative costs are supported until a
+  negative-cost cycle is reachable from the source
+  (`NegativeCycleException`). The result adds `TotalCost` to the familiar
+  flow-value/per-edge-flow shape, and unit capacities make it an
+  assignment-problem solver.
+
+- Biconnected components (`BiconnectedComponents`: maximal edge sets where
+  any two edges share a simple cycle; bridges come out as single-edge
+  components, articulation points are the vertices in more than one) and
+  2-edge-connected components (`TwoEdgeConnectedComponents`: the vertex
+  partition left after removing all bridges). Both ride the existing
+  iterative low-link DFS that already produced bridges and articulation
+  points, so all four views agree by construction.
+
 ## [1.0.1] - 2026-07-15
 
 Correctness and packaging fixes found after the 1.0.0 release. No API changes,
