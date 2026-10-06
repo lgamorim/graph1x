@@ -253,4 +253,22 @@ public class MinCostFlowTests
         Assert.Throws<ArgumentNullException>(
             () => Algorithm().FindMinimumCostMaximumFlow(null!, "s", "t"));
     }
+
+    [Fact]
+    public void FindMinimumCostMaximumFlow_NegativeCostsWithVertexUnreachableFromSource_IgnoresThatVertex()
+    {
+        // Negative costs force the Bellman-Ford potential pass, which must
+        // skip vertices the source cannot reach rather than relax from them.
+        var graph = Network(
+            new CostEdge("s", "a", 1, -5),
+            new CostEdge("a", "t", 1, 2),
+            new CostEdge("x", "t", 1, 1));
+
+        var result = Algorithm().FindMinimumCostMaximumFlow(graph, "s", "t");
+
+        Assert.Equal(1, result.FlowValue);
+        Assert.Equal(-3, result.TotalCost);
+        var unreachable = Assert.Single(result.EdgeFlows, pair => pair.Edge.Source == "x");
+        Assert.Equal(0, unreachable.Flow);
+    }
 }

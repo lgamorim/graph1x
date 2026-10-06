@@ -81,7 +81,8 @@ public static class GraphKShortestPathsExtensions
         where TWeight : INumber<TWeight>
     {
         var comparer = graph.VertexComparer;
-        var first = SpurDijkstra(graph, weightSelector, source, target, bannedVertices: null, bannedFirstHops: null);
+        var noBans = new HashSet<TVertex>(comparer);
+        var first = SpurDijkstra(graph, weightSelector, source, target, noBans, noBans);
         if (first is null)
         {
             yield break;
@@ -156,11 +157,7 @@ public static class GraphKShortestPathsExtensions
         List<TVertex> path, List<TVertex> reference, int length, IEqualityComparer<TVertex> comparer)
         where TVertex : notnull
     {
-        if (path.Count < length)
-        {
-            return false;
-        }
-
+        // Callers check path.Count > length before asking.
         for (var i = 0; i < length; i++)
         {
             if (!comparer.Equals(path[i], reference[i]))
@@ -197,7 +194,9 @@ public static class GraphKShortestPathsExtensions
                 continue;
             }
 
-            var weight = CheckedWeight(weightSelector, edge);
+            // The spur Dijkstra that just ran from 'from' has already rejected
+            // any negative weight on these arcs, so no second check is needed.
+            var weight = weightSelector(edge);
             if (!found || weight < best)
             {
                 best = weight;
@@ -224,41 +223,30 @@ public static class GraphKShortestPathsExtensions
         Func<TEdge, TWeight> weightSelector,
         TVertex from,
         TVertex target,
-        HashSet<TVertex>? bannedVertices,
-        HashSet<TVertex>? bannedFirstHops)
+        HashSet<TVertex> bannedVertices,
+        HashSet<TVertex> bannedFirstHops)
         where TVertex : notnull
         where TEdge : IEdge<TVertex>
         where TWeight : INumber<TWeight>
     {
         var comparer = graph.VertexComparer;
-        Func<TVertex, TVertex, bool>? skipArc = bannedVertices is null && bannedFirstHops is null
-            ? null
-            : (current, neighbor) => (bannedVertices?.Contains(neighbor) ?? false)
-                || (comparer.Equals(current, from) && (bannedFirstHops?.Contains(neighbor) ?? false));
-
         var (distance, predecessor) = DijkstraCore.Relax(
-            graph, weightSelector, from, hasTarget: true, target, skipArc, NonNegativeRequirement);
+            graph,
+            weightSelector,
+            from,
+            hasTarget: true,
+            target,
+            (current, neighbor) => bannedVertices.Contains(neighbor)
+                || (comparer.Equals(current, from) && bannedFirstHops.Contains(neighbor)),
+            NonNegativeRequirement);
 
         return distance.TryGetValue(target, out var total)
             ? (GraphTraversalCore.BuildPath(from, target, predecessor, comparer), total)
             : null;
     }
 
-    private static TWeight CheckedWeight<TEdge, TWeight>(Func<TEdge, TWeight> weightSelector, TEdge edge)
-        where TWeight : INumber<TWeight>
-    {
-        var weight = weightSelector(edge);
-        if (weight < TWeight.Zero)
-        {
-            throw new NegativeWeightException(
-                $"Edge '{edge}' has negative weight {weight}; {NonNegativeRequirement}");
-        }
-
-        return weight;
-    }
-
     /// <summary>Vertex-sequence equality under the graph's vertex comparer.</summary>
-    private sealed class PathComparer<TVertex>(IEqualityComparer<TVertex> comparer) : IEqualityComparer<List<TVertex>>
+    internal sealed class PathComparer<TVertex>(IEqualityComparer<TVertex> comparer) : IEqualityComparer<List<TVertex>>
         where TVertex : notnull
     {
         public bool Equals(List<TVertex>? x, List<TVertex>? y)
